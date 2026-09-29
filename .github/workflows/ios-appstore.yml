@@ -8,6 +8,8 @@ jobs:
   build-upload:
     runs-on: macos-15
     timeout-minutes: 60
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}   # 未配置时为空串 → 上传步自动跳过
     steps:
       - name: 从 Gitea 拉取最新代码（GitHub 仓库仅存构建配置，业务代码以 Gitea 为准）
         env:
@@ -56,7 +58,7 @@ jobs:
       - name: 刷新 CocoaPods specs（云机预装太旧会导致 Firebase 找不到版本）
         run: pod repo update
 
-      - name: 构建 IPA（App Store 签名，云后端）
+      - name: 构建 IPA（手动签名：命令行参数覆盖工程自动签名，云机无 Xcode 账户）
         working-directory: flutter_app
         env:
           ALIYUN_SK: ${{ secrets.ALIYUN_NUMBER_AUTH_IOS_SK }}
@@ -66,10 +68,23 @@ jobs:
           # 替换回官方源后 pub 严格按 lock 安装，与本机构建完全一致。
           sed -i '' 's|https://pub.flutter-io.cn|https://pub.dev|g' pubspec.lock
           flutter pub get --enforce-lockfile
-          flutter build ipa --release \
-            --export-options-plist=ios/ExportOptions-appstore.plist \
+          # 第一遍：编 Flutter 产物（不签名）
+          flutter build ios --release --no-codesign \
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
             --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
+          # 第二遍：xcodebuild archive，命令行参数强制手动签名（优先级最高）
+          mkdir -p build/ios/archive build/ios/ipa
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath build/ios/archive/Runner.xcarchive archive \
+            DEVELOPMENT_TEAM=HDTYXYQC82 \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY='Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)' \
+            PROVISIONING_PROFILE_SPECIFIER='hospital-v5 AppStore'
+          # 导出 App Store 签名的 IPA
+          xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/ExportOptions-appstore.plist
 
       - name: 保存 IPA 产物备份
         uses: actions/upload-artifact@v4
@@ -78,9 +93,9 @@ jobs:
           path: flutter_app/build/ios/ipa/*.ipa
           retention-days: 30
 
-      - name: 上传 App Store Connect
+      - name: 上传 App Store Connect（配好 ASC 密钥后自动生效；未配置时跳过）
+        if: ${{ env.ASC_KEY_ID != '' }}
         env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY_P8: ${{ secrets.ASC_PRIVATE_KEY_P8 }}
         run: |
