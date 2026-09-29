@@ -58,7 +58,7 @@ jobs:
       - name: 刷新 CocoaPods specs（云机预装太旧会导致 Firebase 找不到版本）
         run: pod repo update
 
-      - name: 构建 IPA（手动签名：命令行参数覆盖工程自动签名，云机无 Xcode 账户）
+      - name: 构建 IPA（手动签名：仅 Runner 注入手动配置，Pods 保持自动，不改仓库工程文件）
         working-directory: flutter_app
         env:
           ALIYUN_SK: ${{ secrets.ALIYUN_NUMBER_AUTH_IOS_SK }}
@@ -72,15 +72,15 @@ jobs:
           flutter build ios --release --no-codesign \
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
             --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
-          # 第二遍：xcodebuild archive，命令行参数强制手动签名（优先级最高）
+          # 给 Runner 的 Release 配置注入手动签名（云端内存态修改，不回写仓库）
+          ruby "$GITHUB_WORKSPACE/scripts/sign_runner.rb"
+          # 第二遍：xcodebuild archive（Runner 手动签名，Pods 自动）
           mkdir -p build/ios/archive build/ios/ipa
           xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner \
             -configuration Release -destination 'generic/platform=iOS' \
             -archivePath build/ios/archive/Runner.xcarchive archive \
-            DEVELOPMENT_TEAM=HDTYXYQC82 \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY='Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)'
-          # 导出 App Store 签名的 IPA
+            DEVELOPMENT_TEAM=HDTYXYQC82
+          # 导出 App Store 签名的 IPA（profile 按 ExportOptions plist 套用）
           xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive \
             -exportPath build/ios/ipa \
             -exportOptionsPlist ios/ExportOptions-appstore.plist
