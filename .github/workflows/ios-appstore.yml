@@ -73,7 +73,7 @@ jobs:
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
             --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
           # 给 Runner 的 Release 配置注入手动签名（云端内存态修改，不回写仓库）
-          ruby "$GITHUB_WORKSPACE/scripts/sign_runner.rb"
+          ruby -e "require 'xcodeproj'; p = Xcodeproj::Project.open('ios/Runner.xcodeproj'); p.targets.each { |t| next unless t.name == 'Runner'; t.build_configurations.each { |c| next unless c.name == 'Release'; c.build_settings['CODE_SIGN_STYLE'] = 'Manual'; c.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = 'hospital-v5 AppStore'; c.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)' } }; p.save; puts 'Runner Release signing configured'"
           # 第二遍：xcodebuild archive（Runner 手动签名，Pods 自动）
           mkdir -p build/ios/archive build/ios/ipa
           xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner \
