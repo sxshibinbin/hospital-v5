@@ -61,7 +61,11 @@ jobs:
         env:
           ALIYUN_SK: ${{ secrets.ALIYUN_NUMBER_AUTH_IOS_SK }}
         run: |
-          flutter pub get
+          # Gitea 里的 pubspec.lock 锁的是国内镜像 URL；云端用官方源，
+          # 源不一致会导致 pub 无视 lock 重新解析（拉最新插件 → 与 Podfile.lock 冲突）。
+          # 替换回官方源后 pub 严格按 lock 安装，与本机构建完全一致。
+          sed -i '' 's|https://pub.flutter-io.cn|https://pub.dev|g' pubspec.lock
+          flutter pub get --enforce-lockfile
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions-appstore.plist \
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
