@@ -1,0 +1,88 @@
+name: iOS App Store 构建上传
+
+# 手动触发（Actions 页面点 Run workflow）。省额度，不挂在 push 上。
+on:
+  workflow_dispatch:
+
+jobs:
+  build-upload:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: 从 Gitea 拉取最新代码（GitHub 仓库仅存构建配置，业务代码以 Gitea 为准）
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          git clone --depth 1 "http://jwl:${GITEA_TOKEN}@120.26.226.134:3000/qsg/hospital-v5.git" .
+          git log --oneline -1
+
+      - name: 选择最新 Xcode（必须满足苹果"当前 major SDK"上架要求）
+        run: |
+          ls -d /Applications/Xcode*.app | sort -V
+          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selected: $LATEST"
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.10'   # 与本机一致；pubspec sdk ^3.10.0 兼容
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter 版本确认
+        run: flutter --version
+
+      - name: 安装签名证书与描述文件
+        env:
+          DIST_P12_BASE64: ${{ secrets.APPSTORE_DIST_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          MOBILEPROVISION_BASE64: ${{ secrets.APPSTORE_MOBILEPROVISION }}
+        run: |
+          security create-keychain -p cicheck ci-keychain
+          security default-keychain -s ci-keychain
+          security unlock-keychain -p cicheck ci-keychain
+          security set-keychain-settings -t 3600 ci-keychain
+          echo "$DIST_P12_BASE64" | base64 --decode > /tmp/dist.p12
+          security import /tmp/dist.p12 -k ci-keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k cicheck ci-keychain
+          rm -f /tmp/dist.p12
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$MOBILEPROVISION_BASE64" | base64 --decode > /tmp/profile.mobileprovision
+          cp /tmp/profile.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/"
+          rm -f /tmp/profile.mobileprovision
+          security find-identity -v -p codesigning
+
+      - name: 刷新 CocoaPods specs（云机预装太旧会导致 Firebase 找不到版本）
+        run: pod repo update
+
+      - name: 构建 IPA（App Store 签名，云后端）
+        working-directory: flutter_app
+        env:
+          ALIYUN_SK: ${{ secrets.ALIYUN_NUMBER_AUTH_IOS_SK }}
+        run: |
+          flutter pub get
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions-appstore.plist \
+            --dart-define=API_BASE_URL=https://web.sstkjgf.com \
+            --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
+
+      - name: 保存 IPA 产物备份
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-ipa
+          path: flutter_app/build/ios/ipa/*.ipa
+          retention-days: 30
+
+      - name: 上传 App Store Connect
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY_P8: ${{ secrets.ASC_PRIVATE_KEY_P8 }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$ASC_PRIVATE_KEY_P8" > ~/private_keys/AuthKey_"$ASC_KEY_ID".p8
+          IPA=$(ls flutter_app/build/ios/ipa/*.ipa | head -1)
+          xcrun altool --upload-app -f "$IPA" --type ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          # 若苹果废弃 altool 上传，改用 fastlane pilot（见 runbook 备注）
