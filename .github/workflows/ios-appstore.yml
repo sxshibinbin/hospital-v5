@@ -72,6 +72,7 @@ jobs:
           # flutter 驱动 archive+export（完整 embed 流程保证 App.framework 的 plist 正确；
           # 切勿改回 --no-codesign 两遍构建，那会让 MinimumOSVersion 变空、ASC 校验拒收）
           flutter build ipa --release \
+            --build-number=$GITHUB_RUN_NUMBER \
             --export-options-plist=ios/ExportOptions-appstore.plist \
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
             --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
