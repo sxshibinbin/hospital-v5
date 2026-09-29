@@ -79,8 +79,7 @@ jobs:
             -archivePath build/ios/archive/Runner.xcarchive archive \
             DEVELOPMENT_TEAM=HDTYXYQC82 \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY='Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)' \
-            PROVISIONING_PROFILE_SPECIFIER='hospital-v5 AppStore'
+            CODE_SIGN_IDENTITY='Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)'
           # 导出 App Store 签名的 IPA
           xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive \
             -exportPath build/ios/ipa \
