@@ -72,6 +72,16 @@ jobs:
           flutter build ios --release --no-codesign \
             --dart-define=API_BASE_URL=https://web.sstkjgf.com \
             --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
+          # Flutter 3.38 + 新 Xcode 已知坑：App.framework 的 Info.plist 缺 MinimumOSVersion（空值），
+          # ASC 上传校验会拒收（蒲公英不校验所以本机从没暴露）。在签名前补上。
+          APP_PLIST="build/ios/Release-iphoneos/App.framework/Info.plist"
+          if [ -f "$APP_PLIST" ]; then
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 15.0" "$APP_PLIST" 2>/dev/null \
+              || /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 15.0" "$APP_PLIST"
+            echo "MinimumOSVersion=15.0 已写入 $APP_PLIST"
+          else
+            echo "WARN: $APP_PLIST 不存在，检查产物路径"
+          fi
           # 给 Runner 的 Release 配置注入手动签名（云端内存态修改，不回写仓库）
           ruby -e "require 'xcodeproj'; p = Xcodeproj::Project.open('ios/Runner.xcodeproj'); p.targets.each { |t| next unless t.name == 'Runner'; t.build_configurations.each { |c| next unless c.name == 'Release'; c.build_settings['CODE_SIGN_STYLE'] = 'Manual'; c.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = 'hospital-v5 AppStore'; c.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)' } }; p.save; puts 'Runner Release signing configured'"
           # 第二遍：xcodebuild archive（Runner 手动签名，Pods 自动）
