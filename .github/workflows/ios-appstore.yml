@@ -101,6 +101,9 @@ jobs:
           mkdir -p ~/private_keys
           echo "$ASC_PRIVATE_KEY_P8" > ~/private_keys/AuthKey_"$ASC_KEY_ID".p8
           IPA=$(ls flutter_app/build/ios/ipa/*.ipa | head -1)
+          # 先做认证与包校验（避免 altool 401 时静默假成功）
+          xcrun altool --validate-app -f "$IPA" --type ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
           xcrun altool --upload-app -f "$IPA" --type ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
           # 若苹果废弃 altool 上传，改用 fastlane pilot（见 runbook 备注）
