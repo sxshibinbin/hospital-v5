@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodeReviewAgentOutput",
+  "description": "代码规范审查Agent输出协议（含自动修复）",
+  "type": "object",
+  "required": [
+    "task_id",
+    "work_item_id",
+    "status",
+    "summary",
+    "report_files",
+    "completed_at"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "任务唯一标识"
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "TFS工作项ID"
+    },
+    "status": {
+      "type": "string",
+      "description": "审查状态",
+      "enum": ["passed", "blocked", "fixing", "fix_failed", "no_fixable", "error"]
+    },
+    "review_round": {
+      "type": "integer",
+      "description": "当前审查轮次",
+      "minimum": 1,
+      "maximum": 3,
+      "default": 1
+    },
+    "summary": {
+      "type": "object",
+      "description": "问题统计",
+      "required": ["total_issues", "critical", "warning", "info"],
+      "properties": {
+        "total_issues": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "critical": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warning": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "info": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "suggestion": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "fix_summary": {
+      "type": "object",
+      "description": "修复统计（仅执行修复时返回）",
+      "properties": {
+        "rounds_executed": {
+          "type": "integer",
+          "description": "已执行的审查轮次"
+        },
+        "total_fixable": {
+          "type": "integer",
+          "description": "可自动修复的问题数"
+        },
+        "fixed": {
+          "type": "integer",
+          "description": "已修复的问题数"
+        },
+        "failed": {
+          "type": "integer",
+          "description": "修复失败的问题数"
+        },
+        "remaining_critical": {
+          "type": "integer",
+          "description": "剩余严重问题数"
+        },
+        "remaining_warning": {
+          "type": "integer",
+          "description": "剩余警告问题数"
+        },
+        "unfixable_reason": {
+          "type": "string",
+          "description": "无法修复的原因"
+        }
+      }
+    },
+    "report_files": {
+      "type": "object",
+      "description": "报告文件信息",
+      "required": ["local_path"],
+      "properties": {
+        "local_path": {
+          "type": "string",
+          "description": "本地报告路径"
+        },
+        "fix_report_path": {
+          "type": "string",
+          "description": "修复报告路径"
+        },
+        "tfs_attachment_id": {
+          "type": "integer",
+          "description": "TFS附件ID"
+        }
+      }
+    },
+    "block_reason": {
+      "type": "string",
+      "description": "阻断原因（仅status=blocked时）"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "下一步动作",
+      "enum": ["proceed", "auto_fix", "re_review", "fix_and_retry", "manual_fix_required", "manual_review"]
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "完成时间"
+    }
+  }
+}

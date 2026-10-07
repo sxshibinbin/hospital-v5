@@ -1,0 +1,1 @@
+powershell.exe -Command "Start-Service postgresql-x64-16"

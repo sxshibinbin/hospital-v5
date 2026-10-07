@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "description": "Level 3: AI重症产品线规则",
+  "rules": [
+    {
+      "rule_id": "ICU-RT-001",
+      "rule_name": "实时数据处理超时检查",
+      "category": "performance",
+      "severity": "critical",
+      "description": "ICU实时数据处理响应时间不得超过500ms",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "@Scheduled|@Async|CompletableFuture",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "确保实时数据处理方法有明确的超时控制",
+        "code_example": "// 添加超时控制\n@Timeout(value = 500, unit = TimeUnit.MILLISECONDS)\npublic void processRealTimeData(VitalSignsData data) {\n    // 处理逻辑\n}",
+        "auto_fixable": false
+      },
+      "tags": ["AI重症", "实时性", "性能"],
+      "references": ["AI重症系统性能规范"]
+    },
+    {
+      "rule_id": "ICU-ALERT-001",
+      "rule_name": "告警机制实现检查",
+      "category": "standard",
+      "severity": "warning",
+      "description": "涉及生命体征监测的模块必须实现告警机制",
+      "tech_stack": ["java", "vue"],
+      "detection": {
+        "pattern": "vitalSign|生命体征|heartRate|bloodPressure|spo2",
+        "file_pattern": "**/*.{java,vue}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "生命体征异常时触发告警，支持多级告警阈值配置",
+        "code_example": "public void checkVitalSigns(VitalSigns vitalSigns) {\n    if (vitalSigns.getHeartRate() < 60 || vitalSigns.getHeartRate() > 100) {\n        alertService.triggerAlert(AlertLevel.WARNING, \"心率异常\", vitalSigns);\n    }\n}",
+        "auto_fixable": false
+      },
+      "tags": ["AI重症", "告警机制", "患者安全"],
+      "references": ["AI重症告警规范"]
+    },
+    {
+      "rule_id": "ICU-DATA-001",
+      "rule_name": "生命体征数据完整性检查",
+      "category": "quality",
+      "severity": "warning",
+      "description": "生命体征数据必须包含时间戳和设备标识",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "class\\s+VitalSigns|class\\s+PatientMonitor",
+        "file_pattern": "**/entity/**/*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "确保实体类包含timestamp和deviceId字段",
+        "code_example": "@Entity\npublic class VitalSigns {\n    private LocalDateTime timestamp;\n    private String deviceId;\n    private BigDecimal heartRate;\n    // 必须包含时间戳和设备标识\n}",
+        "auto_fixable": false
+      },
+      "tags": ["AI重症", "数据完整性"],
+      "references": ["AI重症数据规范"]
+    },
+    {
+      "rule_id": "ICU-WEB-001",
+      "rule_name": "监控大屏刷新频率检查",
+      "category": "performance",
+      "severity": "info",
+      "description": "监控大屏数据刷新间隔应≤3秒",
+      "tech_stack": ["vue"],
+      "detection": {
+        "pattern": "setInterval|setTimeout.*\\d{4,}",
+        "file_pattern": "**/views/monitor/**/*.vue",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "调整定时刷新间隔，确保实时性",
+        "code_example": "// 刷新间隔不超过3秒\nconst refreshInterval = 3000;\nsetInterval(fetchMonitorData, refreshInterval);",
+        "auto_fixable": false
+      },
+      "tags": ["AI重症", "监控大屏"],
+      "references": ["AI重症前端规范"]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.qoder/
+logs/
+medical_consultation.db
+*.db
+.git/
+.gitignore
+*.md
+!README.md
+scripts/exported_data/
+alembic.ini

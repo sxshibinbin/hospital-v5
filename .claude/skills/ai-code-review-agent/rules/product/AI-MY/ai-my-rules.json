@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "description": "Level 3: AI-MY产品线规则",
+  "rules": [
+    {
+      "rule_id": "AIMY-API-001",
+      "rule_name": "API统一POST方法检查",
+      "category": "standard",
+      "severity": "warning",
+      "description": "AI-MY平台所有API接口统一使用POST方法",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "@(Get|Put|Delete)Mapping",
+        "file_pattern": "**/*Controller*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "将@GetMapping/@PutMapping/@DeleteMapping改为@PostMapping",
+        "code_example": "// 修复前\n@GetMapping(\"/user/list\")\n\n// 修复后\n@PostMapping(\"/user/list\")",
+        "auto_fixable": false
+      },
+      "tags": ["AI-MY", "API规范"],
+      "references": ["AI-MY后端开发规范"]
+    },
+    {
+      "rule_id": "AIMY-API-002",
+      "rule_name": "API路径前缀检查",
+      "category": "standard",
+      "severity": "warning",
+      "description": "API路径应包含统一前缀/api/v1/agent_framework/admin",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "@(Post|Get)Mapping\\(\"/(?!api/v1)",
+        "file_pattern": "**/*Controller*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "在API路径前添加统一前缀",
+        "code_example": "// 修复前\n@PostMapping(\"/user/list\")\n\n// 修复后\n@PostMapping(\"/api/v1/agent_framework/admin/user/list\")",
+        "auto_fixable": false
+      },
+      "tags": ["AI-MY", "API规范"],
+      "references": ["AI-MY后端开发规范"]
+    },
+    {
+      "rule_id": "AIMY-OFFLINE-001",
+      "rule_name": "离线数据同步检查",
+      "category": "quality",
+      "severity": "warning",
+      "description": "涉及离线功能的接口应考虑数据同步机制",
+      "tech_stack": ["java", "vue"],
+      "detection": {
+        "pattern": "offline|离线",
+        "file_pattern": "**/*.{java,vue}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "离线数据应实现增量同步和冲突解决机制",
+        "code_example": "// 建议实现\npublic void syncOfflineData(List<OfflineData> dataList) {\n    // 1. 数据校验\n    // 2. 冲突检测\n    // 3. 合并策略\n    // 4. 状态同步\n}",
+        "auto_fixable": false
+      },
+      "tags": ["AI-MY", "离线数据"],
+      "references": ["AI-MY移动端开发规范"]
+    },
+    {
+      "rule_id": "AIMY-MOBILE-001",
+      "rule_name": "移动端响应式检查",
+      "category": "standard",
+      "severity": "info",
+      "description": "移动端页面应适配不同屏幕尺寸",
+      "tech_stack": ["vue"],
+      "detection": {
+        "pattern": "width:\\s*\\d+px",
+        "file_pattern": "**/*.vue",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用rem/vw/vh等相对单位，或使用媒体查询适配",
+        "code_example": "/* 修复前 */\n.container { width: 375px; }\n\n/* 修复后 */\n.container { width: 100%; max-width: 750px; }",
+        "auto_fixable": false
+      },
+      "tags": ["AI-MY", "移动端适配"],
+      "references": ["AI-MY移动端开发规范"]
+    }
+  ]
+}

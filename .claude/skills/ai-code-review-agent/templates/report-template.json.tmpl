@@ -1,0 +1,92 @@
+{
+  "report_meta": {
+    "version": "1.0.0",
+    "generated_at": "{{generated_at}}",
+    "agent_version": "{{agent_version}}"
+  },
+  "task_info": {
+    "task_id": "{{task_id}}",
+    "work_item_id": {{work_item_id}},
+    "product_line": "{{product_line}}",
+    "project_name": "{{project_name}}",
+    "scan_mode": "{{scan_mode}}",
+    "scan_type": "{{scan_type}}",
+    "source_branch": "{{source_branch}}",
+    "target_branch": "{{target_branch}}"
+  },
+  "status": {
+    "result": "{{status}}",
+    "block_reason": "{{block_reason}}",
+    "next_action": "{{next_action}}"
+  },
+  "summary": {
+    "total_issues": {{summary.total_issues}},
+    "critical": {{summary.critical}},
+    "warning": {{summary.warning}},
+    "info": {{summary.info}},
+    "suggestion": {{summary.suggestion}}
+  },
+  "score": {
+    "security": {{score.security}},
+    "maintainability": {{score.maintainability}},
+    "performance": {{score.performance}},
+    "standard": {{score.standard}},
+    "overall": {{score.overall}}
+  },
+  "issues": [
+    {
+      "issue_id": "{{issue_id}}",
+      "rule_id": "{{rule_id}}",
+      "rule_name": "{{rule_name}}",
+      "rule_layer": "{{rule_layer}}",
+      "severity": "{{severity}}",
+      "category": "{{category}}",
+      "tech_stack": "{{tech_stack}}",
+      "file_path": "{{file_path}}",
+      "line_number": {{line_number}},
+      "line_content": "{{line_content}}",
+      "description": "{{description}}",
+      "fix_guidance": {
+        "description": "{{fix_description}}",
+        "code_example": "{{fix_code_example}}",
+        "auto_fixable": {{auto_fixable}}
+      },
+      "tags": ["{{tags}}"],
+      "references": ["{{references}}"]
+    }
+  ],
+  "rule_stats": {
+    "common": {
+      "total": {{rule_stats.common.total}},
+      "hits": {{rule_stats.common.hits}}
+    },
+    "medical": {
+      "total": {{rule_stats.medical.total}},
+      "hits": {{rule_stats.medical.hits}}
+    },
+    "product": {
+      "total": {{rule_stats.product.total}},
+      "hits": {{rule_stats.product.hits}}
+    },
+    "project": {
+      "total": {{rule_stats.project.total}},
+      "hits": {{rule_stats.project.hits}}
+    }
+  },
+  "tech_stack_analysis": [
+    {
+      "tech_stack": "{{tech_stack}}",
+      "files_scanned": {{files_scanned}},
+      "issues_found": {{issues_found}},
+      "issue_density": "{{issue_density}}"
+    }
+  ],
+  "scan_config": {
+    "scan_mode": "{{scan_mode}}",
+    "scan_type": "{{scan_type}}",
+    "tech_stack_tags": ["{{tech_stack_tags}}"],
+    "changed_files_only": {{changed_files_only}}
+  },
+  "files_scanned": {{files_scanned_count}},
+  "duration_seconds": {{duration_seconds}}
+}

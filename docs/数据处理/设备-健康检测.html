@@ -1,0 +1,3390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>报警记录 - 原型设计</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DESIGN TOKENS
+   Match Flutter App: Soft Lavender Light Theme
+   Primary: #5B57F7 | Background: #F8F5FD
+   ============================================ */
+:root {
+  /* Brand colors (from Flutter AppTheme) */
+  --primary: #5B57F7;
+  --primary-dark: #2F266F;
+  --primary-light: #8B7CFF;
+  --primary-surface: #F1ECFF;
+  --primary-tint: rgba(91,87,247,0.08);
+
+  /* Page backgrounds */
+  --bg-page: #F8F5FD;
+  --bg-gradient-start: #EDE8FF;
+  --bg-gradient-end: #F8F6FC;
+  --bg-hero-start: #F0EAFF;
+  --bg-hero-end: #F8F5FF;
+
+  /* Surface (cards) */
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-tinted: #F8F6FF;
+
+  /* Outline & borders */
+  --outline: #E7E3F5;
+  --outline-light: #F0ECF8;
+  --outline-primary: rgba(91,87,247,0.3);
+
+  /* Text */
+  --text-primary: #2F266F;
+  --text-secondary: #6B6490;
+  --text-muted: #9891B8;
+  --text-on-primary: #FFFFFF;
+
+  /* Alarm type colors - harmonized for light bg */
+  --alarm-报警: #E8453A;
+  --alarm-报警-bg: #FDECEA;
+  --alarm-报警-border: rgba(232,69,58,0.18);
+  --alarm-演练: #E88D0C;
+  --alarm-演练-bg: #FFF4E0;
+  --alarm-演练-border: rgba(232,141,12,0.18);
+  --alarm-测试: #3B82F6;
+  --alarm-测试-bg: #EBF2FF;
+  --alarm-测试-border: rgba(59,130,246,0.18);
+  --alarm-其他: #8B86A0;
+  --alarm-其他-bg: #F2F1F5;
+  --alarm-其他-border: rgba(139,134,160,0.18);
+
+  /* Alarm level */
+  --level-1: #E8453A;
+  --level-2: #E88D0C;
+  --level-3: #3B82F6;
+
+  /* Status */
+  --confirmed: #22A06B;
+  --confirmed-bg: #E6F7EF;
+  --pending: #E88D0C;
+  --pending-bg: #FFF4E0;
+  --online: #22A06B;
+  --offline: #E8453A;
+
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(47,38,111,0.06);
+  --shadow-card-hover: 0 4px 20px rgba(47,38,111,0.1);
+  --shadow-sheet: 0 -8px 40px rgba(47,38,111,0.12);
+  --shadow-btn: 0 2px 8px rgba(91,87,247,0.2);
+
+  /* Radii (match Flutter: 24-28px for cards, 20 for buttons) */
+  --radius-card: 20px;
+  --radius-card-lg: 24px;
+  --radius-btn: 20px;
+  --radius-chip: 14px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+
+  /* Fonts */
+  --font-cn: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-cn);
+  background: #E8E4F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   PHONE FRAME
+   ============================================ */
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  background: var(--bg-page);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 2px #d0c8e0,
+    0 0 0 6px #1a1528,
+    0 20px 60px rgba(47,38,111,0.25);
+}
+
+/* ============================================
+   STATUS BAR (iOS style)
+   ============================================ */
+.status-bar {
+  height: 54px;
+  padding: 14px 28px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-page) 100%);
+}
+
+.status-bar__time {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-bar__icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-bar__icons svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--text-primary);
+}
+
+/* ============================================
+   HEADER (matches Flutter AppBar style)
+   ============================================ */
+.header {
+  height: 52px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-page) 100%);
+}
+
+.header__back {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.header__back:active {
+  background: var(--primary-tint);
+}
+
+.header__back svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--primary-dark);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  letter-spacing: 0.5px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header__add-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.header__add-btn:active {
+  transform: scale(0.9);
+  background: var(--primary-dark);
+}
+
+.header__add-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 56px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 15px;
+  background: var(--primary-tint);
+  border: 1.5px solid var(--outline-primary);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.header__badge:active {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  transform: scale(0.96);
+}
+
+.header__badge svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main-content {
+  height: calc(812px - 54px - 52px - 34px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+/* ============================================
+   TAB BAR (ChoiceChip style from Flutter)
+   ============================================ */
+.tab-bar {
+  display: flex;
+  padding: 4px 16px 12px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tab-chip {
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px solid var(--outline);
+  background: var(--surface);
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: var(--font-cn);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-btn);
+}
+
+.tab-chip__count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--outline-light);
+  color: var(--text-muted);
+  transition: all 0.25s;
+}
+
+.tab-chip.active .tab-chip__count {
+  background: rgba(255,255,255,0.25);
+  color: var(--text-on-primary);
+}
+
+/* ============================================
+   FILTER SECTION
+   ============================================ */
+.filter-section {
+  flex-shrink: 0;
+  padding: 0 16px 10px;
+}
+
+.filter-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.filter-toggle {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-toggle__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.filter-toggle__label svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--primary);
+  fill: none;
+  stroke-width: 2;
+}
+
+.filter-toggle__chevron {
+  width: 18px;
+  height: 18px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.filter-toggle__chevron.open {
+  transform: rotate(180deg);
+}
+
+.filter-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.filter-body.open {
+  max-height: 280px;
+}
+
+.filter-body__inner {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.filter-select {
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 14px;
+  background: var(--surface-tinted);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-cn);
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239891B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+}
+
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-row span {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.filter-date {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--surface-tinted);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color-scheme: light;
+}
+
+.filter-date:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.btn-reset, .btn-apply {
+  flex: 1;
+  height: 42px;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-cn);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset {
+  background: var(--surface-tinted);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--outline);
+}
+
+.btn-reset:active {
+  background: var(--outline-light);
+}
+
+.btn-apply {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-btn);
+}
+
+.btn-apply:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   RECORDS LIST
+   ============================================ */
+.records-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.records-list::-webkit-scrollbar { width: 0; }
+
+/* ============================================
+   ALARM CARD (white card on lavender bg)
+   ============================================ */
+.alarm-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 12px 16px 10px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid var(--outline-light);
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s,
+    border-color 0.2s;
+  animation: cardEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  overflow: hidden;
+}
+
+.alarm-card:active {
+  transform: scale(0.985);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--outline);
+}
+
+/* Top color accent bar */
+.alarm-card__accent {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+}
+
+.alarm-card__accent[data-type="报警"] { background: var(--alarm-报警); }
+.alarm-card__accent[data-type="演练"] { background: var(--alarm-演练); }
+.alarm-card__accent[data-type="测试"] { background: var(--alarm-测试); }
+.alarm-card__accent[data-type="其他"] { background: var(--alarm-其他); }
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+.alarm-card:nth-child(1) { animation-delay: 0.04s; }
+.alarm-card:nth-child(2) { animation-delay: 0.08s; }
+.alarm-card:nth-child(3) { animation-delay: 0.12s; }
+.alarm-card:nth-child(4) { animation-delay: 0.16s; }
+.alarm-card:nth-child(5) { animation-delay: 0.2s; }
+.alarm-card:nth-child(6) { animation-delay: 0.24s; }
+.alarm-card:nth-child(7) { animation-delay: 0.28s; }
+
+/* Card header */
+.alarm-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
+.alarm-card__location {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.alarm-card__type-badge {
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+}
+
+.alarm-card__type-badge[data-type="报警"] {
+  background: var(--alarm-报警-bg);
+  color: var(--alarm-报警);
+  border-color: var(--alarm-报警-border);
+}
+.alarm-card__type-badge[data-type="演练"] {
+  background: var(--alarm-演练-bg);
+  color: var(--alarm-演练);
+  border-color: var(--alarm-演练-border);
+}
+.alarm-card__type-badge[data-type="测试"] {
+  background: var(--alarm-测试-bg);
+  color: var(--alarm-测试);
+  border-color: var(--alarm-测试-border);
+}
+.alarm-card__type-badge[data-type="其他"] {
+  background: var(--alarm-其他-bg);
+  color: var(--alarm-其他);
+  border-color: var(--alarm-其他-border);
+}
+
+.alarm-card__time {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alarm-card__time svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.alarm-card__reason {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* Card meta grid */
+.alarm-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--outline-light);
+}
+
+.alarm-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.alarm-card__meta-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.alarm-card__meta-value {
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Level dot */
+.level-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.level-dot--1 { background: var(--level-1); }
+.level-dot--2 { background: var(--level-2); }
+.level-dot--3 { background: var(--level-3); }
+
+/* Confirmation footer row */
+.alarm-card__confirm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--outline-light);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.alarm-card__confirm-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.alarm-card__confirm-time svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--confirmed);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.alarm-card__confirm-person {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.alarm-card__confirm-person::before {
+  content: '确认人 ';
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-state.visible { display: flex; }
+
+.empty-state__icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  stroke: var(--outline);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.empty-state__text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   DETAIL BOTTOM SHEET
+   ============================================ */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.detail-overlay.visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.detail-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(47,38,111,0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.detail-sheet {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) translateY(100%);
+  width: 375px;
+  max-height: 88vh;
+  background: var(--bg-page);
+  border-radius: var(--radius-card-lg) var(--radius-card-lg) 0 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+}
+
+.detail-overlay.visible .detail-sheet {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Drag handle */
+.detail-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--outline);
+  border-radius: 4px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+/* Detail header */
+.detail-header {
+  padding: 16px 20px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--bg-hero-start) 0%, var(--bg-page) 100%);
+}
+
+.detail-header__info { flex: 1; }
+
+.detail-header__type {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
+
+.detail-header__type[data-type="报警"] {
+  background: var(--alarm-报警-bg);
+  color: var(--alarm-报警);
+  border-color: var(--alarm-报警-border);
+}
+.detail-header__type[data-type="演练"] {
+  background: var(--alarm-演练-bg);
+  color: var(--alarm-演练);
+  border-color: var(--alarm-演练-border);
+}
+.detail-header__type[data-type="测试"] {
+  background: var(--alarm-测试-bg);
+  color: var(--alarm-测试);
+  border-color: var(--alarm-测试-border);
+}
+.detail-header__type[data-type="其他"] {
+  background: var(--alarm-其他-bg);
+  color: var(--alarm-其他);
+  border-color: var(--alarm-其他-border);
+}
+
+.detail-header__time {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.detail-header__time svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+}
+
+.detail-close {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--outline);
+  background: var(--surface);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.detail-close:active {
+  transform: scale(0.9);
+  background: var(--outline-light);
+}
+
+.detail-close svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-secondary);
+  fill: none;
+  stroke-width: 2.5;
+}
+
+/* Detail body */
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 16px 34px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.detail-body::-webkit-scrollbar { width: 0; }
+
+/* Detail sections */
+.detail-section {
+  margin-bottom: 16px;
+}
+
+.detail-section:last-child { margin-bottom: 0; }
+
+.detail-section__title {
+  font-size: 14px;
+  color: var(--primary-dark);
+  font-weight: 800;
+  margin-bottom: 10px;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-section__title::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Info card (white container) */
+.detail-info-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--outline-light);
+  overflow: hidden;
+}
+
+.detail-info__row {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  gap: 12px;
+  border-bottom: 1px solid var(--outline-light);
+}
+
+.detail-info__row:last-child {
+  border-bottom: none;
+}
+
+.detail-info__label {
+  width: 72px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.detail-info__value {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.detail-info__value.mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.detail-info__value .level-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge--online {
+  background: var(--confirmed-bg);
+  color: var(--confirmed);
+}
+
+.status-badge--offline {
+  background: var(--alarm-报警-bg);
+  color: var(--alarm-报警);
+}
+
+/* Recent alarm mini card */
+.recent-alarm {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--outline-light);
+  border-left: 4px solid var(--alarm-演练);
+}
+
+.recent-alarm__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.recent-alarm__type {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.recent-alarm__time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.recent-alarm__reason {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.no-recent {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--outline-light);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   PAGE NAVIGATION
+   ============================================ */
+.page {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.page.active {
+  display: flex;
+}
+
+/* ============================================
+   DEVICE LIST PAGE
+   ============================================ */
+.device-filter-bar {
+  flex-shrink: 0;
+  padding: 4px 16px 10px;
+}
+
+.device-filter-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--outline-light);
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.device-filter-card .filter-select {
+  flex: 1;
+  height: 38px;
+  padding: 0 32px 0 12px;
+  font-size: 13px;
+}
+
+.device-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.device-list::-webkit-scrollbar { width: 0; }
+
+.device-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 14px 16px 12px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid var(--outline-light);
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s;
+  animation: cardEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.device-card:active {
+  transform: scale(0.985);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.device-card:nth-child(1) { animation-delay: 0.04s; }
+.device-card:nth-child(2) { animation-delay: 0.08s; }
+.device-card:nth-child(3) { animation-delay: 0.12s; }
+.device-card:nth-child(4) { animation-delay: 0.16s; }
+.device-card:nth-child(5) { animation-delay: 0.2s; }
+.device-card:nth-child(6) { animation-delay: 0.24s; }
+.device-card:nth-child(7) { animation-delay: 0.28s; }
+.device-card:nth-child(8) { animation-delay: 0.32s; }
+
+.device-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.device-card__type {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.device-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.device-card__settings {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--outline);
+  background: var(--surface-tinted);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.device-card__settings:active {
+  transform: scale(0.92);
+  background: var(--primary-tint);
+  border-color: var(--primary);
+}
+
+.device-card__settings svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+}
+
+.device-card__location {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Health metric cards for wearable devices */
+.device-card__health {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.health-metric-card {
+  background: var(--surface);
+  border: 1px solid var(--outline-light);
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.health-metric-card:active {
+  transform: scale(0.96);
+  border-color: var(--primary);
+  box-shadow: 0 2px 12px var(--primary-tint);
+}
+
+.health-metric-card--wide {
+  grid-column: 1 / -1;
+}
+
+.health-metric-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-family: "Noto Serif SC", serif;
+}
+
+.health-metric-card__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+}
+
+.health-metric-card__value--small {
+  font-size: 18px;
+}
+
+.health-metric-card__value-sub {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Safety range bar */
+.health-metric-card__range {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  position: relative;
+  margin-bottom: 10px;
+  background: linear-gradient(to right, #EF4444 0%, #F59E0B 35%, #22C55E 65%, #22C55E 100%);
+}
+
+.health-metric-card__range::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: var(--indicator-pos, 50%);
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid rgba(100,100,120,0.6);
+}
+
+.health-metric-card__time {
+  font-size: 11px;
+  color: var(--text-muted);
+  align-self: flex-end;
+}
+
+/* Radar alarm count display */
+.device-card__radar-alarm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface-tinted);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--outline-light);
+  margin-bottom: 2px;
+}
+
+.device-card__radar-alarm-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.device-card__radar-alarm-value {
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.device-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid var(--outline-light);
+}
+
+.device-card__model {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.device-card__model span {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.device-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.device-card__status:hover {
+  opacity: 0.8;
+}
+
+.device-card__status--online {
+  background: var(--confirmed-bg);
+  color: var(--confirmed);
+}
+
+.device-card__status--offline {
+  background: var(--alarm-报警-bg);
+  color: var(--alarm-报警);
+}
+
+.device-card__status--fault {
+  background: var(--alarm-演练-bg);
+  color: var(--alarm-演练);
+}
+
+/* ============================================
+   DEVICE DETAIL PAGE
+   ============================================ */
+.device-detail-header {
+  padding: 16px 20px 12px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--bg-hero-start) 0%, var(--bg-page) 100%);
+}
+
+.device-detail-header__type {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+}
+
+.device-detail-header__model {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.device-tabs {
+  display: flex;
+  padding: 0 16px;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.device-tab {
+  flex: 1;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--outline);
+  background: var(--surface);
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+  font-family: var(--font-cn);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.25s;
+}
+
+.device-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-btn);
+}
+
+.device-detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 50px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.device-detail-body::-webkit-scrollbar { width: 0; }
+
+.device-detail-section {
+  display: none;
+}
+
+.device-detail-section.active {
+  display: block;
+}
+
+.param-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--outline-light);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.param-card__header {
+  padding: 12px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.param-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.param-card__tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.param-card__tag--editable {
+  background: var(--primary-tint);
+  color: var(--primary);
+  border: 1px solid var(--outline-primary);
+}
+
+.param-card__tag--readonly {
+  background: var(--surface-tinted);
+  color: var(--text-muted);
+  border: 1px solid var(--outline);
+}
+
+.param-card__body {
+  padding: 0 16px 12px;
+}
+
+.param-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--outline-light);
+  gap: 12px;
+}
+
+.param-row:last-child {
+  border-bottom: none;
+}
+
+.param-row__label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.param-row__value {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.param-row__input {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--surface-tinted);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-align: right;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.param-row__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+}
+
+.param-row__unit {
+  width: 30px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.param-save-btn {
+  width: 100%;
+  height: 46px;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-cn);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition: all 0.2s;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.param-save-btn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   BOTTOM HOME INDICATOR
+   ============================================ */
+.home-indicator {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+  background: var(--bg-page);
+}
+
+.home-indicator__bar {
+  width: 134px;
+  height: 5px;
+  background: var(--text-muted);
+  border-radius: 5px;
+  opacity: 0.3;
+}
+
+/* Device add form */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Metric detail page */
+.metric-range-selector {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 10px;
+}
+
+.metric-range-selector .tab-chip {
+  height: 34px;
+  font-size: 13px;
+}
+
+.metric-date-range {
+  text-align: center;
+  padding: 4px 0 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.metric-date-range:active {
+  color: var(--primary);
+}
+
+.metric-chart-container {
+  margin: 0 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--outline-light);
+  padding: 16px 12px 8px;
+  overflow: hidden;
+}
+
+.metric-chart-container canvas {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+/* Data detail section below chart */
+.metric-data-detail {
+  margin: 12px 16px 0;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--outline-light);
+  padding: 14px 16px;
+}
+
+.metric-data-detail__empty {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+.metric-data-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--outline-light);
+}
+
+.metric-data-detail__time {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metric-data-detail__value {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.metric-data-detail__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.metric-data-detail__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.metric-data-detail__val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Metric chart area (relative wrapper for floating picker) */
+.metric-chart-area {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Custom date picker (floats over chart) */
+.metric-date-picker {
+  position: absolute;
+  top: 32px;
+  left: 16px;
+  right: 16px;
+  z-index: 10;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px 10px;
+  box-shadow: 0 8px 30px rgba(47,38,111,0.15);
+  animation: mdpSlideIn 0.2s ease-out;
+}
+  box-shadow: 0 4px 20px rgba(47,38,111,0.1);
+  animation: mdpSlideIn 0.2s ease-out;
+}
+
+@keyframes mdpSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mdp-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.mdp-header__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.mdp-weekdays span {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.mdp-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mdp-day {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 7px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mdp-day:not(.mdp-day--empty):active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.mdp-day--today {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+}
+
+.mdp-day--empty {
+  pointer-events: none;
+}
+
+/* Month picker */
+.mdp-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.mdp-month {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 10px 0;
+  border-radius: 10px;
+  border: 1.5px solid var(--outline-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mdp-month:active {
+  background: var(--primary-tint);
+  border-color: var(--primary);
+}
+
+.mdp-month--today {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Year picker */
+.mdp-year-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mdp-year {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 14px 0;
+  border-radius: 12px;
+  border: 1.5px solid var(--outline-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mdp-year:active {
+  background: var(--primary-tint);
+  border-color: var(--primary);
+}
+
+.mdp-year--today {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+  <!-- iOS Status Bar -->
+  <div class="status-bar">
+    <span class="status-bar__time">9:41</span>
+    <div class="status-bar__icons">
+      <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="1" y="6" width="3" height="12" rx="1" opacity="0.3"/><rect x="5" y="4" width="3" height="14" rx="1" opacity="0.5"/><rect x="9" y="2" width="3" height="16" rx="1"/><rect x="13" y="6" width="3" height="12" rx="1"/><rect x="17" y="9" width="3" height="9" rx="1" opacity="0.5"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="4" y="9" width="10" height="6" rx="1" fill="currentColor" opacity="0.8"/><path d="M22 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <button class="header__back" aria-label="返回" onclick="navigateTo('device-list')">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="header__title">报警记录</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- Tab Bar (ChoiceChip style) -->
+    <div class="tab-bar">
+      <button class="tab-chip" data-tab="all" onclick="switchTab('all')">
+        全部
+        <span class="tab-chip__count" id="countAll">6</span>
+      </button>
+      <button class="tab-chip active" data-tab="unconfirmed" onclick="switchTab('unconfirmed')">
+        未确认
+        <span class="tab-chip__count" id="countUnconfirmed">3</span>
+      </button>
+      <button class="tab-chip" data-tab="confirmed" onclick="switchTab('confirmed')">
+        已确认
+        <span class="tab-chip__count" id="countConfirmed">3</span>
+      </button>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-card">
+        <div class="filter-toggle" onclick="toggleFilter()">
+          <div class="filter-toggle__label">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+            <span>筛选条件</span>
+          </div>
+          <svg class="filter-toggle__chevron" id="filterChevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="filter-body" id="filterBody">
+          <div class="filter-body__inner">
+            <div class="filter-group">
+              <label>设备类型</label>
+              <select class="filter-select" id="filterDeviceType">
+                <option value="">全部类型</option>
+                <option value="烟雾报警器">烟雾报警器</option>
+                <option value="温度传感器">温度传感器</option>
+                <option value="门禁系统">门禁系统</option>
+                <option value="监控摄像头">监控摄像头</option>
+                <option value="电气火灾监控">电气火灾监控</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>日期范围</label>
+              <div class="date-row">
+                <input type="date" class="filter-date" id="filterDateStart" value="2026-07-24">
+                <span>至</span>
+                <input type="date" class="filter-date" id="filterDateEnd" value="2026-07-24">
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn-reset" onclick="resetFilters()">重置</button>
+              <button class="btn-apply" onclick="applyFilters()">应用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Records List -->
+    <div class="records-list" id="recordsList"></div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <svg class="empty-state__icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div class="empty-state__text">暂无相关报警记录</div>
+    </div>
+  </div>
+
+  <!-- ========== DEVICE LIST PAGE ========== -->
+  <div class="page" id="pageDeviceList">
+    <div class="status-bar">
+      <span class="status-bar__time">9:41</span>
+      <div class="status-bar__icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="1" y="6" width="3" height="12" rx="1" opacity="0.3"/><rect x="5" y="4" width="3" height="14" rx="1" opacity="0.5"/><rect x="9" y="2" width="3" height="16" rx="1"/><rect x="13" y="6" width="3" height="12" rx="1"/><rect x="17" y="9" width="3" height="9" rx="1" opacity="0.5"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="4" y="9" width="10" height="6" rx="1" fill="currentColor" opacity="0.8"/><path d="M22 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="header">
+      <button class="header__back" onclick="navigateTo('alarm-list')">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="header__title">健康检测</span>
+      <button class="header__add-btn" onclick="navigateTo('device-add')" title="新增设备">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="main-content">
+      <!-- Device List -->
+      <div class="device-list" id="deviceList"></div>
+    </div>
+    <div class="home-indicator">
+      <div class="home-indicator__bar"></div>
+    </div>
+  </div>
+
+  <!-- ========== DEVICE DETAIL PAGE ========== -->
+  <div class="page" id="pageDeviceDetail">
+    <div class="status-bar">
+      <span class="status-bar__time">9:41</span>
+      <div class="status-bar__icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="1" y="6" width="3" height="12" rx="1" opacity="0.3"/><rect x="5" y="4" width="3" height="14" rx="1" opacity="0.5"/><rect x="9" y="2" width="3" height="16" rx="1"/><rect x="13" y="6" width="3" height="12" rx="1"/><rect x="17" y="9" width="3" height="9" rx="1" opacity="0.5"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="4" y="9" width="10" height="6" rx="1" fill="currentColor" opacity="0.8"/><path d="M22 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="header">
+      <button class="header__back" onclick="navigateTo('device-list')">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="header__title">设备详情</span>
+      <div style="width:40px"></div>
+    </div>
+    <div class="main-content">
+      <div class="device-detail-header" id="deviceDetailHeader"></div>
+      <div class="device-tabs">
+        <button class="device-tab active" data-tab="info" onclick="switchDeviceTab('info')">设备详情</button>
+        <button class="device-tab" data-tab="params" onclick="switchDeviceTab('params')">设备参数</button>
+      </div>
+      <div class="device-detail-body">
+        <div class="device-detail-section active" id="deviceSectionInfo"></div>
+        <div class="device-detail-section" id="deviceSectionParams"></div>
+      </div>
+    </div>
+    <div class="home-indicator">
+      <div class="home-indicator__bar"></div>
+    </div>
+  </div>
+
+  <!-- ========== DEVICE ADD PAGE ========== -->
+  <div class="page" id="pageDeviceAdd">
+    <div class="status-bar">
+      <span class="status-bar__time">9:41</span>
+      <div class="status-bar__icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="1" y="6" width="3" height="12" rx="1" opacity="0.3"/><rect x="5" y="4" width="3" height="14" rx="1" opacity="0.5"/><rect x="9" y="2" width="3" height="16" rx="1"/><rect x="13" y="6" width="3" height="12" rx="1"/><rect x="17" y="9" width="3" height="9" rx="1" opacity="0.5"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="4" y="9" width="10" height="6" rx="1" fill="currentColor" opacity="0.8"/><path d="M22 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="header">
+      <button class="header__back" onclick="navigateTo('device-list')">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="header__title">新增设备</span>
+      <div style="width:40px"></div>
+    </div>
+    <div class="main-content" style="padding:0 16px 16px;">
+      <div class="form-group">
+        <label class="form-label">设备型号</label>
+        <select class="filter-select" id="addDeviceModel" style="width:100%">
+          <option value="智能手表">智能手表</option>
+          <option value="智能手环">智能手环</option>
+          <option value="跌倒雷达">跌倒雷达</option>
+          <option value="睡眠雷达">睡眠雷达</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">IMEI</label>
+        <input class="form-input" id="addDeviceImei" placeholder="请输入IMEI编号">
+      </div>
+      <div class="form-group">
+        <label class="form-label">安装位置</label>
+        <input class="form-input" id="addDeviceAddress" placeholder="请输入安装位置，如：居然创客大厦">
+      </div>
+    </div>
+    <div style="padding:16px;border-top:1px solid var(--outline-light);background:var(--surface);">
+      <button class="param-save-btn" style="width:100%" onclick="saveNewDevice()">确认添加</button>
+    </div>
+    <div class="home-indicator">
+      <div class="home-indicator__bar"></div>
+    </div>
+  </div>
+
+  <!-- ========== METRIC DETAIL PAGE ========== -->
+  <div class="page" id="pageMetricDetail">
+    <div class="status-bar">
+      <span class="status-bar__time">9:41</span>
+      <div class="status-bar__icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2a7.07 7.07 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="1" y="6" width="3" height="12" rx="1" opacity="0.3"/><rect x="5" y="4" width="3" height="14" rx="1" opacity="0.5"/><rect x="9" y="2" width="3" height="16" rx="1"/><rect x="13" y="6" width="3" height="12" rx="1"/><rect x="17" y="9" width="3" height="9" rx="1" opacity="0.5"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="4" y="9" width="10" height="6" rx="1" fill="currentColor" opacity="0.8"/><path d="M22 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="header">
+      <button class="header__back" onclick="navigateTo('device-list')">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="header__title" id="metricDetailTitle">指标详情</span>
+      <div style="width:40px"></div>
+    </div>
+    <div class="main-content">
+      <!-- Time range selector -->
+      <div class="metric-range-selector">
+        <button class="tab-chip active" data-range="day" onclick="switchMetricRange('day')">日</button>
+        <button class="tab-chip" data-range="week" onclick="switchMetricRange('week')">周</button>
+        <button class="tab-chip" data-range="month" onclick="switchMetricRange('month')">月</button>
+        <button class="tab-chip" data-range="year" onclick="switchMetricRange('year')">年</button>
+      </div>
+
+      <!-- Relative wrapper for date range + chart (picker floats over chart) -->
+      <div class="metric-chart-area" id="metricChartArea">
+        <!-- Date range display (clickable) -->
+        <div class="metric-date-range" id="metricDateRange" onclick="onDateRangeClick()"></div>
+
+        <!-- Trend chart -->
+        <div class="metric-chart-container">
+          <canvas id="metricChart"></canvas>
+        </div>
+
+        <!-- Data detail section -->
+        <div class="metric-data-detail" id="metricDataDetail">
+          <div class="metric-data-detail__empty">点击图表中的数据点查看详情</div>
+        </div>
+      </div>
+    </div>
+    <div class="home-indicator">
+      <div class="home-indicator__bar"></div>
+    </div>
+  </div>
+
+  <!-- Home Indicator (alarm page) -->
+  <div class="home-indicator">
+    <div class="home-indicator__bar"></div>
+  </div>
+
+  <!-- Detail Bottom Sheet -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-backdrop" onclick="closeDetail()"></div>
+    <div class="detail-sheet">
+      <div class="detail-sheet__handle"></div>
+      <div class="detail-header" id="detailHeader"></div>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// MOCK DATA
+// ============================================
+const alarmData = [
+  {
+    id: 1, status: 'unconfirmed',
+    address: 'A栋3楼心内科护士站', alarmTime: '2026-07-24 09:23:15',
+    alarmType: '报警', alarmReason: '烟感探测器触发报警，现场检测到浓烟信号，疑似火情',
+    confirmTime: '--', confirmPerson: '--',
+    alarmLevel: 1, eventLevel: 'A', deviceType: '烟雾报警器',
+    installLocation: 'A栋3楼心内科护士站走廊西侧',
+    receiver: '--', imei: '864523016789012',
+    remark: '已通知消防控制室，等待现场确认',
+    recentAlarm: { type: '测试', time: '2026-07-20 14:30', reason: '月度例行消防检测' },
+    deviceStatus: '在线'
+  },
+  {
+    id: 2, status: 'unconfirmed',
+    address: 'B栋5楼ICU病房区', alarmTime: '2026-07-24 08:45:30',
+    alarmType: '报警', alarmReason: '温度异常升高至42.5°C，超出预设安全阈值，请立即检查设备运行状态及周边环境',
+    confirmTime: '--', confirmPerson: '--',
+    alarmLevel: 1, eventLevel: 'A', deviceType: '温度传感器',
+    installLocation: 'B栋5楼ICU病房区设备带',
+    receiver: '--', imei: '864523016789045',
+    remark: 'ICU区域，需优先处理',
+    recentAlarm: null,
+    deviceStatus: '在线'
+  },
+  {
+    id: 3, status: 'unconfirmed',
+    address: '门诊楼1楼急诊入口', alarmTime: '2026-07-24 07:30:00',
+    alarmType: '其他', alarmReason: '设备通信中断超过30分钟',
+    confirmTime: '--', confirmPerson: '--',
+    alarmLevel: 2, eventLevel: 'B', deviceType: '门禁系统',
+    installLocation: '门诊楼1楼急诊入口右侧',
+    receiver: '--', imei: '864523016789078',
+    remark: '',
+    recentAlarm: { type: '其他', time: '2026-07-22 16:00', reason: '设备离线告警' },
+    deviceStatus: '离线'
+  },
+  {
+    id: 4, status: 'confirmed',
+    address: 'C栋地下室配电房', alarmTime: '2026-07-23 14:22:08',
+    alarmType: '演练', alarmReason: '消防演练-模拟火情报警测试',
+    confirmTime: '2026-07-23 14:35:20', confirmPerson: '张安全员',
+    alarmLevel: 3, eventLevel: 'C', deviceType: '烟雾报警器',
+    installLocation: 'C栋地下室配电房入口处',
+    receiver: '李消防', imei: '864523016789112',
+    remark: '计划内演练',
+    recentAlarm: { type: '测试', time: '2026-07-15 10:00', reason: '季度消防设备检查' },
+    deviceStatus: '在线'
+  },
+  {
+    id: 5, status: 'confirmed',
+    address: 'A栋7楼手术室区域', alarmTime: '2026-07-23 10:15:33',
+    alarmType: '报警', alarmReason: '电气火灾监控系统检测到漏电异常',
+    confirmTime: '2026-07-23 10:20:45', confirmPerson: '王工程师',
+    alarmLevel: 1, eventLevel: 'A', deviceType: '电气火灾监控',
+    installLocation: 'A栋7楼手术室区域配电箱',
+    receiver: '张消防', imei: '864523016789145',
+    remark: '已处理，线路老化导致',
+    recentAlarm: { type: '报警', time: '2026-07-10 09:30', reason: '漏电异常报警' },
+    deviceStatus: '在线'
+  },
+  {
+    id: 6, status: 'confirmed',
+    address: 'D栋2楼检验科', alarmTime: '2026-07-22 16:40:00',
+    alarmType: '测试', alarmReason: '设备定期自检触发',
+    confirmTime: '2026-07-22 17:00:00', confirmPerson: '赵技术员',
+    alarmLevel: 3, eventLevel: 'C', deviceType: '监控摄像头',
+    installLocation: 'D栋2楼检验科走廊',
+    receiver: '赵技术员', imei: '864523016789178',
+    remark: '正常自检，无异常',
+    recentAlarm: null,
+    deviceStatus: '在线'
+  }
+];
+
+// ============================================
+// STATE
+// ============================================
+let currentTab = 'unconfirmed';
+let filterOpen = false;
+let filterDeviceType = '';
+
+// ============================================
+// TAB LOGIC
+// ============================================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.tab === tab);
+  });
+  renderCards();
+}
+
+// ============================================
+// FILTER LOGIC
+// ============================================
+function toggleFilter() {
+  filterOpen = !filterOpen;
+  document.getElementById('filterBody').classList.toggle('open', filterOpen);
+  document.getElementById('filterChevron').classList.toggle('open', filterOpen);
+}
+
+function resetFilters() {
+  document.getElementById('filterDeviceType').value = '';
+  document.getElementById('filterDateStart').value = '2026-07-24';
+  document.getElementById('filterDateEnd').value = '2026-07-24';
+  filterDeviceType = '';
+  renderCards();
+}
+
+function applyFilters() {
+  filterDeviceType = document.getElementById('filterDeviceType').value;
+  renderCards();
+}
+
+function getFilteredData() {
+  let data = [...alarmData];
+  if (currentTab === 'unconfirmed') data = data.filter(d => d.status === 'unconfirmed');
+  else if (currentTab === 'confirmed') data = data.filter(d => d.status === 'confirmed');
+  if (filterDeviceType) data = data.filter(d => d.deviceType === filterDeviceType);
+  return data;
+}
+
+// ============================================
+// RENDER CARDS
+// ============================================
+function renderCards() {
+  const list = document.getElementById('recordsList');
+  const empty = document.getElementById('emptyState');
+  const data = getFilteredData();
+
+  if (data.length === 0) {
+    list.classList.add('hidden');
+    empty.classList.add('visible');
+    return;
+  }
+
+  list.classList.remove('hidden');
+  empty.classList.remove('visible');
+
+  list.innerHTML = data.map((item, i) => `
+    <div class="alarm-card" onclick="openDetail(${item.id})" style="animation-delay:${(i+1)*0.04}s">
+      <div class="alarm-card__accent" data-type="${item.alarmType}"></div>
+      <div class="alarm-card__header">
+        <span class="alarm-card__location">${item.address}</span>
+        <span class="alarm-card__type-badge" data-type="${item.alarmType}">${item.alarmType}</span>
+      </div>
+      <div class="alarm-card__time">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${item.alarmTime}
+      </div>
+      <div class="alarm-card__reason">${item.alarmReason}</div>
+      <div class="alarm-card__meta">
+        <div class="alarm-card__meta-item">
+          <span class="alarm-card__meta-label">报警等级</span>
+          <span class="level-dot level-dot--${item.alarmLevel}"></span>
+          <span class="alarm-card__meta-value">${item.alarmLevel}级</span>
+        </div>
+        <div class="alarm-card__meta-item">
+          <span class="alarm-card__meta-label">事件等级</span>
+          <span class="alarm-card__meta-value">${item.eventLevel}级</span>
+        </div>
+        <div class="alarm-card__meta-item">
+          <span class="alarm-card__meta-label">设备类型</span>
+          <span class="alarm-card__meta-value">${item.deviceType}</span>
+        </div>
+      </div>
+      ${item.status === 'confirmed' ? `
+      <div class="alarm-card__confirm-row">
+        <span class="alarm-card__confirm-time">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          ${item.confirmTime}
+        </span>
+        <span class="alarm-card__confirm-person">${item.confirmPerson}</span>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ============================================
+// DETAIL VIEW
+// ============================================
+function openDetail(id) {
+  const item = alarmData.find(d => d.id === id);
+  if (!item) return;
+
+  const header = document.getElementById('detailHeader');
+  const body = document.getElementById('detailBody');
+
+  header.innerHTML = `
+    <div class="detail-header__info">
+      <div class="detail-header__type" data-type="${item.alarmType}">${item.alarmType}</div>
+      <div class="detail-header__time">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 12 16 14"/></svg>
+        ${item.alarmTime}
+      </div>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  `;
+
+  body.innerHTML = `
+    <!-- 位置信息 -->
+    <div class="detail-section">
+      <div class="detail-section__title">位置信息</div>
+      <div class="detail-info-card">
+        <div class="detail-info__row">
+          <span class="detail-info__label">安装位置</span>
+          <span class="detail-info__value">${item.installLocation}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">详细地址</span>
+          <span class="detail-info__value">${item.address}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 报警信息 -->
+    <div class="detail-section">
+      <div class="detail-section__title">报警信息</div>
+      <div class="detail-info-card">
+        <div class="detail-info__row">
+          <span class="detail-info__label">接警人员</span>
+          <span class="detail-info__value">${item.receiver || '--'}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">报警原因</span>
+          <span class="detail-info__value">${item.alarmReason}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">报警等级</span>
+          <span class="detail-info__value">
+            <span class="level-inline">
+              <span class="level-dot level-dot--${item.alarmLevel}"></span>
+              ${item.alarmLevel}级${item.alarmLevel === 1 ? '(紧急)' : item.alarmLevel === 2 ? '(重要)' : '(一般)'}
+            </span>
+          </span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">事件等级</span>
+          <span class="detail-info__value">${item.eventLevel}级</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">确认时间</span>
+          <span class="detail-info__value mono">${item.confirmTime}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">确认人</span>
+          <span class="detail-info__value">${item.confirmPerson}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设备信息 -->
+    <div class="detail-section">
+      <div class="detail-section__title">设备信息</div>
+      <div class="detail-info-card">
+        <div class="detail-info__row">
+          <span class="detail-info__label">IMEI</span>
+          <span class="detail-info__value mono">${item.imei}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">设备类型</span>
+          <span class="detail-info__value">${item.deviceType}</span>
+        </div>
+        <div class="detail-info__row">
+          <span class="detail-info__label">设备状态</span>
+          <span class="detail-info__value">
+            <span class="status-badge ${item.deviceStatus === '在线' ? 'status-badge--online' : 'status-badge--offline'}">
+              <span class="level-dot" style="width:7px;height:7px;background:${item.deviceStatus === '在线' ? 'var(--online)' : 'var(--offline)'}"></span>
+              ${item.deviceStatus}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 备注 -->
+    <div class="detail-section">
+      <div class="detail-section__title">备注</div>
+      <div class="detail-info-card">
+        <div class="detail-info__row">
+          <span class="detail-info__label">备注</span>
+          <span class="detail-info__value">${item.remark || '无'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最近报警 -->
+    <div class="detail-section">
+      <div class="detail-section__title">最近报警</div>
+      ${item.recentAlarm ? `
+      <div class="recent-alarm" style="border-left-color: var(--alarm-${item.recentAlarm.type})">
+        <div class="recent-alarm__header">
+          <span class="recent-alarm__type" style="color: var(--alarm-${item.recentAlarm.type})">${item.recentAlarm.type}</span>
+          <span class="recent-alarm__time">${item.recentAlarm.time}</span>
+        </div>
+        <div class="recent-alarm__reason">${item.recentAlarm.reason}</div>
+      </div>` : `<div class="no-recent">暂无历史记录</div>`}
+    </div>
+  `;
+
+  document.getElementById('detailOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderCards();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDetail();
+});
+
+// ============================================
+// PAGE NAVIGATION
+// ============================================
+// Alarm page elements (direct children of phone-frame that are NOT .page wrappers)
+const _alarmEls = null; // populated on first call
+
+function navigateTo(page) {
+  const phoneFrame = document.querySelector('.phone-frame');
+  const deviceListPage = document.getElementById('pageDeviceList');
+  const deviceDetailPage = document.getElementById('pageDeviceDetail');
+  const deviceAddPage = document.getElementById('pageDeviceAdd');
+  const metricDetailPage = document.getElementById('pageMetricDetail');
+
+  // Get alarm page direct children (status bar, header, main-content, home-indicator)
+  const alarmChildren = Array.from(phoneFrame.children).filter(
+    el => !el.classList.contains('page') && el.tagName !== 'SCRIPT'
+  );
+
+  if (page === 'alarm-list') {
+    alarmChildren.forEach(el => el.style.display = '');
+    deviceListPage.style.display = 'none';
+    deviceDetailPage.style.display = 'none';
+    deviceAddPage.style.display = 'none';
+    metricDetailPage.style.display = 'none';
+  } else if (page === 'device-list') {
+    alarmChildren.forEach(el => el.style.display = 'none');
+    deviceListPage.style.display = 'flex';
+    deviceDetailPage.style.display = 'none';
+    deviceAddPage.style.display = 'none';
+    metricDetailPage.style.display = 'none';
+    renderDeviceCards();
+  } else if (page === 'device-detail') {
+    alarmChildren.forEach(el => el.style.display = 'none');
+    deviceListPage.style.display = 'none';
+    deviceDetailPage.style.display = 'flex';
+    deviceAddPage.style.display = 'none';
+    metricDetailPage.style.display = 'none';
+  } else if (page === 'device-add') {
+    alarmChildren.forEach(el => el.style.display = 'none');
+    deviceListPage.style.display = 'none';
+    deviceDetailPage.style.display = 'none';
+    deviceAddPage.style.display = 'flex';
+    metricDetailPage.style.display = 'none';
+  } else if (page === 'metric-detail') {
+    alarmChildren.forEach(el => el.style.display = 'none');
+    deviceListPage.style.display = 'none';
+    deviceDetailPage.style.display = 'none';
+    deviceAddPage.style.display = 'none';
+    metricDetailPage.style.display = 'flex';
+  }
+}
+
+// Initialize: show device-list as default page
+document.addEventListener('DOMContentLoaded', () => {
+  const phoneFrame = document.querySelector('.phone-frame');
+  const alarmChildren = Array.from(phoneFrame.children).filter(
+    el => !el.classList.contains('page') && el.tagName !== 'SCRIPT'
+  );
+  alarmChildren.forEach(el => el.style.display = 'none');
+  document.getElementById('pageDeviceList').style.display = 'flex';
+  document.getElementById('pageDeviceDetail').style.display = 'none';
+  document.getElementById('pageDeviceAdd').style.display = 'none';
+  document.getElementById('pageMetricDetail').style.display = 'none';
+  renderDeviceCards();
+});
+
+// ============================================
+// DEVICE DATA
+// ============================================
+const deviceData = [
+  {
+    id: 1, type: '智能手表', address: '居然创客大厦',
+    status: '在线', model: 'HW-WATCH3', imei: '864523016789012',
+    manufacturer: '华为', installDate: '2026-01-15',
+    lastCheck: '2026-07-25 09:30', firmwareVersion: 'v3.2.1',
+    latestTime: '2026-07-25 09:28',
+    health: {
+      heartRate: { value: '72', unit: 'bpm', low: 50, safeLow: 60, safeHigh: 100, high: 130 },
+      temperature: { value: '36.5', unit: '°C', low: 35.0, safeLow: 36.0, safeHigh: 37.3, high: 38.5 },
+      bloodPressure: { value: '120/80', unit: 'mmHg', low: 0, safeLow: 0, safeHigh: 0, high: 0 },
+      spo2: { value: '98', unit: '%', low: 85, safeLow: 90, safeHigh: 100, high: 100 },
+      steps: { value: '3,456', unit: '步', low: 0, safeLow: 0, safeHigh: 0, high: 0 }
+    },
+    healthTime: '7/25',
+    info: { wearLocation: '左手腕', zone: '居然创客大厦', responsiblePerson: '李护士', maintenanceCycle: '每月' },
+    params: { heartRateAlert: '100', spo2Alert: '90', fallDetect: true, sosEnabled: true, heartEditable: true, spo2Editable: true }
+  },
+  {
+    id: 2, type: '智能手环', address: '居然创客大厦',
+    status: '在线', model: 'MI-BAND8', imei: '864523016789045',
+    manufacturer: '小米', installDate: '2026-03-01',
+    lastCheck: '2026-07-25 09:25', firmwareVersion: 'v2.1.0',
+    latestTime: '2026-07-25 09:20',
+    health: {
+      heartRate: { value: '68', unit: 'bpm', low: 50, safeLow: 60, safeHigh: 100, high: 130 },
+      temperature: { value: '36.3', unit: '°C', low: 35.0, safeLow: 36.0, safeHigh: 37.3, high: 38.5 },
+      bloodPressure: { value: '115/75', unit: 'mmHg', low: 0, safeLow: 0, safeHigh: 0, high: 0 },
+      spo2: { value: '97', unit: '%', low: 85, safeLow: 90, safeHigh: 100, high: 100 },
+      steps: { value: '2,180', unit: '步', low: 0, safeLow: 0, safeHigh: 0, high: 0 }
+    },
+    healthTime: '7/25',
+    info: { wearLocation: '左手腕', zone: '居然创客大厦', responsiblePerson: '王护士', maintenanceCycle: '每月' },
+    params: { heartRateAlert: '100', spo2Alert: '90', fallDetect: true, sosEnabled: true, heartEditable: true, spo2Editable: true }
+  },
+  {
+    id: 3, type: '跌倒雷达', address: '居然创客大厦',
+    status: '在线', model: 'RF-FALL100', imei: '864523016789078',
+    manufacturer: '清雷科技', installDate: '2025-11-20',
+    lastCheck: '2026-07-25 09:00', firmwareVersion: 'v1.5.0',
+    latestTime: '2026-07-25 09:00',
+    health: { alarmCount: '0' },
+    healthTime: '7/25',
+    info: { installLocation: '走廊天花板', zone: '住院部3楼', responsiblePerson: '张安全员', maintenanceCycle: '每季度', detectRange: '5m×8m' },
+    params: { sensitivity: '中', detectDistance: '6', alarmDelay: '3', installHeight: '2.8', detectArea: '全覆盖' }
+  },
+  {
+    id: 4, type: '睡眠雷达', address: '居然创客大厦',
+    status: '在线', model: 'RF-SLEEP200', imei: '864523016789112',
+    manufacturer: '清雷科技', installDate: '2025-11-20',
+    lastCheck: '2026-07-25 08:00', firmwareVersion: 'v1.3.2',
+    latestTime: '2026-07-25 08:00',
+    health: { alarmCount: '1' },
+    healthTime: '7/25',
+    info: { installLocation: '床头天花板', zone: '居然创客大厦', responsiblePerson: '张安全员', maintenanceCycle: '每季度', detectRange: '2m×3m' },
+    params: { hrInterval: '5', motionSensitivity: '中', bedExitAlert: true, apneaAlert: true, reportInterval: '10' }
+  }
+];
+
+// ============================================
+// DEVICE LIST RENDERING
+// ============================================
+function renderDeviceCards() {
+  const container = document.getElementById('deviceList');
+  const devices = [...deviceData];
+
+  if (devices.length === 0) {
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--outline)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;opacity:0.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
+        </svg>
+        <div style="font-size:14px;color:var(--text-muted)">暂无匹配设备</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = devices.map((device, i) => {
+    const statusClass = device.status === '在线' ? 'online' : device.status === '离线' ? 'offline' : 'fault';
+    const statusDot = device.status === '在线' ? 'var(--online)' : device.status === '离线' ? 'var(--offline)' : 'var(--alarm-演练)';
+    const isWearable = device.type === '智能手表' || device.type === '智能手环';
+    const isRadar = device.type === '跌倒雷达' || device.type === '睡眠雷达';
+
+    // Health metric cards for wearable devices
+    let healthHtml = '';
+    if (isWearable && device.health) {
+      const metrics = [
+        { name: '心率', key: 'heartRate', icon: '❤', iconColor: '#EF4444', wide: false, showRange: false },
+        { name: '体温', key: 'temperature', icon: '', iconColor: '#F59E0B', wide: false, showRange: true, valueClass: 'health-metric-card__value--small' },
+        { name: '血压', key: 'bloodPressure', icon: '', iconColor: '#3B82F6', wide: false, showRange: false },
+        { name: '血氧饱和度', key: 'spo2', icon: '', iconColor: '#10B981', wide: false, showRange: true, valueClass: 'health-metric-card__value--small' },
+        { name: '步数', key: 'steps', icon: '', iconColor: '#8B5CF6', wide: true, showRange: false },
+      ];
+      healthHtml = `<div class="device-card__health">` + metrics.map(m => {
+        const h = device.health[m.key];
+        if (!h) return '';
+        const range = h.high > h.low
+          ? ((parseFloat(h.value) - h.low) / (h.high - h.low) * 100).toFixed(0)
+          : 50;
+        const wideClass = m.wide ? ' health-metric-card--wide' : '';
+        const rangeBar = m.showRange ? `<div class="health-metric-card__range" style="--indicator-pos:${range}%"></div>` : '';
+        return `<div class="health-metric-card${wideClass}" onclick="openMetricDetail(${device.id},'${m.key}','${m.name}','${m.iconColor}')">
+          <div class="health-metric-card__name">${m.icon ? `<span style="color:${m.iconColor};margin-right:4px">${m.icon}</span>` : ''}${m.name}</div>
+          <div class="health-metric-card__value${m.valueClass ? ' ' + m.valueClass : ''}">${h.value}<span class="health-metric-card__value-sub">${h.unit}</span></div>
+          ${rangeBar}
+          <div class="health-metric-card__time">${device.healthTime}</div>
+        </div>`;
+      }).join('') + `</div>`;
+    }
+
+    // Alarm count for radar devices
+    let radarAlarmHtml = '';
+    if (isRadar && device.health) {
+      const count = parseInt(device.health.alarmCount) || 0;
+      const alarmColor = count > 0 ? 'var(--alarm-演练)' : 'var(--confirmed)';
+      radarAlarmHtml = `
+      <div class="device-card__radar-alarm">
+        <span class="device-card__radar-alarm-label">报警次数</span>
+        <span class="device-card__radar-alarm-value" style="color:${alarmColor}">${device.health.alarmCount} 次</span>
+      </div>`;
+    }
+
+    return `
+    <div class="device-card" style="animation-delay:${(i+1)*0.04}s">
+      <div class="device-card__header">
+        <span class="device-card__title-group">
+          <span class="device-card__type">${device.type}</span>
+          <span class="device-card__status device-card__status--${statusClass}" onclick="event.stopPropagation();navigateTo('alarm-list')">
+            <span class="level-dot" style="width:7px;height:7px;background:${statusDot}"></span>
+            ${device.status}
+          </span>
+        </span>
+        <button class="device-card__settings" onclick="event.stopPropagation();openDeviceDetail(${device.id})" title="设备参数设置">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+      ${healthHtml}
+      ${radarAlarmHtml}
+      <div class="device-card__footer">
+        <div class="device-card__model">最新 <span>${device.latestTime}</span></div>
+        <div class="device-card__location">${device.address}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================
+// DEVICE DETAIL & PARAMS
+// ============================================
+let currentDeviceId = null;
+
+function openDeviceDetail(id) {
+  currentDeviceId = id;
+  const device = deviceData.find(d => d.id === id);
+  if (!device) return;
+
+  // Header
+  document.getElementById('deviceDetailHeader').innerHTML = `
+    <div class="device-detail-header__type">${device.type}</div>
+    <div class="device-detail-header__model">${device.model} · ${device.imei}</div>
+  `;
+
+  // Info section
+  renderDeviceInfo(device);
+  // Params section
+  renderDeviceParams(device);
+
+  // Reset to info tab
+  switchDeviceTab('info');
+  navigateTo('device-detail');
+}
+
+function renderDeviceInfo(device) {
+  const isWearable = device.type === '智能手表' || device.type === '智能手环';
+  const isRadar = device.type === '跌倒雷达' || device.type === '睡眠雷达';
+
+  const baseRows = [
+    ['设备类型', device.type],
+    ['设备型号', device.model],
+    ['IMEI', `<span class="mono">${device.imei}</span>`],
+    ['生产厂家', device.manufacturer],
+    ['固件版本', device.firmwareVersion],
+    ['所属区域', device.info.zone],
+    ['责任人', device.info.responsiblePerson],
+    ['维护周期', device.info.maintenanceCycle],
+    ['安装日期', device.installDate],
+    ['最近检查', device.lastCheck],
+  ];
+
+  // Wearable-specific info
+  if (isWearable) {
+    baseRows.splice(5, 0, ['佩戴位置', device.info.wearLocation]);
+  }
+
+  // Radar-specific info
+  if (isRadar) {
+    baseRows.splice(5, 0, ['安装位置', device.info.installLocation]);
+    if (device.info.detectRange) baseRows.push(['探测范围', device.info.detectRange]);
+  }
+
+  // Health data display
+  let healthBlock = '';
+  if (isWearable && device.health) {
+    const h = device.health;
+    healthBlock = `
+    <div class="param-card">
+      <div class="param-card__header">
+        <span class="param-card__title">最新健康指标</span>
+        <span class="param-card__tag param-card__tag--readonly">${device.healthTime || device.latestTime}</span>
+      </div>
+      <div class="param-card__body">
+        <div class="param-row"><span class="param-row__label">心率</span><span class="param-row__value" style="color:#EF4444;font-weight:700">${h.heartRate.value} <span style="font-size:11px;color:var(--text-muted);font-weight:400">${h.heartRate.unit}</span></span></div>
+        <div class="param-row"><span class="param-row__label">体温</span><span class="param-row__value" style="color:#F59E0B;font-weight:700">${h.temperature.value} <span style="font-size:11px;color:var(--text-muted);font-weight:400">${h.temperature.unit}</span></span></div>
+        <div class="param-row"><span class="param-row__label">血压</span><span class="param-row__value" style="color:#3B82F6;font-weight:700">${h.bloodPressure.value} <span style="font-size:11px;color:var(--text-muted);font-weight:400">${h.bloodPressure.unit}</span></span></div>
+        <div class="param-row"><span class="param-row__label">血氧</span><span class="param-row__value" style="color:#10B981;font-weight:700">${h.spo2.value} <span style="font-size:11px;color:var(--text-muted);font-weight:400">${h.spo2.unit}</span></span></div>
+        <div class="param-row"><span class="param-row__label">步数</span><span class="param-row__value" style="color:#8B5CF6;font-weight:700">${h.steps.value} <span style="font-size:11px;color:var(--text-muted);font-weight:400">${h.steps.unit}</span></span></div>
+      </div>
+    </div>`;
+  }
+
+  if (isRadar && device.health) {
+    const alarmCount = parseInt(device.health.alarmCount) || 0;
+    const alarmColor = alarmCount > 0 ? 'var(--alarm-演练)' : 'var(--confirmed)';
+    healthBlock = `
+    <div class="param-card">
+      <div class="param-card__header">
+        <span class="param-card__title">报警统计</span>
+        <span class="param-card__tag param-card__tag--readonly">${device.healthTime || device.latestTime}</span>
+      </div>
+      <div class="param-card__body">
+        <div class="param-row"><span class="param-row__label">报警次数</span><span class="param-row__value" style="color:${alarmColor};font-weight:800;font-size:18px">${device.health.alarmCount} 次</span></div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('deviceSectionInfo').innerHTML = `
+    ${healthBlock}
+    <div class="param-card">
+      <div class="param-card__body">
+        ${baseRows.map(([label, value]) => `
+          <div class="param-row">
+            <span class="param-row__label">${label}</span>
+            <span class="param-row__value">${value}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div style="padding:12px 0;">
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:600;${device.status === '在线' ? 'background:var(--confirmed-bg);color:var(--confirmed)' : device.status === '离线' ? 'background:var(--alarm-报警-bg);color:var(--alarm-报警)' : 'background:var(--alarm-演练-bg);color:var(--alarm-演练)'}">
+        <span class="level-dot" style="width:7px;height:7px;background:${device.status === '在线' ? 'var(--online)' : device.status === '离线' ? 'var(--offline)' : 'var(--alarm-演练)'}"></span>
+        当前状态：${device.status}
+      </div>
+    </div>
+  `;
+}
+
+function renderDeviceParams(device) {
+  const p = device.params;
+  let paramGroups = [];
+
+  if (device.type === '智能手表' || device.type === '智能手环') {
+    paramGroups = [{
+      title: '健康预警参数',
+      rows: [
+        { label: '心率报警上限', value: p.heartRateAlert, editable: p.heartEditable, key: 'heartRateAlert', unit: '次/分' },
+        { label: '血氧报警下限', value: p.spo2Alert, editable: p.spo2Editable, key: 'spo2Alert', unit: '%' },
+        { label: '跌倒检测', value: p.fallDetect ? '已开启' : '已关闭', editable: false },
+        { label: 'SOS求助', value: p.sosEnabled ? '已开启' : '已关闭', editable: false },
+      ]
+    }];
+  } else if (device.type === '跌倒雷达') {
+    paramGroups = [{
+      title: '检测参数',
+      rows: [
+        { label: '检测灵敏度', value: p.sensitivity || '高', editable: true, key: 'sensitivity' },
+        { label: '监测距离', value: p.detectDistance || '6', editable: true, key: 'detectDistance', unit: '米' },
+        { label: '报警延迟', value: p.alarmDelay || '3', editable: true, key: 'alarmDelay', unit: '秒' },
+        { label: '安装高度', value: p.installHeight || '2.5', editable: true, key: 'installHeight', unit: '米' },
+        { label: '检测区域', value: p.detectArea || '全覆盖', editable: false },
+      ]
+    }];
+  } else if (device.type === '睡眠雷达') {
+    paramGroups = [{
+      title: '监测参数',
+      rows: [
+        { label: '心率采样间隔', value: p.hrInterval || '5', editable: true, key: 'hrInterval', unit: '分钟' },
+        { label: '体动灵敏度', value: p.motionSensitivity || '中', editable: true, key: 'motionSensitivity' },
+        { label: '离床报警', value: p.bedExitAlert ? '已开启' : '已关闭', editable: false },
+        { label: '呼吸暂停报警', value: p.apneaAlert ? '已开启' : '已关闭', editable: false },
+        { label: '数据上报间隔', value: p.reportInterval || '10', editable: true, key: 'reportInterval', unit: '分钟' },
+      ]
+    }];
+  }
+
+  document.getElementById('deviceSectionParams').innerHTML = paramGroups.map(group => `
+    <div class="param-card">
+      <div class="param-card__header">
+        <span class="param-card__title">${group.title}</span>
+        <span class="param-card__tag param-card__tag--editable">可维护</span>
+      </div>
+      <div class="param-card__body">
+        ${group.rows.map(row => `
+          <div class="param-row">
+            <span class="param-row__label">${row.label}</span>
+            ${row.editable
+              ? `<input class="param-row__input" value="${row.value}" data-key="${row.key}">
+                 ${row.unit ? `<span class="param-row__unit">${row.unit}</span>` : ''}`
+              : `<span class="param-row__value">${row.value}</span>`
+            }
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') + `<button class="param-save-btn" onclick="saveDeviceParams()">保存参数设置</button>`;
+}
+
+function switchDeviceTab(tab) {
+  document.querySelectorAll('.device-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('deviceSectionInfo').classList.toggle('active', tab === 'info');
+  document.getElementById('deviceSectionParams').classList.toggle('active', tab === 'params');
+}
+
+function saveDeviceParams() {
+  const device = deviceData.find(d => d.id === currentDeviceId);
+  if (!device) return;
+
+  document.querySelectorAll('.param-row__input').forEach(input => {
+    const key = input.dataset.key;
+    if (key && device.params[key] !== undefined) {
+      device.params[key] = input.value;
+    }
+  });
+
+  // Show simple feedback
+  const btn = document.querySelector('.param-save-btn');
+  const origText = btn.textContent;
+  btn.textContent = '已保存';
+  btn.style.background = 'var(--confirmed)';
+  setTimeout(() => {
+    btn.textContent = origText;
+    btn.style.background = '';
+  }, 1500);
+}
+
+function saveNewDevice() {
+  const address = document.getElementById('addDeviceAddress').value.trim();
+  const type = document.getElementById('addDeviceModel').value;
+  const imei = document.getElementById('addDeviceImei').value.trim();
+
+  if (!address) {
+    alert('请输入安装位置');
+    return;
+  }
+
+  const isWearable = type === '智能手表' || type === '智能手环';
+
+  const newDevice = {
+    id: Math.max(...deviceData.map(d => d.id)) + 1,
+    type,
+    address,
+    status: '在线',
+    model: type,
+    imei: imei || '—',
+    manufacturer: '—',
+    installDate: new Date().toISOString().slice(0, 10),
+    lastCheck: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    firmwareVersion: 'v1.0.0',
+    latestTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    health: isWearable
+      ? {
+          heartRate: { value: '—', unit: 'bpm', low: 50, safeLow: 60, safeHigh: 100, high: 130 },
+          temperature: { value: '—', unit: '°C', low: 35.0, safeLow: 36.0, safeHigh: 37.3, high: 38.5 },
+          bloodPressure: { value: '—', unit: 'mmHg', low: 0, safeLow: 0, safeHigh: 0, high: 0 },
+          spo2: { value: '—', unit: '%', low: 85, safeLow: 90, safeHigh: 100, high: 100 },
+          steps: { value: '—', unit: '步', low: 0, safeLow: 0, safeHigh: 0, high: 0 }
+        }
+      : { alarmCount: '0' },
+    healthTime: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
+    info: isWearable
+      ? { wearLocation: '—', zone: '—', responsiblePerson: '—', maintenanceCycle: '每月' }
+      : { installLocation: '—', zone: '—', responsiblePerson: '—', maintenanceCycle: '每季度' },
+    params: isWearable
+      ? { heartRateAlert: '100', spo2Alert: '90', fallDetect: true, sosEnabled: true, heartEditable: true, spo2Editable: true }
+      : type === '跌倒雷达'
+        ? { sensitivity: '中', detectDistance: '6', alarmDelay: '3', installHeight: '2.8', detectArea: '全覆盖' }
+        : { hrInterval: '5', motionSensitivity: '中', bedExitAlert: true, apneaAlert: true, reportInterval: '10' }
+  };
+
+  deviceData.push(newDevice);
+
+  // Clear form
+  document.getElementById('addDeviceAddress').value = '';
+  document.getElementById('addDeviceModel').selectedIndex = 0;
+  document.getElementById('addDeviceImei').value = '';
+
+  // Navigate back to device list
+  navigateTo('device-list');
+}
+
+// ============================================
+// METRIC DETAIL PAGE
+// ============================================
+let _metricState = {
+  deviceId: null,
+  metricKey: null,
+  metricName: '',
+  color: '#5B57F7',
+  range: 'day',
+  chartData: null,
+  chartLabels: null
+};
+
+function openMetricDetail(deviceId, metricKey, metricName, color) {
+  const device = deviceData.find(d => d.id === deviceId);
+  if (!device) return;
+
+  _metricState = { deviceId, metricKey, metricName, color, range: 'day', chartData: null, chartLabels: null };
+
+  // Update header title: "心率 详情"
+  document.getElementById('metricDetailTitle').textContent = metricName + ' 详情';
+
+  // Reset range tabs
+  document.querySelectorAll('.metric-range-selector .tab-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.range === 'day');
+  });
+
+  // Reset data detail
+  document.getElementById('metricDataDetail').innerHTML = '<div class="metric-data-detail__empty">点击图表中的数据点查看详情</div>';
+
+  // Navigate first, then render chart after layout settles
+  navigateTo('metric-detail');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      updateMetricDateRange('day');
+      renderMetricChart('day');
+    });
+  });
+}
+
+function switchMetricRange(range) {
+  _metricState.range = range;
+
+  document.querySelectorAll('.metric-range-selector .tab-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.range === range);
+  });
+
+  // Reset data detail
+  document.getElementById('metricDataDetail').innerHTML = '<div class="metric-data-detail__empty">点击图表中的数据点查看详情</div>';
+
+  updateMetricDateRange(range);
+  renderMetricChart(range);
+}
+
+function updateMetricDateRange(range) {
+  const today = new Date(2026, 6, 25);
+  let text = '';
+
+  if (range === 'day') {
+    text = formatDate(today);
+  } else if (range === 'week') {
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    text = formatDateShort(start) + ' - ' + formatDateShort(today);
+  } else if (range === 'month') {
+    const start = new Date(today);
+    start.setDate(start.getDate() - 29);
+    text = formatDateShort(start) + ' - ' + formatDateShort(today);
+  } else if (range === 'year') {
+    text = '2025/08 - 2026/07';
+  }
+
+  document.getElementById('metricDateRange').textContent = text;
+}
+
+function onDateRangeClick() {
+  const range = _metricState.range;
+
+  // Remove existing picker if any
+  closeDatePicker();
+
+  const area = document.getElementById('metricChartArea');
+  const picker = document.createElement('div');
+  picker.className = 'metric-date-picker';
+  picker.id = 'metricDatePicker';
+
+  if (range === 'day' || range === 'week') {
+    picker.innerHTML = buildCalendarHTML(2026, 6, range);
+  } else if (range === 'month') {
+    picker.innerHTML = buildMonthPickerHTML(2026);
+  } else if (range === 'year') {
+    picker.innerHTML = buildYearPickerHTML();
+  }
+
+  // Close picker when clicking outside
+  const closeOnOutside = (e) => {
+    if (!picker.contains(e.target) && e.target.id !== 'metricDateRange') {
+      closeDatePicker();
+      document.removeEventListener('click', closeOnOutside);
+    }
+  };
+  requestAnimationFrame(() => document.addEventListener('click', closeOnOutside));
+
+  area.appendChild(picker);
+}
+
+function closeDatePicker() {
+  const existing = document.getElementById('metricDatePicker');
+  if (existing) existing.remove();
+}
+
+function buildCalendarHTML(year, month, range) {
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const weekDays = ['一','二','三','四','五','六','日'];
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  // Monday-based: getDay() returns 0=Sun, convert to Mon=0
+  let startDow = firstDay.getDay() || 7; // 1=Mon ... 7=Sun
+  startDow = startDow - 1; // 0=Mon ... 6=Sun
+
+  let daysHtml = '';
+  // Empty cells before first day
+  for (let i = 0; i < startDow; i++) {
+    daysHtml += '<span class="mdp-day mdp-day--empty"></span>';
+  }
+
+  const today = 25; // July 25, 2026
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = (year === 2026 && month === 6 && d === today);
+    daysHtml += `<span class="mdp-day${isToday ? ' mdp-day--today' : ''}" onclick="onCalendarDayClick(${year},${month},${d})">${d}</span>`;
+  }
+
+  return `
+    <div class="mdp-header">
+      <span class="mdp-header__title">${year}年${monthNames[month]}</span>
+    </div>
+    <div class="mdp-weekdays">${weekDays.map(d => `<span>${d}</span>`).join('')}</div>
+    <div class="mdp-days">${daysHtml}</div>
+  `;
+}
+
+function onCalendarDayClick(year, month, day) {
+  const range = _metricState.range;
+  const selected = new Date(year, month, day);
+
+  if (range === 'day') {
+    const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    document.getElementById('metricDateRange').textContent = dateStr;
+  } else if (range === 'week') {
+    const dayOfWeek = selected.getDay() || 7;
+    const weekStart = new Date(selected);
+    weekStart.setDate(selected.getDate() - dayOfWeek + 1);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    document.getElementById('metricDateRange').textContent = formatDateShort(weekStart) + ' - ' + formatDateShort(weekEnd);
+  }
+
+  closeDatePicker();
+  renderMetricChart(range);
+}
+
+function buildMonthPickerHTML(year) {
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  let html = '<div class="mdp-header"><span class="mdp-header__title">' + year + '年</span></div>';
+  html += '<div class="mdp-month-grid">';
+  for (let m = 0; m < 12; m++) {
+    const isSelected = (year === 2026 && m === 6);
+    html += `<span class="mdp-month${isSelected ? ' mdp-month--today' : ''}" onclick="onMonthClick(${year},${m})">${monthNames[m]}</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function onMonthClick(year, month) {
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+  document.getElementById('metricDateRange').textContent = formatDateShort(monthStart) + ' - ' + formatDateShort(monthEnd);
+  closeDatePicker();
+  renderMetricChart('month');
+}
+
+function buildYearPickerHTML() {
+  const years = [2024, 2025, 2026, 2027];
+  let html = '<div class="mdp-header"><span class="mdp-header__title">选择年度</span></div>';
+  html += '<div class="mdp-year-grid">';
+  for (const y of years) {
+    const isSelected = (y === 2026);
+    html += `<span class="mdp-year${isSelected ? ' mdp-year--today' : ''}" onclick="onYearClick(${y})">${y}年</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function onYearClick(year) {
+  document.getElementById('metricDateRange').textContent = (year - 1) + '/08 - ' + year + '/07';
+  closeDatePicker();
+  renderMetricChart('year');
+}
+
+function formatDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function formatDateShort(d) {
+  return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+}
+
+function generateMockData(metricKey, range) {
+  const data = [];
+  const labels = [];
+  const today = new Date(2026, 6, 25);
+
+  const configs = {
+    heartRate: { base: 72, variance: 15, decimals: 0 },
+    temperature: { base: 36.5, variance: 0.8, decimals: 1 },
+    bloodPressure: { base: 120, variance: 20, decimals: 0 },
+    spo2: { base: 97, variance: 4, decimals: 0 },
+    steps: { base: 3000, variance: 2000, decimals: 0 }
+  };
+
+  const cfg = configs[metricKey] || { base: 50, variance: 10, decimals: 0 };
+
+  function randValue(base, variance) {
+    const v = base + (Math.random() - 0.5) * 2 * variance;
+    return parseFloat(v.toFixed(cfg.decimals));
+  }
+
+  if (range === 'day') {
+    for (let h = 0; h < 24; h++) {
+      labels.push(String(h).padStart(2, '0') + ':00');
+      let timeFactor = 1;
+      if (h >= 0 && h < 6) timeFactor = 0.85;
+      else if (h >= 6 && h < 12) timeFactor = 1.05;
+      else if (h >= 12 && h < 18) timeFactor = 1.1;
+      else timeFactor = 0.95;
+      data.push(randValue(cfg.base * timeFactor, cfg.variance * 0.5));
+    }
+  } else if (range === 'week') {
+    for (let d = 6; d >= 0; d--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - d);
+      labels.push(formatDateShort(date));
+      data.push(randValue(cfg.base, cfg.variance));
+    }
+  } else if (range === 'month') {
+    for (let d = 29; d >= 0; d--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - d);
+      labels.push(formatDateShort(date));
+      data.push(randValue(cfg.base, cfg.variance));
+    }
+  } else if (range === 'year') {
+    const monthNames = ['8月','9月','10月','11月','12月','1月','2月','3月','4月','5月','6月','7月'];
+    for (let m = 0; m < 12; m++) {
+      labels.push(monthNames[m]);
+      data.push(randValue(cfg.base, cfg.variance * 1.2));
+    }
+  }
+
+  return { data, labels };
+}
+
+function renderMetricChart(range) {
+  const canvas = document.getElementById('metricChart');
+  if (!canvas) return;
+
+  const container = canvas.parentElement;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  // Use container's clientWidth for reliable width
+  const containerW = container.clientWidth - 24;
+  const w = Math.max(containerW, 280);
+  const h = 220;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+
+  const { data, labels } = generateMockData(_metricState.metricKey, range);
+  if (data.length === 0) return;
+
+  // Store for click detection
+  _metricState.chartData = data;
+  _metricState.chartLabels = labels;
+
+  const color = _metricState.color;
+  const padLeft = 44;
+  const padRight = 12;
+  const padTop = 16;
+  const padBottom = 30;
+  const chartW = w - padLeft - padRight;
+  const chartH = h - padTop - padBottom;
+
+  const minVal = Math.min(...data);
+  const maxVal = Math.max(...data);
+  const valRange = maxVal - minVal || 1;
+  const yMin = minVal - valRange * 0.15;
+  const yMax = maxVal + valRange * 0.15;
+  const yRange = yMax - yMin;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid lines
+  ctx.strokeStyle = '#F0ECF8';
+  ctx.lineWidth = 1;
+  ctx.font = '10px "JetBrains Mono", monospace';
+  ctx.fillStyle = '#9891B8';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const y = padTop + (chartH / 4) * i;
+    const val = yMax - (yRange / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(w - padRight, y);
+    ctx.stroke();
+    ctx.fillText(val.toFixed(_metricState.metricKey === 'temperature' ? 1 : 0), padLeft - 6, y + 4);
+  }
+
+  // X-axis labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9891B8';
+  const labelInterval = Math.max(1, Math.floor(labels.length / 6));
+  for (let i = 0; i < labels.length; i += labelInterval) {
+    const x = padLeft + (chartW / (labels.length - 1 || 1)) * i;
+    ctx.fillText(labels[i], x, h - 6);
+  }
+
+  // Compute point positions for click detection
+  const pointPositions = [];
+  for (let i = 0; i < data.length; i++) {
+    const x = padLeft + (chartW / (data.length - 1 || 1)) * i;
+    const y = padTop + chartH - ((data[i] - yMin) / yRange) * chartH;
+    pointPositions.push({ x, y, index: i, value: data[i], label: labels[i] });
+  }
+
+  // Store point positions for click handling
+  _metricState.pointPositions = pointPositions;
+  _metricState.chartPadLeft = padLeft;
+  _metricState.chartPadRight = padRight;
+  _metricState.chartPadTop = padTop;
+  _metricState.chartW = chartW;
+  _metricState.chartH = chartH;
+
+  // Draw area fill
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = padLeft + (chartW / (data.length - 1 || 1)) * i;
+    const y = padTop + chartH - ((data[i] - yMin) / yRange) * chartH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  const lastX = padLeft + chartW;
+  ctx.lineTo(lastX, padTop + chartH);
+  ctx.lineTo(padLeft, padTop + chartH);
+  ctx.closePath();
+
+  const gradient = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+  gradient.addColorStop(0, color + '30');
+  gradient.addColorStop(1, color + '05');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Draw line
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = padLeft + (chartW / (data.length - 1 || 1)) * i;
+    const y = padTop + chartH - ((data[i] - yMin) / yRange) * chartH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Draw dots (only if not too many points)
+  if (data.length <= 12) {
+    for (let i = 0; i < data.length; i++) {
+      const x = padLeft + (chartW / (data.length - 1 || 1)) * i;
+      const y = padTop + chartH - ((data[i] - yMin) / yRange) * chartH;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+}
+
+// Chart click handler — show data point detail
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('metricChart');
+  if (!canvas) return;
+
+  canvas.addEventListener('click', (e) => {
+    if (!_metricState.pointPositions || _metricState.pointPositions.length === 0) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    // Find nearest point
+    let nearest = null;
+    let minDist = Infinity;
+    for (const pt of _metricState.pointPositions) {
+      const dist = Math.sqrt((clickX - pt.x) ** 2 + (clickY - pt.y) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = pt;
+      }
+    }
+
+    if (nearest && minDist < 40) {
+      showMetricDataDetail(nearest);
+    }
+  });
+});
+
+function showMetricDataDetail(point) {
+  const cfg = {
+    heartRate: { unit: 'bpm', normal: '60-100' },
+    temperature: { unit: '°C', normal: '36.0-37.3' },
+    bloodPressure: { unit: 'mmHg', normal: '90/60-140/90' },
+    spo2: { unit: '%', normal: '95-100' },
+    steps: { unit: '步', normal: '—' }
+  };
+  const c = cfg[_metricState.metricKey] || { unit: '', normal: '—' };
+
+  document.getElementById('metricDataDetail').innerHTML = `
+    <div class="metric-data-detail__header">
+      <span class="metric-data-detail__time">${point.label}</span>
+      <span class="metric-data-detail__value" style="color:${_metricState.color}">${point.value} ${c.unit}</span>
+    </div>
+    <div class="metric-data-detail__row">
+      <span class="metric-data-detail__label">正常范围</span>
+      <span class="metric-data-detail__val">${c.normal} ${c.unit}</span>
+    </div>
+    <div class="metric-data-detail__row">
+      <span class="metric-data-detail__label">设备</span>
+      <span class="metric-data-detail__val">${deviceData.find(d => d.id === _metricState.deviceId)?.type || '—'}</span>
+    </div>
+    <div class="metric-data-detail__row">
+      <span class="metric-data-detail__label">状态</span>
+      <span class="metric-data-detail__val" style="color:var(--confirmed)">正常</span>
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "description": "Level 2: 医疗通用规则（医疗项目必选）",
+  "rules": [
+    {
+      "rule_id": "MED-SEC-001",
+      "rule_name": "患者敏感信息脱敏检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "日志和响应中不得明文输出患者姓名、身份证号、手机号等敏感信息",
+      "tech_stack": ["java", "vue", "ts", "python", "csharp"],
+      "detection": {
+        "pattern": "(log\\.(info|debug|error).*?(patientName|idCard|phone))|(return.*?(patientName|idCard|phone))",
+        "file_pattern": "**/*.{java,vue,ts,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用脱敏工具类处理敏感信息后再输出",
+        "code_example": "// 修复前\nlog.info(\"患者姓名: {}\", patient.getName());\nreturn patient.getName();\n\n// 修复后\nlog.info(\"患者姓名: {}\", SensitiveUtils.maskName(patient.getName()));\nreturn SensitiveUtils.maskName(patient.getName());",
+        "auto_fixable": false
+      },
+      "tags": ["医疗合规", "数据安全", "隐私保护"],
+      "references": ["《个人信息保护法》", "《医疗数据安全管理规范》"]
+    },
+    {
+      "rule_id": "MED-SEC-002",
+      "rule_name": "患者数据加密存储检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "患者敏感数据（身份证号、手机号等）必须加密存储",
+      "tech_stack": ["java", "sql"],
+      "detection": {
+        "pattern": "id_card\\s+VARCHAR|phone\\s+VARCHAR",
+        "file_pattern": "**/*.sql",
+        "exclude_pattern": ""
+      },
+      "fix_guidance": {
+        "description": "敏感字段使用加密类型存储，或在应用层加密后存储",
+        "code_example": "-- 修复前\nCREATE TABLE patient (id_card VARCHAR(18), phone VARCHAR(11));\n\n-- 修复后\nCREATE TABLE patient (id_card_encrypted VARCHAR(64), phone_encrypted VARCHAR(64));",
+        "auto_fixable": false
+      },
+      "tags": ["医疗合规", "数据加密"],
+      "references": ["《医疗数据安全管理规范》"]
+    },
+    {
+      "rule_id": "MED-AUDIT-001",
+      "rule_name": "关键操作审计日志检查",
+      "category": "security",
+      "severity": "warning",
+      "description": "患者数据的新增、修改、删除操作必须记录审计日志",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "@Transactional.*?(save|update|delete|remove)",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "在关键操作方法中添加审计日志记录",
+        "code_example": "@Transactional\npublic void updatePatient(Patient patient) {\n    // 添加审计日志\n    auditLogService.log(\"更新患者信息\", patient.getId(), SecurityUtils.getCurrentUserId());\n    patientMapper.update(patient);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医疗合规", "审计日志"],
+      "references": ["《医疗机构病历管理规定》"]
+    },
+    {
+      "rule_id": "MED-PERM-001",
+      "rule_name": "数据权限检查",
+      "category": "security",
+      "severity": "warning",
+      "description": "查询患者数据的接口应添加数据权限控制",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "@GetMapping.*?patient|@PostMapping.*?patient",
+        "file_pattern": "**/*Controller*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "添加数据权限注解或在Service层实现数据权限过滤",
+        "code_example": "@GetMapping(\"/patient/{id}\")\n@DataPermission(scope = \"department\")\npublic Patient getPatient(@PathVariable Long id) {\n    return patientService.getById(id);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医疗合规", "权限控制"],
+      "references": ["《医疗机构病历管理规定》"]
+    },
+    {
+      "rule_id": "MED-VALID-001",
+      "rule_name": "患者信息必填校验",
+      "category": "quality",
+      "severity": "warning",
+      "description": "患者基本信息（姓名、性别、出生日期）应有必填校验",
+      "tech_stack": ["java", "vue", "ts"],
+      "detection": {
+        "pattern": "class\\s+Patient\\s*\\{[^}]*?(private\\s+String\\s+name;|name:\\s*string)",
+        "file_pattern": "**/*.{java,vue,ts}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "添加@NotBlank等校验注解",
+        "code_example": "public class Patient {\n    @NotBlank(message = \"患者姓名不能为空\")\n    private String name;\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医疗合规", "数据校验"],
+      "references": []
+    }
+  ]
+}

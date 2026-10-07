@@ -1,0 +1,170 @@
+{
+  "task_id": "REVIEW-20260515-001",
+  "work_item_id": 1500229,
+  "status": "blocked",
+  "summary": {
+    "total_issues": 12,
+    "critical": 2,
+    "warning": 5,
+    "info": 4,
+    "suggestion": 1
+  },
+  "report_files": {
+    "local_path": "DOCS/1500229/代码审查/审查报告_20260515_143000.md",
+    "json_path": "DOCS/1500229/代码审查/审查报告_20260515_143000.json",
+    "csv_path": "DOCS/1500229/代码审查/问题清单.csv",
+    "tfs_attachment_id": 12345
+  },
+  "block_reason": "发现2个严重问题需修复：SQL注入漏洞、患者数据未脱敏",
+  "next_action": "fix_and_retry",
+  "completed_at": "2026-05-15T14:30:00Z",
+  "details": {
+    "issues": [
+      {
+        "issue_id": "ISSUE-001",
+        "rule_id": "COMMON-SEC-001",
+        "rule_name": "SQL注入漏洞",
+        "rule_layer": "common",
+        "severity": "critical",
+        "category": "security",
+        "tech_stack": "java",
+        "file_path": "src/main/java/com/winning/mmop/winexmy/service/UserService.java",
+        "line_number": 45,
+        "line_content": "String sql = \"SELECT * FROM users WHERE username = '\" + username + \"'\";",
+        "description": "使用字符串拼接构建SQL语句存在注入风险，攻击者可通过构造特殊输入执行恶意SQL",
+        "fix_guidance": {
+          "description": "使用参数化查询或预编译语句替代字符串拼接",
+          "code_example": "// 修复前\nString sql = \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n\n// 修复后\nString sql = \"SELECT * FROM users WHERE username = ?\";\njdbcTemplate.queryForObject(sql, new Object[]{username}, new UserRowMapper());",
+          "auto_fixable": false
+        },
+        "tags": ["安全", "SQL注入"],
+        "references": ["OWASP Top 10 - A03:2021 Injection"]
+      },
+      {
+        "issue_id": "ISSUE-002",
+        "rule_id": "MED-SEC-001",
+        "rule_name": "患者敏感信息脱敏检查",
+        "rule_layer": "medical",
+        "severity": "critical",
+        "category": "security",
+        "tech_stack": "java",
+        "file_path": "src/main/java/com/winning/mmop/winexmy/service/PatientService.java",
+        "line_number": 156,
+        "line_content": "return new PatientVO(patient.getName(), patient.getIdCard(), patient.getPhone());",
+        "description": "患者姓名、身份证号、手机号等敏感信息未脱敏直接返回，违反医疗数据安全规范",
+        "fix_guidance": {
+          "description": "使用脱敏工具类处理患者敏感信息后再返回",
+          "code_example": "// 修复前\nreturn new PatientVO(patient.getName(), patient.getIdCard(), patient.getPhone());\n\n// 修复后\nreturn new PatientVO(\n    DesensitizationUtil.name(patient.getName()),\n    DesensitizationUtil.idCard(patient.getIdCard()),\n    DesensitizationUtil.phone(patient.getPhone())\n);",
+          "auto_fixable": false
+        },
+        "tags": ["医疗合规", "数据脱敏", "患者隐私"],
+        "references": ["医疗数据安全管理规范", "个人信息保护法"]
+      },
+      {
+        "issue_id": "ISSUE-003",
+        "rule_id": "COMMON-QUAL-001",
+        "rule_name": "空catch块",
+        "rule_layer": "common",
+        "severity": "warning",
+        "category": "quality",
+        "tech_stack": "java",
+        "file_path": "src/main/java/com/winning/mmop/winexmy/service/OrderService.java",
+        "line_number": 89,
+        "line_content": "} catch (Exception e) {\n    // do nothing\n}",
+        "description": "空的catch块会隐藏异常信息，导致问题难以排查",
+        "fix_guidance": {
+          "description": "至少记录异常日志，或根据业务需要处理异常",
+          "code_example": "// 修复前\n} catch (Exception e) {\n    // do nothing\n}\n\n// 修复后\n} catch (Exception e) {\n    log.error(\"订单处理异常\", e);\n    throw new BusinessException(\"订单处理失败\");\n}",
+          "auto_fixable": true
+        },
+        "tags": ["代码质量", "异常处理"],
+        "references": []
+      },
+      {
+        "issue_id": "ISSUE-004",
+        "rule_id": "AIMY-API-001",
+        "rule_name": "API统一POST方法检查",
+        "rule_layer": "product",
+        "severity": "warning",
+        "category": "standard",
+        "tech_stack": "java",
+        "file_path": "src/main/java/com/winning/mmop/winexmy/controller/UserController.java",
+        "line_number": 34,
+        "line_content": "@GetMapping(\"/user/list\")",
+        "description": "AI-MY平台所有API接口统一使用POST方法",
+        "fix_guidance": {
+          "description": "将@GetMapping改为@PostMapping",
+          "code_example": "// 修复前\n@GetMapping(\"/user/list\")\n\n// 修复后\n@PostMapping(\"/api/v1/agent_framework/admin/user/list\")",
+          "auto_fixable": false
+        },
+        "tags": ["AI-MY", "API规范"],
+        "references": ["AI-MY后端开发规范"]
+      }
+    ],
+    "rule_stats": {
+      "common": {
+        "total": 9,
+        "hits": 6
+      },
+      "medical": {
+        "total": 5,
+        "hits": 2
+      },
+      "product": {
+        "total": 4,
+        "hits": 3
+      },
+      "project": {
+        "total": 0,
+        "hits": 0
+      }
+    },
+    "score": {
+      "security": 65,
+      "security_desc": "存在SQL注入风险和敏感数据暴露问题",
+      "maintainability": 78,
+      "maintainability_desc": "代码结构清晰，但存在空catch块等问题",
+      "performance": 85,
+      "performance_desc": "未发现明显性能问题",
+      "standard": 70,
+      "standard_desc": "API规范不符合AI-MY平台要求",
+      "overall": 72
+    },
+    "tech_stack_analysis": [
+      {
+        "tech_stack": "java",
+        "files_scanned": 15,
+        "issues_found": 10,
+        "issue_density": "0.67 issues/file"
+      },
+      {
+        "tech_stack": "vue",
+        "files_scanned": 8,
+        "issues_found": 2,
+        "issue_density": "0.25 issues/file"
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "P0",
+        "title": "修复SQL注入漏洞",
+        "description": "立即修复UserService.java中的SQL注入问题，使用参数化查询"
+      },
+      {
+        "priority": "P0",
+        "title": "实现患者数据脱敏",
+        "description": "PatientService返回数据前必须进行脱敏处理"
+      },
+      {
+        "priority": "P1",
+        "title": "统一API规范",
+        "description": "按照AI-MY平台规范调整API方法和路径前缀"
+      },
+      {
+        "priority": "P2",
+        "title": "完善异常处理",
+        "description": "消除空catch块，添加适当的异常日志记录"
+      }
+    ]
+  }
+}

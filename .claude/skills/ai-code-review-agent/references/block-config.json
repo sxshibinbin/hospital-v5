@@ -1,0 +1,41 @@
+{
+  "block_thresholds": {
+    "critical": {
+      "count": 1,
+      "action": "block",
+      "message": "发现严重问题，必须修复"
+    },
+    "warning": {
+      "count": 10,
+      "action": "block",
+      "message": "警告问题过多，请检查"
+    },
+    "info": {
+      "count": -1,
+      "action": "pass",
+      "message": "不影响流程"
+    }
+  },
+  "product_line_overrides": {
+    "AI-MY": {
+      "critical": { "count": 0 },
+      "warning": { "count": 5 }
+    },
+    "CDSS": {
+      "critical": { "count": 0 },
+      "warning": { "count": 8 }
+    },
+    "AI重症": {
+      "critical": { "count": 0 },
+      "warning": { "count": 5 }
+    },
+    "病历质控": {
+      "critical": { "count": 0 },
+      "warning": { "count": 6 }
+    },
+    "医保控费": {
+      "critical": { "count": 0 },
+      "warning": { "count": 8 }
+    }
+  }
+}

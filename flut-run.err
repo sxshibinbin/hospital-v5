@@ -1,0 +1,373 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+lib/screens/chat_screen.dart:11:8: Error: Error when reading '.pub-cache/hosted/pub.dev/genui-0.8.0/lib/genui.dart': 系统找不到指定的路径。
+import 'package:genui/genui.dart' as genui;
+       ^
+Error: Couldn't resolve the package 'equatable' in 'package:equatable/equatable.dart'.
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:5:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/base_chart/base_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/pie_chart/pie_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:4:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/side_titles/side_titles_flex.dart:3:8: Error: Not found: 'package:equatable/equatable.dart'
+import 'package:equatable/equatable.dart';
+       ^
+lib/screens/chat_screen.dart:115:14: Error: Type 'genui.SurfaceController' not found.
+  late final genui.SurfaceController _surfaceController =
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:119:22: Error: Type 'genui.ChatMessage' not found.
+  StreamSubscription<genui.ChatMessage>? _surfaceSubmitSubscription;
+                     ^^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:714:8: Error: Type 'genui.Component' not found.
+  List<genui.Component> _buildConsultationSurfaceComponents(
+       ^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:844:41: Error: Type 'genui.ChatMessage' not found.
+  Future<void> _handleSurfaceSubmission(genui.ChatMessage message) async {
+                                        ^^^^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:16:47: Error: Type 'EquatableMixin' not found.
+class BarChartData extends AxisChartData with EquatableMixin {
+                                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:194:30: Error: Type 'EquatableMixin' not found.
+class BarChartGroupData with EquatableMixin {
+                             ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:305:28: Error: Type 'EquatableMixin' not found.
+class BarChartRodData with EquatableMixin {
+                           ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:474:33: Error: Type 'EquatableMixin' not found.
+class BarChartRodStackItem with EquatableMixin {
+                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:545:38: Error: Type 'EquatableMixin' not found.
+class BackgroundBarChartRodData with EquatableMixin {
+                                     ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:611:63: Error: Type 'EquatableMixin' not found.
+class BarTouchData extends FlTouchData<BarTouchResponse> with EquatableMixin {
+                                                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:712:32: Error: Type 'EquatableMixin' not found.
+class BarTouchTooltipData with EquatableMixin {
+                               ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:843:27: Error: Type 'EquatableMixin' not found.
+class BarTooltipItem with EquatableMixin {
+                          ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/bar_chart/bar_chart_data.dart:916:47: Error: Type 'EquatableMixin' not found.
+class BarTouchedSpot extends TouchedSpot with EquatableMixin {
+                                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:17:57: Error: Type 'EquatableMixin' not found.
+abstract class AxisChartData extends BaseChartData with EquatableMixin {
+                                                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:168:23: Error: Type 'EquatableMixin' not found.
+class SideTitles with EquatableMixin {
+                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:268:35: Error: Type 'EquatableMixin' not found.
+class SideTitleFitInsideData with EquatableMixin {
+                                  ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:335:23: Error: Type 'EquatableMixin' not found.
+class AxisTitles with EquatableMixin {
+                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:405:25: Error: Type 'EquatableMixin' not found.
+class FlTitlesData with EquatableMixin {
+                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:579:25: Error: Type 'EquatableMixin' not found.
+class FlErrorRange with EquatableMixin {
+                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:618:23: Error: Type 'EquatableMixin' not found.
+class FlGridData with EquatableMixin {
+                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:765:19: Error: Type 'EquatableMixin' not found.
+class FlLine with EquatableMixin {
+                  ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:830:33: Error: Type 'EquatableMixin' not found.
+abstract class TouchedSpot with EquatableMixin {
+                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:858:29: Error: Type 'EquatableMixin' not found.
+class RangeAnnotations with EquatableMixin {
+                            ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:910:38: Error: Type 'EquatableMixin' not found.
+class HorizontalRangeAnnotation with EquatableMixin {
+                                     ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:978:36: Error: Type 'EquatableMixin' not found.
+class VerticalRangeAnnotation with EquatableMixin {
+                                   ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1049:42: Error: Type 'EquatableMixin' not found.
+class HorizontalLine extends FlLine with EquatableMixin {
+                                         ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1120:40: Error: Type 'EquatableMixin' not found.
+class VerticalLine extends FlLine with EquatableMixin {
+                                       ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1211:52: Error: Type 'EquatableMixin' not found.
+class HorizontalLineLabel extends FlLineLabel with EquatableMixin {
+                                                   ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1267:50: Error: Type 'EquatableMixin' not found.
+class VerticalLineLabel extends FlLineLabel with EquatableMixin {
+                                                 ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1337:25: Error: Type 'EquatableMixin' not found.
+class SizedPicture with EquatableMixin {
+                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1368:27: Error: Type 'EquatableMixin' not found.
+class ExtraLinesData with EquatableMixin {
+                          ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1406:34: Error: Type 'EquatableMixin' not found.
+abstract class FlDotPainter with EquatableMixin {
+                                 ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1721:10: Error: Type 'EquatableMixin' not found.
+    with EquatableMixin {
+         ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1779:45: Error: Type 'EquatableMixin' not found.
+abstract class FlSpotErrorRangePainter with EquatableMixin {
+                                            ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:1818:65: Error: Type 'EquatableMixin' not found.
+class FlSimpleErrorPainter extends FlSpotErrorRangePainter with EquatableMixin {
+                                                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/axis_chart_data.dart:2062:51: Error: Type 'EquatableMixin' not found.
+abstract class FlSpotErrorRangeCallbackInput with EquatableMixin {}
+                                                  ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/base_chart/base_chart_data.dart:14:35: Error: Type 'EquatableMixin' not found.
+abstract class BaseChartData with EquatableMixin {
+                                  ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/base_chart/base_chart_data.dart:39:25: Error: Type 'EquatableMixin' not found.
+class FlBorderData with EquatableMixin {
+                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/base_chart/base_chart_data.dart:84:62: Error: Type 'EquatableMixin' not found.
+abstract class FlTouchData<R extends BaseTouchResponse> with EquatableMixin {
+                                                             ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/base_chart/base_chart_data.dart:121:23: Error: Type 'EquatableMixin' not found.
+class FlClipData with EquatableMixin {
+                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:15:48: Error: Type 'EquatableMixin' not found.
+class LineChartData extends AxisChartData with EquatableMixin {
+                                               ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:189:29: Error: Type 'EquatableMixin' not found.
+class LineChartBarData with EquatableMixin {
+                            ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:494:30: Error: Type 'EquatableMixin' not found.
+class LineChartStepData with EquatableMixin {
+                             ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:526:24: Error: Type 'EquatableMixin' not found.
+class BarAreaData with EquatableMixin {
+                       ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:598:28: Error: Type 'EquatableMixin' not found.
+class BetweenBarsData with EquatableMixin {
+                           ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:646:29: Error: Type 'EquatableMixin' not found.
+class BarAreaSpotsLine with EquatableMixin {
+                            ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:769:22: Error: Type 'EquatableMixin' not found.
+class FlDotData with EquatableMixin {
+                     ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:817:33: Error: Type 'EquatableMixin' not found.
+abstract class FlLineLabel with EquatableMixin {
+                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:862:65: Error: Type 'EquatableMixin' not found.
+class LineTouchData extends FlTouchData<LineTouchResponse> with EquatableMixin {
+                                                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:1034:33: Error: Type 'EquatableMixin' not found.
+class LineTouchTooltipData with EquatableMixin {
+                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:1162:39: Error: Type 'EquatableMixin' not found.
+class LineBarSpot extends FlSpot with EquatableMixin {
+                                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:1208:28: Error: Type 'EquatableMixin' not found.
+class LineTooltipItem with EquatableMixin {
+                           ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:1248:37: Error: Type 'EquatableMixin' not found.
+class TouchedSpotIndicatorData with EquatableMixin {
+                                    ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/line_chart/line_chart_data.dart:1274:37: Error: Type 'EquatableMixin' not found.
+class ShowingTooltipIndicators with EquatableMixin {
+                                    ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/pie_chart/pie_chart_data.dart:13:47: Error: Type 'EquatableMixin' not found.
+class PieChartData extends BaseChartData with EquatableMixin {
+                                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/pie_chart/pie_chart_data.dart:137:32: Error: Type 'EquatableMixin' not found.
+class PieChartSectionData with EquatableMixin {
+                               ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/pie_chart/pie_chart_data.dart:308:63: Error: Type 'EquatableMixin' not found.
+class PieTouchData extends FlTouchData<PieTouchResponse> with EquatableMixin {
+                                                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/pie_chart/pie_chart_data.dart:340:30: Error: Type 'EquatableMixin' not found.
+class PieTouchedSection with EquatableMixin {
+                             ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:44:49: Error: Type 'EquatableMixin' not found.
+class RadarChartData extends BaseChartData with EquatableMixin {
+                                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:280:25: Error: Type 'EquatableMixin' not found.
+class RadarDataSet with EquatableMixin {
+                        ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:362:23: Error: Type 'EquatableMixin' not found.
+class RadarEntry with EquatableMixin {
+                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:388:10: Error: Type 'EquatableMixin' not found.
+    with EquatableMixin {
+         ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/radar_chart/radar_chart_data.dart:449:49: Error: Type 'EquatableMixin' not found.
+class RadarTouchedSpot extends TouchedSpot with EquatableMixin {
+                                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:15:51: Error: Type 'EquatableMixin' not found.
+class ScatterChartData extends AxisChartData with EquatableMixin {
+                                                  ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:208:39: Error: Type 'EquatableMixin' not found.
+class ScatterSpot extends FlSpot with EquatableMixin {
+                                      ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:300:10: Error: Type 'EquatableMixin' not found.
+    with EquatableMixin {
+         ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:404:31: Error: Type 'EquatableMixin' not found.
+class ScatterTouchedSpot with EquatableMixin {
+                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:432:36: Error: Type 'EquatableMixin' not found.
+class ScatterTouchTooltipData with EquatableMixin {
+                                   ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:598:31: Error: Type 'EquatableMixin' not found.
+class ScatterTooltipItem with EquatableMixin {
+                              ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/scatter_chart/scatter_chart_data.dart:701:33: Error: Type 'EquatableMixin' not found.
+class ScatterLabelSettings with EquatableMixin {
+                                ^^^^^^^^^^^^^^
+.pub-cache/hosted/pub.dev/fl_chart-0.70.2/lib/src/chart/base/axis_chart/side_titles/side_titles_flex.dart:282:34: Error: Type 'EquatableMixin' not found.
+class AxisSideTitleMetaData with EquatableMixin {
+                                 ^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:115:20: Error: 'SurfaceController' isn't a type.
+  late final genui.SurfaceController _surfaceController =
+                   ^^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:116:48: Error: Undefined name 'BasicCatalogItems'.
+      genui.SurfaceController(catalogs: [genui.BasicCatalogItems.asCatalog()]);
+                                               ^^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:116:13: Error: Method not found: 'SurfaceController'.
+      genui.SurfaceController(catalogs: [genui.BasicCatalogItems.asCatalog()]);
+            ^^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:119:28: Error: 'ChatMessage' isn't a type.
+  StreamSubscription<genui.ChatMessage>? _surfaceSubmitSubscription;
+                           ^^^^^^^^^^^
+lib/screens/chat_screen.dart:692:21: Error: Couldn't find constructor 'DeleteSurface'.
+        const genui.DeleteSurface(surfaceId: _resultSurfaceId),
+                    ^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:700:26: Error: Undefined name 'basicCatalogId'.
+        catalogId: genui.basicCatalogId,
+                         ^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:698:19: Error: Couldn't find constructor 'CreateSurface'.
+      const genui.CreateSurface(
+                  ^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:704:13: Error: Method not found: 'UpdateComponents'.
+      genui.UpdateComponents(
+            ^^^^^^^^^^^^^^^^
+lib/screens/chat_screen.dart:723:19: Error: 'Component' isn't a type.
+    return <genui.Component>[
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:724:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:731:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:736:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:753:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:758:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:763:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:768:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:773:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:778:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:783:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:788:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:793:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:798:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:805:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:820:13: Error: Method not found: 'Component'.
+      genui.Component(
+            ^^^^^^^^^
+lib/screens/chat_screen.dart:825:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:836:19: Error: Couldn't find constructor 'Component'.
+      const genui.Component(
+                  ^^^^^^^^^
+lib/screens/chat_screen.dart:844:47: Error: 'ChatMessage' isn't a type.
+  Future<void> _handleSurfaceSubmission(genui.ChatMessage message) async {
+                                              ^^^^^^^^^^^
+lib/screens/chat_screen.dart:3834:17: Error: Method not found: 'Surface'.
+          genui.Surface(
+                ^^^^^^^
+Unhandled exception:
+Unsupported operation: Unsupported invalid type InvalidType(<invalid>) (InvalidType). Encountered while compiling file:///D:/hermes/30Day/hospital-v5/flutter_app/lib/screens/chat_screen.dart, which contains the type: InterfaceType(StreamSubscription<<invalid>>?).
+#0      LibraryCompiler._typeCompilationError (package:dev_compiler/src/kernel/compiler_new.dart:4493)
+#1      LibraryCompiler._emitType (package:dev_compiler/src/kernel/compiler_new.dart:4458)
+#2      LibraryCompiler._emitCast (package:dev_compiler/src/kernel/compiler_new.dart:8667)
+#3      LibraryCompiler.visitAsExpression (package:dev_compiler/src/kernel/compiler_new.dart:8595)
+#4      AsExpression.accept (package:kernel/src/ast/expressions.dart:4010)
+#5      LibraryCompiler._visitExpression (package:dev_compiler/src/kernel/compiler_new.dart:5138)
+#6      LibraryCompiler.visitInstanceSet (package:dev_compiler/src/kernel/compiler_new.dart:6290)
+#7      InstanceSet.accept (package:kernel/src/ast/expressions.dart:926)
+#8      LibraryCompiler._visitExpression (package:dev_compiler/src/kernel/compiler_new.dart:5138)
+#9      LibraryCompiler.visitExpressionStatement (package:dev_compiler/src/kernel/compiler_new.dart:5226)
+#10     ExpressionStatement.accept (package:kernel/src/ast/statements.dart:50)
+#11     LibraryCompiler._visitStatement (package:dev_compiler/src/kernel/compiler_new.dart:5035)
+#12     MappedIterable.elementAt (dart:_internal/iterable.dart:402)
+#13     ListIterator.moveNext (dart:_internal/iterable.dart:371)
+#14     new _GrowableList._ofEfficientLengthIterable (dart:core-patch/growable_array.dart:194)
+#15     new _GrowableList.of (dart:core-patch/growable_array.dart:154)
+#16     new List.of (dart:core-patch/array_patch.dart:39)
+#17     SetBase.toList (dart:collection/set.dart:119)
+#18     LibraryCompiler.visitBlock (package:dev_compiler/src/kernel/compiler_new.dart:5248)
+#19     Block.accept (package:kernel/src/ast/statements.dart:106)
+#20     LibraryCompiler._visitStatement (package:dev_compiler/src/kernel/compiler_new.dart:5035)
+#21     LibraryCompiler._emitFunctionScopedBody (package:dev_compiler/src/kernel/compiler_new.dart:5072)
+#22     LibraryCompiler._emitFunction.<anonymous closure> (package:dev_compiler/src/kernel/compiler_new.dart:4680)
+#23     LibraryCompiler._withLetScope (package:dev_compiler/src/kernel/compiler_new.dart:3674)
+#24     LibraryCompiler._withCurrentFunction (package:dev_compiler/src/kernel/compiler_new.dart:4854)
+#25     LibraryCompiler._emitFunction (package:dev_compiler/src/kernel/compiler_new.dart:4672)
+#26     LibraryCompiler._emitMethodDeclaration.<anonymous closure> (package:dev_compiler/src/kernel/compiler_new.dart:2941)
+#27     LibraryCompiler._withMethodDeclarationContext (package:dev_compiler/src/kernel/compiler_new.dart:4879)
+#28     LibraryCompiler._emitMethodDeclaration (package:dev_compiler/src/kernel/compiler_new.dart:2939)
+#29     LibraryCompiler._emitClassProperties (package:dev_compiler/src/kernel/compiler_new.dart:2880)
+#30     LibraryCompiler._emitClassDeclaration (package:dev_compiler/src/kernel/compiler_new.dart:1488)
+#31     LibraryCompiler._emitClass (package:dev_compiler/src/kernel/compiler_new.dart:1426)
+#32     List.forEach (dart:core-patch/growable_array.dart:428)
+#33     LibraryCompiler._emitLibrary (package:dev_compiler/src/kernel/compiler_new.dart:1348)
+#34     LibraryCompiler.emitLibrary (package:dev_compiler/src/kernel/compiler_new.dart:962)
+#35     LibraryBundleCompiler.emitModule (package:dev_compiler/src/kernel/compiler_new.dart:164)
+#36     IncrementalJavaScriptBundler.compile (package:frontend_server/src/javascript_bundle.dart:324)
+#37     FrontendCompiler.writeJavaScriptBundle (package:frontend_server/frontend_server.dart:922)
+<asynchronous suspension>
+#38     FrontendCompiler.compile (package:frontend_server/frontend_server.dart:728)
+<asynchronous suspension>
+#39     listenAndCompile.<anonymous closure> (package:frontend_server/frontend_server.dart:1449)
+<asynchronous suspension>
+The Dart compiler exited unexpectedly.
+Failed to compile application.

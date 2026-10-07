@@ -1,0 +1,139 @@
+{
+  "version": "1.0.0",
+  "description": "修复规则注册表 - 定义各技术栈支持的自动修复规则",
+
+  "engines": {
+    "java": {
+      "name": "Java修复引擎",
+      "engine_path": "fix-engines/java-fix-engine.md",
+      "supported_rules": [
+        "COMMON-SEC-002",
+        "COMMON-QUAL-001",
+        "COMMON-STD-002",
+        "MED-SEC-001"
+      ]
+    },
+    "vue": {
+      "name": "Vue修复引擎",
+      "engine_path": "fix-engines/vue-fix-engine.md",
+      "supported_rules": [
+        "COMMON-SEC-003",
+        "AIMY-MOBILE-001"
+      ]
+    },
+    "sql": {
+      "name": "SQL修复引擎",
+      "engine_path": "fix-engines/sql-fix-engine.md",
+      "supported_rules": [
+        "COMMON-PERF-002"
+      ]
+    }
+  },
+
+  "rule_fix_strategies": {
+    "COMMON-SEC-001": {
+      "rule_name": "SQL注入风险检查",
+      "auto_fixable": false,
+      "risk_level": "high",
+      "strategy": "manual_review_required",
+      "reason": "SQL重构需要理解业务语义，无法自动修复"
+    },
+    "COMMON-SEC-002": {
+      "rule_name": "敏感信息日志输出检查",
+      "auto_fixable": true,
+      "risk_level": "low",
+      "strategy": "remove_or_mask_sensitive_log",
+      "description": "移除或脱敏日志中的敏感信息"
+    },
+    "COMMON-SEC-003": {
+      "rule_name": "XSS风险检查",
+      "auto_fixable": true,
+      "risk_level": "medium",
+      "strategy": "add_sanitize_wrapper",
+      "description": "为v-html添加DOMPurify净化处理"
+    },
+    "COMMON-PERF-001": {
+      "rule_name": "N+1查询检查",
+      "auto_fixable": false,
+      "risk_level": "high",
+      "strategy": "manual_review_required",
+      "reason": "需要理解数据关系和业务逻辑"
+    },
+    "COMMON-PERF-002": {
+      "rule_name": "深分页检查",
+      "auto_fixable": true,
+      "risk_level": "medium",
+      "strategy": "convert_to_cursor_pagination",
+      "description": "转换为基于游标的分页方式"
+    },
+    "COMMON-QUAL-001": {
+      "rule_name": "空catch块检查",
+      "auto_fixable": true,
+      "risk_level": "low",
+      "strategy": "add_log_statement",
+      "description": "在空catch块中添加日志语句"
+    },
+    "COMMON-QUAL-002": {
+      "rule_name": "空指针风险检查",
+      "auto_fixable": false,
+      "risk_level": "medium",
+      "strategy": "manual_review_required",
+      "reason": "需要理解业务逻辑确定合理的默认值"
+    },
+    "COMMON-STD-001": {
+      "rule_name": "方法长度检查",
+      "auto_fixable": false,
+      "risk_level": "high",
+      "strategy": "manual_refactor_required",
+      "reason": "方法拆分需要理解业务逻辑"
+    },
+    "COMMON-STD-002": {
+      "rule_name": "命名规范检查",
+      "auto_fixable": true,
+      "risk_level": "medium",
+      "strategy": "rename_identifier",
+      "description": "转换为正确的命名风格，需全局替换引用"
+    },
+    "MED-SEC-001": {
+      "rule_name": "患者敏感信息脱敏检查",
+      "auto_fixable": true,
+      "risk_level": "low",
+      "strategy": "apply_desensitization",
+      "description": "应用脱敏工具类处理患者信息"
+    },
+    "MED-SEC-002": {
+      "rule_name": "患者数据加密存储检查",
+      "auto_fixable": false,
+      "risk_level": "high",
+      "strategy": "manual_review_required",
+      "reason": "加密改造涉及数据迁移，需人工处理"
+    },
+    "MED-AUDIT-001": {
+      "rule_name": "关键操作审计日志检查",
+      "auto_fixable": false,
+      "risk_level": "medium",
+      "strategy": "manual_review_required",
+      "reason": "审计日志需要确定关键操作点"
+    },
+    "AIMY-API-001": {
+      "rule_name": "API统一POST方法",
+      "auto_fixable": false,
+      "risk_level": "high",
+      "strategy": "manual_review_required",
+      "reason": "API改造涉及前端联动，需人工确认"
+    },
+    "AIMY-MOBILE-001": {
+      "rule_name": "移动端响应式适配",
+      "auto_fixable": true,
+      "risk_level": "low",
+      "strategy": "convert_to_responsive_unit",
+      "description": "将固定像素转换为rem/vw等响应式单位"
+    }
+  },
+
+  "unsupported_categories": {
+    "architectural": "架构类问题需要人工决策",
+    "business_logic": "业务逻辑问题需要领域知识",
+    "security_critical": "关键安全问题需要安全专家审查"
+  }
+}

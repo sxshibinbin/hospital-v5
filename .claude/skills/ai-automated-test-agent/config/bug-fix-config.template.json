@@ -1,0 +1,47 @@
+{
+  "_comment": "Bug修复配置模板 - 复制到项目根目录 .bug-fix-config.json 使用",
+  "max_fix_retries": 3,
+  "fix_scope": "P0_P1",
+  "auto_backup": true,
+  "require_human_review": ["CRITICAL", "HIGH"],
+  "max_file_size_kb": 500,
+  "forbidden_patterns": [
+    "System.out.println",
+    "console.log",
+    "e.printStackTrace()",
+    "TODO.*fix.*later"
+  ],
+  "forbidden_modifications": [
+    "application-prod.yml",
+    "application-prod.properties",
+    "web.config",
+    "*.env",
+    "docker-compose.prod.yml"
+  ],
+  "compile_commands": {
+    "java": "mvn compile -q -f {project_root}/pom.xml",
+    "csharp": "dotnet build --no-restore {project_root}/{project}.csproj",
+    "vue": "npm run build --prefix {project_root}"
+  },
+  "test_commands": {
+    "java": "mvn test -Dtest={TestClass} -f {project_root}/pom.xml",
+    "java_all": "mvn test -f {project_root}/pom.xml",
+    "csharp": "dotnet test --filter \"FullyQualifiedName~{TestName}\" --no-restore",
+    "csharp_all": "dotnet test --no-restore",
+    "vue": "npm test --prefix {project_root} -- --testPathPattern={TestFile}",
+    "vue_all": "npm test --prefix {project_root}"
+  },
+  "medical_review_rules": {
+    "always_require_review": [
+      "MEDICAL_DATA_INTEGRITY",
+      "MEDICAL_DOSAGE_CALC",
+      "MEDICAL_AUTH_BYPASS"
+    ],
+    "review_checklist": [
+      "修复是否影响其他医疗业务流程",
+      "修复是否改变了数据一致性保证",
+      "修复是否涉及剂量计算精度",
+      "修复是否影响角色权限隔离"
+    ]
+  }
+}

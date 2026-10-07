@@ -1,0 +1,157 @@
+name: flutter_app
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.3+4
+
+environment:
+  sdk: ^3.10.0
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  webview_flutter: ^4.13.1
+  dio: ^5.9.2
+  provider: ^6.1.5+1
+  go_router: ^17.2.0
+  shared_preferences: ^2.5.5
+  flutter_secure_storage: ^9.2.4
+  flutter_ai_toolkit: ^1.0.0
+  genui: ^0.8.0
+  json_schema_builder: ^0.1.3
+  http: ^1.6.0
+  flutter_markdown: ^0.7.7+1
+  ali_auth:
+    path: .vendor/ali_auth
+  file_picker: ^11.0.2
+  permission_handler: ^12.0.1
+  mobile_scanner: ^6.0.2
+  image_picker: ^1.1.2
+  fl_chart: ^0.70.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# 本机 Xcode 14.2 只带 iOS 16.2 SDK / Swift 5.7：引用 16.4+ SDK API（如 WKWebView.isInspectable）
+# 或 Swift 5.9 语法（if/switch 表达式）的插件编译不过。不用的依赖直接删（webview_flutter 已删），
+# 能钉版本的（genui 带的 video_player）用 overrides 钉到能编译的最后版本；全版本都脏且干净版
+# 要求 Dart 3.12+ 的（flutter_ai_toolkit 传导的 record_ios / camera_avfoundation）vendor 到
+# .vendor/ 手工改语法后 path 覆盖，协议版本零漂移。云端新机器（Xcode 15+）可全部解除。
+dependency_overrides:
+  video_player_avfoundation: 2.9.4
+  record_ios:
+    path: .vendor/record_ios
+  camera_avfoundation:
+    path: .vendor/camera_avfoundation
+  audioplayers_darwin:
+    path: .vendor/audioplayers_darwin
+  firebase_app_check_platform_interface:
+    path: third_party/firebase_app_check_platform_interface
+  # 以下 5 个 Android 插件原包要求 Flutter ≥3.44 工具链注入 kotlin 插件，
+  # 本机 Flutter 3.41.7 不满足；third_party 本地副本在 plugins block
+  # 显式声明 kotlin-android（见各包 android/build.gradle.kts 的补丁注释）
+  file_selector_android:
+    path: third_party/file_selector_android-0.5.2+11
+  image_picker_android:
+    path: third_party/image_picker_android-0.8.13+23
+  shared_preferences_android:
+    path: third_party/shared_preferences_android-2.4.28
+  url_launcher_android:
+    path: third_party/url_launcher_android-6.3.33
+  video_player_android:
+    path: third_party/video_player_android-2.12.2
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo.webp
+    - assets/auth/icon_nav_back.png
+    - assets/auth/icon_checkbox_checked.png
+    - assets/auth/icon_checkbox_unchecked.png
+
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+# For details regarding fonts from package dependencies,
+# see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo.png"
+  adaptive_icon_monochrome: "assets/images/logo.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true

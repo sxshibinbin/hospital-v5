@@ -1,0 +1,53 @@
+# AIAutoDevSetup 清单配置
+# 定义全自动化研发工作流程所需的技能（无 MCP）
+
+tfs:
+  # TFS 仓库配置
+  base_url: "http://tfs2018-web.winning.com.cn:8080/tfs"
+  collection: "WinCode"
+  skill_project: "Skill"
+  host: "tfs2018-web.winning.com.cn:8080"
+
+workflows:
+  ai-auto-dev:
+    name: "全流程自动化研发"
+    description: "AI事业部多Agent编排体系，包含需求分析、架构设计、前后端开发、代码审查、自动化测试、Git操作、TFS集成等完整研发流程"
+    skills:
+      - name: "ai-auto-dev"
+        description: "主调度技能 - 多需求并行自动开发的完整解决方案"
+        required: true
+      - name: "ai-tfs-integration"
+        description: "TFS集成技能 - 工作项管理、代码提交检查、需求状态追踪"
+        required: true
+        needs_config: true  # 需要TFS权限配置
+      - name: "ai-prd-auto"
+        description: "需求分析技能 - 将自然语言需求转化为结构化PRD"
+        required: true
+      - name: "ai-architecture-design"
+        description: "架构设计技能 - 生成系统架构、数据库模型、API接口规范"
+        required: true
+      - name: "ai-backend-dev-pro"
+        description: "后端开发技能 - Java Spring Boot / AKSO 框架开发"
+        required: true
+      - name: "ai-frontend-dev-pro"
+        description: "前端开发技能 - Vue.js 前端编码"
+        required: true
+      - name: "ai-code-review-agent"
+        description: "代码审查技能 - 多技术栈代码审查、TFS集成"
+        required: true
+      - name: "ai-automated-test-agent"
+        description: "自动化测试技能 - 多类型测试用例生成与执行"
+        required: true
+      - name: "ai-git-merge"
+        description: "合并分支技能 - Git 分支合并工作流"
+        required: true
+      - name: "ai-git-push"
+        description: "代码提交技能 - 代码提交推送工作流"
+        required: true
+
+# 预定义的安装位置
+install_locations:
+  global:
+    skills_dir: "~/.claude/skills"
+  project:
+    skills_dir: ".claude/skills"  # 相对于当前项目根目录

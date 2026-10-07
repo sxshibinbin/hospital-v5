@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "automated-test-agent Output Schema",
+  "type": "object",
+  "required": ["task_id", "work_item_id", "status", "summary", "report_files"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "任务唯一标识"
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "TFS工作项ID（需求号）"
+    },
+    "status": {
+      "type": "string",
+      "description": "执行状态",
+      "enum": ["completed", "failed", "blocked", "partial"]
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total_cases", "passed", "failed", "skipped", "pass_rate"],
+      "properties": {
+        "total_cases": { "type": "integer", "description": "总用例数" },
+        "passed": { "type": "integer", "description": "通过数" },
+        "failed": { "type": "integer", "description": "失败数" },
+        "skipped": { "type": "integer", "description": "跳过数" },
+        "pass_rate": { "type": "string", "description": "通过率百分比" }
+      }
+    },
+    "bug_summary": {
+      "type": "object",
+      "properties": {
+        "P0_critical": { "type": "integer" },
+        "P1_high": { "type": "integer" },
+        "P2_medium": { "type": "integer" },
+        "P3_low": { "type": "integer" }
+      }
+    },
+    "related_agents": {
+      "type": "object",
+      "description": "关联的前置Agent任务ID",
+      "properties": {
+        "prd_agent": { "type": "string" },
+        "arch_agent": { "type": "string" },
+        "review_agent": { "type": "string" }
+      }
+    },
+    "case_source_stats": {
+      "type": "object",
+      "description": "用例来源统计",
+      "properties": {
+        "from_prd": { "type": "integer", "description": "来自PRD解析的用例数" },
+        "from_arch": { "type": "integer", "description": "来自架构设计的用例数" },
+        "from_review": { "type": "integer", "description": "来自代码审查的用例数" },
+        "from_medical": { "type": "integer", "description": "来自医疗规则库的用例数" }
+      }
+    },
+    "report_files": {
+      "type": "object",
+      "required": ["local_path"],
+      "properties": {
+        "local_path": { "type": "string", "description": "本地报告路径" },
+        "html_path": { "type": "string", "description": "HTML报告路径" },
+        "tfs_attachment_id": { "type": "integer", "description": "TFS附件ID" }
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "description": "下一步操作建议",
+      "enum": ["deploy", "fix_and_retest", "manual_review", "completed"]
+    },
+    "block_reason": {
+      "type": "string",
+      "description": "阻断原因（仅status为blocked时）"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "完成时间"
+    }
+  }
+}

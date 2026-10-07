@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>APP首启用户协议原型</title>
+<style>
+  :root {
+    --primary: #5b57f7;
+    --primary-dark: #2f266f;
+    --accent: #8b7cff;
+    --warm: #ff8b6f;
+    --page-top: #f8f3ff;
+    --page-bottom: #fdf7f5;
+    --surface-soft: #f8f6ff;
+    --ink: #20223a;
+    --muted: #7b7f8f;
+    --line: #e7e3f5;
+    --surface: #ffffff;
+    --page: #f8f6ff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #edf0f2;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  .stage {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 50% 22%, rgba(139, 124, 255, 0.18), transparent 28%),
+      linear-gradient(135deg, rgba(91, 87, 247, 0.14), rgba(255, 139, 111, 0.08)),
+      #edf0f2;
+  }
+
+  .phone {
+    position: relative;
+    width: min(390px, calc(100vw - 32px));
+    height: min(844px, calc(100vh - 48px));
+    min-height: 680px;
+    overflow: hidden;
+    border: 1px solid rgba(24, 30, 45, 0.14);
+    border-radius: 38px;
+    background: linear-gradient(180deg, var(--page-top) 0%, #ffffff 48%, var(--page-bottom) 100%);
+    box-shadow: 0 28px 72px rgba(17, 24, 39, 0.22);
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--page-top) 0%, #ffffff 50%, var(--page-bottom) 100%);
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  .screen[hidden] {
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .statusbar {
+    position: relative;
+    flex: 0 0 48px;
+    padding: 13px 28px 0;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .notch {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    width: 126px;
+    height: 36px;
+    border-radius: 24px;
+    background: #111827;
+    transform: translateX(-50%);
+  }
+
+  .status-icons {
+    position: absolute;
+    top: 16px;
+    right: 25px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .signal {
+    display: flex;
+    align-items: end;
+    gap: 2px;
+    height: 14px;
+  }
+
+  .signal i {
+    width: 3px;
+    border-radius: 2px;
+    background: #111827;
+  }
+
+  .signal i:nth-child(1) { height: 5px; }
+  .signal i:nth-child(2) { height: 8px; }
+  .signal i:nth-child(3) { height: 11px; }
+  .signal i:nth-child(4) { height: 14px; }
+
+  .wifi {
+    width: 16px;
+    height: 12px;
+    border: 3px solid #111827;
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .battery {
+    position: relative;
+    width: 27px;
+    height: 14px;
+    border: 2px solid #111827;
+    border-radius: 5px;
+  }
+
+  .battery::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: -5px;
+    width: 3px;
+    height: 6px;
+    border-radius: 0 2px 2px 0;
+    background: #111827;
+  }
+
+  .battery::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px 2px 2px;
+    border-radius: 3px;
+    background: #111827;
+  }
+
+  .launch-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 30px 28px;
+  }
+
+  .launch-hero {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 0 22px;
+  }
+
+  .doctor-visual {
+    position: relative;
+    width: 232px;
+    height: 232px;
+    display: grid;
+    place-items: center;
+    margin: 6px auto 30px;
+  }
+
+  .doctor-visual::before {
+    content: none;
+    position: absolute;
+    width: 202px;
+    height: 188px;
+    border-radius: 52% 48% 48% 52%;
+    background: rgba(139, 124, 255, 0.42);
+    filter: blur(10px);
+  }
+
+  .doctor-visual::after {
+    content: none;
+    position: absolute;
+    left: 30px;
+    right: 30px;
+    bottom: 12px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.96));
+    filter: blur(12px);
+  }
+
+  .launch-logo {
+    position: relative;
+    z-index: 1;
+    width: 176px;
+    height: 176px;
+    object-fit: contain;
+  }
+
+  .slogan {
+    margin: 0;
+    color: var(--primary-dark);
+    font-size: 35px;
+    font-weight: 850;
+    line-height: 1.18;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .consent-actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .start-button {
+    min-height: 58px;
+    border: 0;
+    border-radius: 17px;
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 13px 28px rgba(91, 87, 247, 0.28);
+    font-size: 20px;
+    font-weight: 760;
+    cursor: pointer;
+    transition: transform 140ms ease, background 140ms ease;
+  }
+
+  .start-button:active {
+    transform: scale(0.985);
+  }
+
+  .reject-link {
+    align-self: center;
+    border: 0;
+    background: transparent;
+    color: #747188;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .legal-copy {
+    margin: 70px 0 0;
+    color: #8f93a3;
+    font-size: 13px;
+    line-height: 1.68;
+    text-align: center;
+  }
+
+  .legal-copy button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--primary-dark);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .app-screen {
+    background: linear-gradient(180deg, var(--page-top) 0%, var(--page-bottom) 62%, #f8f6fc 100%);
+  }
+
+  .app-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 20px 12px;
+  }
+
+  .app-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .app-brand img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+  }
+
+  .app-brand-title {
+    margin: 0;
+    color: #2f266f;
+    font-size: 19px;
+    font-weight: 850;
+  }
+
+  .app-content {
+    flex: 1;
+    min-height: 0;
+    padding: 8px 16px;
+  }
+
+  .summary-card {
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 12px 28px rgba(91, 87, 247, 0.12);
+  }
+
+  .summary-card h2 {
+    margin: 0 0 8px;
+    color: #2f266f;
+    font-size: 21px;
+  }
+
+  .summary-card p {
+    margin: 0;
+    color: #626579;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .login-panel {
+    margin-top: 34px;
+    padding: 28px 24px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 16px 36px rgba(15, 10, 54, 0.08);
+    text-align: center;
+  }
+
+  .login-panel h2 {
+    margin: 0 0 10px;
+    color: var(--primary-dark);
+    font-size: 27px;
+    font-weight: 850;
+  }
+
+  .login-panel p {
+    margin: 0;
+    color: #78748d;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .login-button {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 26px;
+    border: 0;
+    border-radius: 24px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 760;
+  }
+
+  .login-link {
+    margin-top: 12px;
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .feature-card {
+    min-height: 96px;
+    padding: 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .feature-card i {
+    display: block;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 10px;
+    border-radius: 11px;
+    background: rgba(91, 87, 247, 0.13);
+  }
+
+  .feature-card:nth-child(2) i,
+  .feature-card:nth-child(3) i {
+    background: rgba(255, 139, 111, 0.15);
+  }
+
+  .feature-card h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+  }
+
+  .feature-card p {
+    margin: 0;
+    color: #777b8b;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .bottom-nav {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 10px 14px 18px;
+    border-top: 1px solid rgba(231, 227, 245, 0.78);
+    background: rgba(255, 255, 255, 0.84);
+  }
+
+  .nav-item {
+    display: grid;
+    place-items: center;
+    gap: 5px;
+    color: #8b8da0;
+    font-size: 11px;
+  }
+
+  .nav-item::before {
+    content: "";
+    width: 19px;
+    height: 19px;
+    border-radius: 7px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .nav-item.active {
+    color: var(--primary);
+    font-weight: 760;
+  }
+
+  .agreement-modal {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(16, 18, 31, 0.52);
+    backdrop-filter: blur(6px);
+    transition: opacity 180ms ease, visibility 180ms ease;
+  }
+
+  .agreement-modal[hidden] {
+    display: grid;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .agreement-dialog {
+    width: min(356px, calc(100vw - 36px));
+    height: min(620px, calc(100vh - 104px));
+    min-height: min(520px, calc(100vh - 104px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 26px 64px rgba(8, 13, 26, 0.26);
+  }
+
+  .dialog-header {
+    position: relative;
+    flex: 0 0 auto;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dialog-title {
+    margin: 0;
+    padding: 18px 52px 14px;
+    color: #172133;
+    font-size: 18px;
+    font-weight: 850;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .dialog-close {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    color: #687083;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .dialog-close:active {
+    background: #f1f3f7;
+  }
+
+  .agreement-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 14px;
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    border: 1px solid #e4e8ef;
+    border-radius: 14px;
+    background: #f8fafc;
+    scrollbar-gutter: stable;
+  }
+
+  .agreement-scroll::-webkit-scrollbar:horizontal {
+    display: none;
+  }
+
+  .agreement-frame {
+    display: block;
+    width: 100%;
+    height: 8200px;
+    max-width: 100%;
+    border: 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .agreement-frame.is-privacy {
+    height: 9000px;
+  }
+
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    z-index: 30;
+    width: max-content;
+    max-width: calc(100% - 44px);
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(26, 31, 45, 0.92);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: center;
+    transform: translate(-50%, 16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  .toast.is-visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+
+  @media (max-width: 520px) {
+    .stage {
+      display: block;
+      padding: 0;
+      background: #fff;
+    }
+
+    .phone {
+      width: 100vw;
+      height: 100vh;
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .launch-body {
+      padding: 0 28px 26px;
+    }
+
+    .doctor-visual {
+      width: 220px;
+      height: 220px;
+      margin-bottom: 28px;
+    }
+
+    .slogan {
+      font-size: 35px;
+    }
+
+    .legal-copy {
+      margin-top: 62px;
+    }
+
+    .agreement-dialog {
+      width: min(356px, calc(100vw - 28px));
+      height: min(620px, calc(100vh - 88px));
+      min-height: 0;
+    }
+  }
+
+  @media (max-height: 720px) {
+    .doctor-visual {
+      width: 188px;
+      height: 188px;
+      margin-bottom: 22px;
+      transform: scale(0.9);
+    }
+
+    .slogan {
+      font-size: 31px;
+    }
+
+    .start-button {
+      min-height: 52px;
+      font-size: 18px;
+    }
+
+    .legal-copy {
+      margin-top: 34px;
+      font-size: 12px;
+    }
+
+    .agreement-dialog {
+      height: calc(100vh - 72px);
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <section class="phone" aria-label="APP首启原型">
+      <section class="screen launch-screen" data-launch-screen>
+        <div class="statusbar" aria-hidden="true">
+          <span>10:18</span>
+          <div class="notch"></div>
+          <div class="status-icons">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span class="wifi"></span>
+            <span class="battery"></span>
+          </div>
+        </div>
+
+        <div class="launch-body">
+          <div class="launch-hero">
+            <div class="doctor-visual" aria-hidden="true">
+              <img class="launch-logo" src="../../flutter_app/assets/images/logo.webp" alt="">
+            </div>
+            <h1 class="slogan">三十天时刻智护</h1>
+          </div>
+
+          <div class="consent-actions">
+            <button class="start-button" type="button" data-start-app>同意并开始使用</button>
+            <button class="reject-link" type="button" data-reject-launch>不同意以下条款</button>
+          </div>
+
+          <p class="legal-copy">
+            请在使用前仔细阅读了解
+            <button type="button" data-open-agreement>用户协议</button>
+            和
+            <button type="button" data-open-privacy>隐私政策</button>。
+            为实现信息分享、统计分析等目的所必须，我们可能会调用剪贴板并使用与功能相关的最小必要信息（口令、链接、统计参数等）。
+          </p>
+        </div>
+      </section>
+
+      <section class="screen app-screen" data-app-screen hidden>
+        <div class="statusbar" aria-hidden="true">
+          <span>10:18</span>
+          <div class="notch"></div>
+          <div class="status-icons">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span class="wifi"></span>
+            <span class="battery"></span>
+          </div>
+        </div>
+        <header class="app-header">
+          <div class="app-brand">
+            <img src="../../flutter_app/assets/images/logo.webp" alt="三十天时刻智护">
+            <p class="app-brand-title">三十天时刻智护</p>
+          </div>
+        </header>
+        <div class="app-content">
+          <section class="login-panel">
+            <h2>Hi，我是时小安</h2>
+            <p>健康是福，健康的事就找时小安～</p>
+            <button class="login-button" type="button">本机号码一键登录</button>
+            <button class="login-link" type="button">其他手机号登录</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="agreement-modal" data-agreement-modal hidden role="dialog" aria-modal="true" aria-labelledby="agreement-dialog-title">
+        <div class="agreement-dialog">
+          <header class="dialog-header">
+            <h2 class="dialog-title" id="agreement-dialog-title">用户协议</h2>
+            <button class="dialog-close" type="button" data-close-policy aria-label="关闭">×</button>
+          </header>
+          <div class="agreement-scroll" data-agreement-scroll tabindex="0">
+            <iframe class="agreement-frame" data-agreement-frame src="https://web.sstkjgf.com/user-agreement.html" title="用户协议内容" scrolling="no"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <div class="toast" data-toast role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  var launchScreen = document.querySelector('[data-launch-screen]');
+  var appScreen = document.querySelector('[data-app-screen]');
+  var modal = document.querySelector('[data-agreement-modal]');
+  var dialogTitle = document.querySelector('[data-agreement-modal] .dialog-title');
+  var scrollBox = document.querySelector('[data-agreement-scroll]');
+  var agreementFrame = document.querySelector('[data-agreement-frame]');
+  var closePolicyButton = document.querySelector('[data-close-policy]');
+  var toast = document.querySelector('[data-toast]');
+  var toastTimer = null;
+  var activePolicy = 'agreement';
+  var policyConfig = {
+    agreement: {
+      title: '用户协议',
+      frameTitle: '用户协议内容',
+      url: 'https://web.sstkjgf.com/user-agreement.html'
+    },
+    privacy: {
+      title: '隐私政策',
+      frameTitle: '隐私政策内容',
+      url: 'https://web.sstkjgf.com/privacy-policy.html'
+    }
+  };
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () {
+      toast.classList.remove('is-visible');
+    }, 1800);
+  }
+
+  function openPolicy(policyType) {
+    activePolicy = policyType || 'agreement';
+    var config = policyConfig[activePolicy];
+    dialogTitle.textContent = config.title;
+    agreementFrame.src = config.url;
+    agreementFrame.title = config.frameTitle;
+    agreementFrame.classList.toggle('is-privacy', activePolicy === 'privacy');
+    scrollBox.scrollTop = 0;
+    modal.hidden = false;
+    window.setTimeout(function () {
+      scrollBox.focus({ preventScroll: true });
+    }, 0);
+  }
+
+  function closePolicy() {
+    modal.hidden = true;
+  }
+
+  document.querySelectorAll('[data-open-agreement]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      openPolicy('agreement');
+    });
+  });
+
+  document.querySelector('[data-open-privacy]').addEventListener('click', function () {
+    openPolicy('privacy');
+  });
+
+  document.querySelector('[data-start-app]').addEventListener('click', function () {
+    launchScreen.hidden = true;
+    appScreen.hidden = false;
+    showToast('已同意条款，进入登录页');
+  });
+
+  document.querySelector('[data-reject-launch]').addEventListener('click', function () {
+    showToast('不同意条款将无法使用本应用');
+  });
+
+  closePolicyButton.addEventListener('click', closePolicy);
+
+  modal.addEventListener('click', function (event) {
+    if (event.target === modal) {
+      closePolicy();
+    }
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (modal.hidden) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePolicy();
+    }
+  }, true);
+})();
+</script>
+</body>
+</html>

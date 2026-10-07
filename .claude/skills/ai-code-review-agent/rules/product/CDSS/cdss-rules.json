@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "description": "Level 3: CDSS临床决策支持系统产品线规则",
+  "rules": [
+    {
+      "rule_id": "CDSS-DEC-001",
+      "rule_name": "临床决策逻辑可追溯检查",
+      "category": "compliance",
+      "severity": "warning",
+      "description": "CDSS决策结果必须可追溯至具体规则和知识来源",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "recommend|诊断建议|treatmentSuggest",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "决策结果应包含规则ID、知识来源、置信度等信息",
+        "code_example": "public class DecisionResult {\n    private String recommendation;\n    private String ruleId;           // 规则ID\n    private String knowledgeSource;  // 知识来源\n    private Double confidence;       // 置信度\n    private List<String> evidence;   // 依据\n}",
+        "auto_fixable": false
+      },
+      "tags": ["CDSS", "可追溯性", "医疗安全"],
+      "references": ["CDSS系统功能规范"]
+    },
+    {
+      "rule_id": "CDSS-KB-001",
+      "rule_name": "知识库版本管理检查",
+      "category": "standard",
+      "severity": "info",
+      "description": "知识库调用应记录版本信息，支持版本回溯",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "knowledgeBase|知识库|ruleEngine",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "知识库调用时记录版本号，便于问题追溯",
+        "code_example": "public DecisionResult queryKnowledge(PatientInfo patient, String knowledgeVersion) {\n    KnowledgeBase kb = knowledgeRepository.getVersion(knowledgeVersion);\n    DecisionResult result = kb.evaluate(patient);\n    result.setKnowledgeVersion(knowledgeVersion);\n    result.setQueryTime(LocalDateTime.now());\n    return result;\n}",
+        "auto_fixable": false
+      },
+      "tags": ["CDSS", "知识库", "版本管理"],
+      "references": ["CDSS知识库管理规范"]
+    },
+    {
+      "rule_id": "CDSS-INT-001",
+      "rule_name": "药物相互作用检查",
+      "category": "safety",
+      "severity": "critical",
+      "description": "处方开具时必须检查药物相互作用",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "prescribe|开处方|Prescription|DrugInteraction",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "集成药物相互作用检查服务",
+        "code_example": "public PrescriptionResult prescribe(PrescriptionRequest request) {\n    // 1. 检查药物相互作用\n    List<DrugInteraction> interactions = drugInteractionChecker.check(\n        request.getDrugs(),\n        request.getPatientInfo().getAllergies()\n    );\n    \n    if (!interactions.isEmpty()) {\n        return PrescriptionResult.rejected(interactions);\n    }\n    \n    // 2. 开具处方\n    return prescriptionService.create(request);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["CDSS", "用药安全", "药物相互作用"],
+      "references": ["处方管理办法"]
+    },
+    {
+      "rule_id": "CDSS-ALERT-001",
+      "rule_name": "决策提醒级别检查",
+      "category": "standard",
+      "severity": "warning",
+      "description": "CDSS提醒应分级处理，高危提醒需强制确认",
+      "tech_stack": ["java", "vue"],
+      "detection": {
+        "pattern": "alert|提醒|warning|AlertLevel",
+        "file_pattern": "**/*.{java,vue}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "实现分级提醒机制，高危提醒需医生确认",
+        "code_example": "public enum AlertLevel {\n    INFO,       // 提示信息，可忽略\n    WARNING,    // 警告，建议处理\n    CRITICAL,   // 高危，必须确认\n    BLOCK       // 阻断，禁止操作\n}\n\npublic void handleAlert(CDSSAlert alert) {\n    if (alert.getLevel() == AlertLevel.CRITICAL || \n        alert.getLevel() == AlertLevel.BLOCK) {\n        requireDoctorConfirmation(alert);\n    }\n}",
+        "auto_fixable": false
+      },
+      "tags": ["CDSS", "提醒机制", "患者安全"],
+      "references": ["CDSS临床应用管理规范"]
+    }
+  ]
+}

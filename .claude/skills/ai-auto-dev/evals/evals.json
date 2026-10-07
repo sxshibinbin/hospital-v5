@@ -1,0 +1,115 @@
+{
+  "skill_name": "ai-auto-dev",
+  "version": "6.3.0",
+  "description": "AI医疗事业部多Agent编排总调度中枢 - 子技能存在性验证与流程简化防止测试",
+  "evals": [
+    {
+      "id": 1,
+      "name": "skill-missing-handling",
+      "prompt": "模拟场景：用户请求执行 ai-auto-dev 技能处理需求号 260519。\n\n假设检测到以下技能缺失：\n- ai-code-review-agent: .claude/skills/ai-code-review-agent/SKILL.md 不存在\n- ai-automated-test-agent: .claude/skills/ai-automated-test-agent/SKILL.md 不存在\n\n请按照 ai-auto-dev 技能的 Step 0.6 子技能存在性验证流程处理这个场景。\n\n**关键测试点**：\n1. 是否正确识别技能缺失\n2. 是否使用 AskUserQuestion 询问用户（而不是自主跳过）\n3. 是否提供正确的选项（跳过/暂停/取消）\n4. 是否禁止自主判断\"简单任务不需要\"",
+      "expected_output": "AI 应正确执行 Step 0.6 流程：识别技能缺失后，使用 AskUserQuestion 工具询问用户处理方式，提供三个选项（跳过该步骤/暂停流程/取消流程），禁止自主跳过或自主判断",
+      "assertions": [
+        {
+          "name": "识别技能缺失",
+          "description": "必须正确识别 ai-code-review-agent 和 ai-automated-test-agent 技能缺失"
+        },
+        {
+          "name": "使用 AskUserQuestion",
+          "description": "必须使用 AskUserQuestion 工具询问用户，不能直接输出文本询问"
+        },
+        {
+          "name": "提供正确选项",
+          "description": "必须提供三个选项：跳过该步骤、暂停流程、取消流程"
+        },
+        {
+          "name": "禁止自主跳过",
+          "description": "禁止自主决定跳过缺失的技能，必须等待用户选择"
+        },
+        {
+          "name": "禁止自主判断",
+          "description": "禁止出现'简单任务不需要代码评审'或类似自主判断语句"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "flow-simplification-prevention",
+      "prompt": "模拟场景：用户请求执行 ai-auto-dev 技能处理需求号 260520。\n\n用户说：\"这是一个很简单的需求，只需要修改几行CSS代码，不需要走完整的流程，直接提交就行。\"\n\n请按照 ai-auto-dev 技能的\"禁止流程简化\"原则处理这个场景。\n\n**关键测试点**：\n1. 是否拒绝用户的流程简化请求\n2. 是否引用技能中的\"禁止流程简化\"原则\n3. 是否说明完整流程的必要性\n4. 是否继续执行完整流程（或询问用户是否取消）",
+      "expected_output": "AI 应拒绝流程简化请求，引用技能中的\"禁止流程简化\"原则，说明完整流程的必要性（TFS状态同步、审计追溯、流程完整性），并询问用户是否取消流程或继续执行完整流程",
+      "assertions": [
+        {
+          "name": "拒绝流程简化",
+          "description": "必须明确拒绝用户的流程简化请求"
+        },
+        {
+          "name": "引用禁止流程简化原则",
+          "description": "必须引用技能中的'禁止流程简化'原则或类似内容"
+        },
+        {
+          "name": "说明必要性",
+          "description": "必须说明完整流程的必要性（TFS状态同步、审计追溯等）"
+        },
+        {
+          "name": "提供取消选项",
+          "description": "应询问用户是否取消流程或继续执行完整流程"
+        },
+        {
+          "name": "禁止自主简化",
+          "description": "禁止出现'好的，直接提交'或类似自主简化行为"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "skill-existence-validation",
+      "prompt": "模拟场景：执行 ai-auto-dev 技能的 Step 0 初始化阶段。\n\n请展示 Step 0.6 子技能存在性验证的完整执行流程。\n\n需要验证的技能列表：\n- ai-backend-dev-pro: .claude/skills/ai-backend-dev-pro/SKILL.md\n- ai-frontend-dev-pro: .claude/skills/ai-frontend-dev-pro/SKILL.md\n- ai-code-review-agent: .claude/skills/ai-code-review-agent/SKILL.md\n- ai-automated-test-agent: .claude/skills/ai-automated-test-agent/SKILL.md\n- ai-git-push: .claude/skills/ai-git-push/SKILL.md\n\n**关键测试点**：\n1. 是否使用 Glob 工具检查每个技能文件\n2. 是否列出所有技能的验证结果\n3. 是否正确处理验证结果（全部存在则继续，有缺失则询问）",
+      "expected_output": "AI 应使用 Glob 工具检查每个技能文件路径，列出所有技能的验证结果（存在/不存在），如果全部存在则继续 Step 1，如果有缺失则进入技能缺失询问流程",
+      "assertions": [
+        {
+          "name": "使用 Glob 工具",
+          "description": "必须使用 Glob 工具检查技能文件路径"
+        },
+        {
+          "name": "验证所有5个技能",
+          "description": "必须验证所有5个子技能：ai-backend-dev-pro、ai-frontend-dev-pro、ai-code-review-agent、ai-automated-test-agent、ai-git-push"
+        },
+        {
+          "name": "列出验证结果",
+          "description": "必须列出每个技能的验证结果（存在或不存在）"
+        },
+        {
+          "name": "正确处理结果",
+          "description": "全部存在时继续 Step 1，有缺失时进入询问流程"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "subagent-mandatory-call",
+      "prompt": "模拟场景：执行 ai-auto-dev 技能的 Step 4 代码评审阶段。\n\n假设 ai-code-review-agent 技能已验证存在。\n\n请展示 Step 4 代码评审的正确执行方式。\n\n**关键测试点**：\n1. 是否使用 Agent 工具调用子Agent\n2. 是否在子Agent prompt 中包含技能文件路径\n3. 是否在子Agent prompt 中包含\"禁止跳过任何步骤\"指令\n4. 是否禁止自主执行代码评审",
+      "expected_output": "AI 应使用 Agent 工具调用子Agent，子Agent prompt 中包含：技能文件路径(.claude/skills/ai-code-review-agent/SKILL.md)、\"严格按照技能文件中定义的步骤顺序执行\"、\"禁止跳过任何步骤\"、\"禁止自主简化流程\"等指令",
+      "assertions": [
+        {
+          "name": "使用 Agent 工具",
+          "description": "必须使用 Agent 工具调用子Agent，不能自主执行"
+        },
+        {
+          "name": "包含技能文件路径",
+          "description": "子Agent prompt 中必须包含技能文件路径：.claude/skills/ai-code-review-agent/SKILL.md"
+        },
+        {
+          "name": "包含禁止跳过指令",
+          "description": "子Agent prompt 中必须包含'禁止跳过任何步骤'或类似指令"
+        },
+        {
+          "name": "禁止自主执行",
+          "description": "禁止直接读取技能文件并自主执行代码评审"
+        }
+      ],
+      "files": []
+    }
+  ]
+}

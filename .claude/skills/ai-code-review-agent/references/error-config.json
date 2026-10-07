@@ -1,0 +1,187 @@
+{
+  "version": "1.0.0",
+  "description": "错误处理配置",
+  "error_codes": {
+    "E001": {
+      "code": "E001",
+      "name": "INVALID_INPUT",
+      "message": "输入参数无效",
+      "severity": "error",
+      "retryable": false,
+      "http_status": 400
+    },
+    "E002": {
+      "code": "E002",
+      "name": "MISSING_REQUIRED_FIELD",
+      "message": "缺少必需字段",
+      "severity": "error",
+      "retryable": false,
+      "http_status": 400
+    },
+    "E003": {
+      "code": "E003",
+      "name": "TFS_CONNECTION_FAILED",
+      "message": "TFS连接失败",
+      "severity": "error",
+      "retryable": true,
+      "max_retries": 3,
+      "retry_delay_ms": 1000,
+      "http_status": 503
+    },
+    "E004": {
+      "code": "E004",
+      "name": "WORK_ITEM_NOT_FOUND",
+      "message": "工作项不存在",
+      "severity": "error",
+      "retryable": false,
+      "http_status": 404
+    },
+    "E005": {
+      "code": "E005",
+      "name": "REPOSITORY_ACCESS_DENIED",
+      "message": "仓库访问权限不足",
+      "severity": "error",
+      "retryable": false,
+      "http_status": 403
+    },
+    "E006": {
+      "code": "E006",
+      "name": "BRANCH_NOT_FOUND",
+      "message": "分支不存在",
+      "severity": "error",
+      "retryable": false,
+      "http_status": 404
+    },
+    "E007": {
+      "code": "E007",
+      "name": "RULE_LOAD_FAILED",
+      "message": "规则加载失败",
+      "severity": "warning",
+      "retryable": true,
+      "max_retries": 2,
+      "fallback_action": "use_default_rules",
+      "http_status": 200
+    },
+    "E008": {
+      "code": "E008",
+      "name": "SCAN_TIMEOUT",
+      "message": "扫描超时",
+      "severity": "error",
+      "retryable": true,
+      "max_retries": 1,
+      "http_status": 408
+    },
+    "E009": {
+      "code": "E009",
+      "name": "FILE_READ_ERROR",
+      "message": "文件读取错误",
+      "severity": "warning",
+      "retryable": true,
+      "max_retries": 3,
+      "skip_on_failure": true,
+      "http_status": 200
+    },
+    "E010": {
+      "code": "E010",
+      "name": "UPLOAD_FAILED",
+      "message": "附件上传失败",
+      "severity": "warning",
+      "retryable": true,
+      "max_retries": 3,
+      "http_status": 200
+    },
+    "E011": {
+      "code": "E011",
+      "name": "PRODUCT_LINE_NOT_SUPPORTED",
+      "message": "产品线不支持",
+      "severity": "warning",
+      "fallback_action": "use_common_rules_only",
+      "http_status": 200
+    },
+    "E012": {
+      "code": "E012",
+      "name": "TECH_STACK_NOT_SUPPORTED",
+      "message": "技术栈不支持",
+      "severity": "info",
+      "skip_tech_stack": true,
+      "http_status": 200
+    }
+  },
+  "error_handling_strategy": {
+    "stage_preprocess": {
+      "E001": "abort",
+      "E002": "abort",
+      "E003": "retry_then_abort",
+      "E004": "abort",
+      "E005": "abort",
+      "E006": "abort"
+    },
+    "stage_load_rules": {
+      "E007": "fallback_to_default",
+      "E011": "use_common_only"
+    },
+    "stage_review": {
+      "E008": "return_partial",
+      "E009": "skip_file",
+      "E012": "skip_tech_stack"
+    },
+    "stage_output": {
+      "E003": "retry_then_save_local",
+      "E010": "retry_then_save_local"
+    }
+  },
+  "retry_policy": {
+    "default": {
+      "max_retries": 3,
+      "initial_delay_ms": 1000,
+      "max_delay_ms": 10000,
+      "multiplier": 2
+    },
+    "tfs_operations": {
+      "max_retries": 3,
+      "initial_delay_ms": 2000,
+      "max_delay_ms": 30000,
+      "multiplier": 2
+    },
+    "file_operations": {
+      "max_retries": 2,
+      "initial_delay_ms": 500,
+      "max_delay_ms": 5000,
+      "multiplier": 1.5
+    }
+  },
+  "fallback_actions": {
+    "use_default_rules": {
+      "description": "使用内置默认规则",
+      "rules_file": "rules/common/common-rules.json"
+    },
+    "use_common_rules_only": {
+      "description": "仅使用通用规则",
+      "rules_files": [
+        "rules/common/common-rules.json",
+        "rules/medical/medical-rules.json"
+      ]
+    },
+    "save_local_only": {
+      "description": "仅保存本地报告",
+      "skip_tfs_upload": true
+    }
+  },
+  "error_response_format": {
+    "error": {
+      "code": "{{error_code}}",
+      "name": "{{error_name}}",
+      "message": "{{error_message}}",
+      "details": "{{error_details}}",
+      "timestamp": "{{timestamp}}",
+      "task_id": "{{task_id}}",
+      "stage": "{{current_stage}}"
+    },
+    "partial_result": {
+      "status": "partial",
+      "completed_stages": ["{{completed_stages}}"],
+      "failed_stage": "{{failed_stage}}",
+      "error": "{{error_info}}"
+    }
+  }
+}

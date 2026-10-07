@@ -1,0 +1,21 @@
+-keep class com.sean.rao.ali_auth.** { *; }
+-keep class com.mobile.auth.** { *; }
+-keep class com.cmic.** { *; }
+-keep class com.unicom.** { *; }
+-keep class cn.com.chinatelecom.** { *; }
+-keep class com.alicom.** { *; }
+-keep class com.alibaba.fastjson2.** { *; }
+-keep class com.alibaba.sdk.android.** { *; }
+-keep class com.taobao.** { *; }
+-keep class com.nirvana.tools.** { *; }
+
+-dontwarn com.sean.rao.ali_auth.**
+-dontwarn com.mobile.auth.**
+-dontwarn com.cmic.**
+-dontwarn com.unicom.**
+-dontwarn cn.com.chinatelecom.**
+-dontwarn com.alicom.**
+-dontwarn com.alibaba.fastjson2.**
+-dontwarn com.alibaba.sdk.android.**
+-dontwarn com.taobao.**
+-dontwarn com.nirvana.tools.**

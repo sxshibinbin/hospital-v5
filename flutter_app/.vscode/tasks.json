@@ -1,0 +1,86 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Flutter: Run Debug",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "run",
+                "--debug",
+                "--dart-define=ADMIN_FRONT_CHAT_URL=https://nat100.natappvip.cc/admin_web/chat",
+                "--dart-define=API_BASE_URL=https://nat100.natappvip.cc",
+                "--dart-define=ENV=debug"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Flutter: Run Release",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "run",
+                "--release",
+                "--dart-define=ADMIN_FRONT_CHAT_URL=http://192.168.0.250:5173/chat",
+                "--dart-define=API_BASE_URL=http://192.168.0.250:8000",
+                "--dart-define=ENV=prod"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Flutter: Build APK (Release)",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "build",
+                "apk",
+                "--release",
+                "--dart-define=ADMIN_FRONT_CHAT_URL=https://web.sstkjgf.com/admin_web/chat",
+                "--dart-define=API_BASE_URL=https://web.sstkjgf.com",
+                "--dart-define=ENV=prod"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Flutter: Build AppBundle (Release)",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "build",
+                "appbundle",
+                "--release",
+                "--dart-define=ADMIN_FRONT_CHAT_URL=http://192.168.0.250:5173/chat",
+                "--dart-define=API_BASE_URL=http://192.168.0.250:8000"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Flutter: Build iOS (Release)",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "build",
+                "ios",
+                "--release",
+                "--dart-define=ADMIN_FRONT_CHAT_URL=http://192.168.0.250:5173/chat",
+                "--dart-define=API_BASE_URL=http://192.168.0.250:8000"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Flutter: Run with .env",
+            "type": "shell",
+            "command": "flutter",
+            "args": [
+                "run",
+                "--dart-define=USE_ENV_FILE=true"
+            ],
+            "options": {
+                "env": {
+                    "DOTENV_FILE": ".env.dev"
+                }
+            },
+            "problemMatcher": []
+        }
+    ]
+}

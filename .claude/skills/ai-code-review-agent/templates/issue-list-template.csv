@@ -1,0 +1,13 @@
+issue_id,rule_id,rule_name,severity,category,tech_stack,file_path,line_number,description,fix_guidance,auto_fixable,tags,status
+ISSUE-001,COMMON-SEC-001,SQL注入漏洞,critical,security,java,src/main/java/com/example/UserService.java,45,使用字符串拼接构建SQL语句存在注入风险,使用参数化查询或预编译语句,false,"安全;SQL",待修复
+ISSUE-002,COMMON-SEC-002,XSS跨站脚本攻击,critical,security,vue,src/views/user/UserDetail.vue,128,未对用户输入进行转义处理,使用v-html前进行XSS过滤,false,"安全;XSS",待修复
+ISSUE-003,COMMON-QUAL-001,空catch块,warning,quality,java,src/main/java/com/example/OrderService.java,89,空的catch块会隐藏异常信息,记录异常日志或重新抛出异常,true,"代码质量",待修复
+ISSUE-004,COMMON-SEC-003,敏感信息硬编码,critical,security,java,src/main/resources/application.yml,15,配置文件中存在硬编码的敏感信息,使用环境变量或配置中心管理敏感信息,false,"安全;配置",待修复
+ISSUE-005,COMMON-PERF-001,N+1查询问题,warning,performance,java,src/main/java/com/example/ProductMapper.java,67,循环中执行数据库查询导致性能问题,使用JOIN或批量查询优化,true,"性能;数据库",待修复
+ISSUE-006,COMMON-STD-001,命名规范违反,info,standard,java,src/main/java/com/example/userService.java,1,类名应使用大驼峰命名法,将userService改为UserService,true,"规范;命名",待修复
+ISSUE-007,MED-SEC-001,患者敏感信息脱敏检查,critical,security,java,src/main/java/com/example/PatientService.java,156,患者姓名未脱敏直接展示,使用脱敏工具类处理患者信息,false,"医疗合规;隐私",待修复
+ISSUE-008,MED-SEC-002,患者数据加密存储检查,critical,security,java,src/main/java/com/example/MedicalRecordService.java,89,病历数据存储未加密,使用AES-256加密敏感数据,false,"医疗合规;加密",待修复
+ISSUE-009,MED-AUDIT-001,关键操作审计日志检查,warning,compliance,java,src/main/java/com/example/PrescriptionService.java,234,处方操作未记录审计日志,添加操作审计日志记录,false,"医疗合规;审计",待修复
+ISSUE-010,AIMY-API-001,API方法规范,warning,standard,java,src/main/java/com/example/controller/UserController.java,34,应使用POST方法替代GET方法,将@GetMapping改为@PostMapping,false,"AI-MY;API规范",待修复
+ISSUE-011,AIMY-API-002,API路径前缀缺失,warning,standard,java,src/main/java/com/example/controller/UserController.java,34,API路径缺少统一前缀,添加/api/v1/agent_framework/admin前缀,false,"AI-MY;API规范",待修复
+ISSUE-012,AIMY-MOBILE-001,移动端适配,info,standard,vue,src/views/patient/PatientList.vue,45,使用固定像素宽度不利于移动端适配,使用rem/vw/vh或百分比布局,false,"AI-MY;移动端",待修复

@@ -1,0 +1,26 @@
+{
+  "task_id": "REVIEW-20260515-001",
+  "work_item_id": 1500229,
+  "product_line": "AI-MY",
+  "project_name": "winning-mmop-winexmy",
+  "repository_url": "https://tfs.winning.com/WINNING-6.0/MY/_git/winning-mmop-winexmy",
+  "source_branch": "feature/user-auth",
+  "target_branch": "main",
+  "tech_stack_tags": ["java", "vue"],
+  "scan_mode": "incremental",
+  "scan_type": "full",
+  "collection": "WINNING-6.0",
+  "changed_files": [
+    "src/main/java/com/winning/mmop/winexmy/controller/UserController.java",
+    "src/main/java/com/winning/mmop/winexmy/service/UserService.java",
+    "src/main/resources/mapper/UserMapper.xml",
+    "frontend/src/views/user/UserList.vue"
+  ],
+  "exclude_patterns": [
+    "**/test/**",
+    "**/tests/**",
+    "**/__tests__/**",
+    "**/*.test.java",
+    "**/*.spec.ts"
+  ]
+}

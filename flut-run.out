@@ -1,0 +1,12 @@
+
+========================================
+  运行
+========================================
+
+[RUN] flutter run -d chrome --web-port=5000
+      访问: http://localhost:5000
+      按 Ctrl+C 停止
+
+Launching lib\main.dart on Chrome in debug mode...
+Waiting for connection from debug service on Chrome...          
+Waiting for connection from debug service on Chrome...             22.0s

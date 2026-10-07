@@ -1,0 +1,71 @@
+{
+  "report_meta": {
+    "task_id": "{{task_id}}",
+    "work_item_id": {{work_item_id}},
+    "product_line": "{{product_line}}",
+    "project_name": "{{project_name}}",
+    "tech_stack": {{tech_stack_tags}},
+    "start_time": "{{start_time}}",
+    "end_time": "{{end_time}}",
+    "generated_at": "{{generated_at}}"
+  },
+  "summary": {
+    "total_cases": {{total_cases}},
+    "passed": {{passed}},
+    "failed": {{failed}},
+    "skipped": {{skipped}},
+    "pass_rate": "{{pass_rate}}%",
+    "total_duration_seconds": {{total_duration_seconds}}
+  },
+  "bug_summary": {
+    "p0": {{p0_count}},
+    "p1": {{p1_count}},
+    "p2": {{p2_count}},
+    "p3": {{p3_count}},
+    "total": {{bug_total}}
+  },
+  "bugs": [
+    {{bug_list_json}}
+  ],
+  "agent_correlation": {
+    "prd_agent": {
+      "task_id": "{{prd_agent_task_id}}",
+      "status": "{{prd_agent_status}}",
+      "case_count": {{from_prd_count}}
+    },
+    "arch_agent": {
+      "task_id": "{{arch_agent_task_id}}",
+      "status": "{{arch_agent_status}}",
+      "case_count": {{from_arch_count}}
+    },
+    "review_agent": {
+      "task_id": "{{review_agent_task_id}}",
+      "status": "{{review_agent_status}}",
+      "case_count": {{from_review_count}}
+    },
+    "medical_library": {
+      "case_count": {{from_medical_count}}
+    }
+  },
+  "cases": [
+    {{cases_json}}
+  ],
+  "medical_compliance": {
+    "encryption": "{{med_encryption_status}}",
+    "dosage": "{{med_dosage_status}}",
+    "interaction": "{{med_interaction_status}}",
+    "nursing": "{{med_nursing_status}}",
+    "permission": "{{med_permission_status}}",
+    "desensitize": "{{med_desensitize_status}}",
+    "transaction": "{{med_transaction_status}}"
+  },
+  "review_issue_verification": [
+    {{review_verification_json}}
+  ],
+  "suggestions": {
+    "code": "{{code_suggestions}}",
+    "test": "{{test_suggestions}}",
+    "arch": "{{arch_suggestions}}"
+  },
+  "next_action": "{{next_action}}"
+}

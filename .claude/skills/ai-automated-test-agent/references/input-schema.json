@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "automated-test-agent Input Schema",
+  "type": "object",
+  "required": ["task_id", "work_item_id", "product_line", "project_name", "repository_url", "source_branch", "tech_stack_tags"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "任务唯一标识",
+      "pattern": "^TEST-\\d{8}-\\d{3}$",
+      "example": "TEST-20260518-001"
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "TFS工作项ID（需求号），用于关联其他Agent产出物",
+      "example": 1500229
+    },
+    "product_line": {
+      "type": "string",
+      "description": "产品线名称",
+      "enum": ["AI-MY", "AI重症", "CDSS", "医保控费", "病历质控", "WiNTALK", "WiNEX MY", "移动护理", "远程医疗"]
+    },
+    "project_name": {
+      "type": "string",
+      "description": "项目名称",
+      "example": "winning-mmop-winexmy"
+    },
+    "repository_url": {
+      "type": "string",
+      "description": "代码仓库地址",
+      "example": "https://tfs.winning.com/WINNING-6.0/MY/_git/winning-mmop-winexmy"
+    },
+    "source_branch": {
+      "type": "string",
+      "description": "源分支名称",
+      "example": "feature/user-auth"
+    },
+    "tech_stack_tags": {
+      "type": "array",
+      "description": "技术栈标签",
+      "items": {
+        "type": "string",
+        "enum": ["java", "spring", "csharp", "dotnet", "vue", "react", "sql", "mybatis", "python"]
+      },
+      "example": ["java", "vue"]
+    },
+    "collection": {
+      "type": "string",
+      "description": "TFS集合名称",
+      "example": "WINNING-6.0"
+    },
+    "test_scope": {
+      "type": "string",
+      "description": "测试范围",
+      "enum": ["all", "unit", "integration", "api"],
+      "default": "all"
+    },
+    "prd_result_path": {
+      "type": "string",
+      "description": "PRD解析Agent产出路径，默认自动查找",
+      "default": "DOCS/{work_item_id}/PRD解析/"
+    },
+    "arch_result_path": {
+      "type": "string",
+      "description": "架构设计Agent产出路径，默认自动查找",
+      "default": "DOCS/{work_item_id}/架构设计/"
+    },
+    "review_result_path": {
+      "type": "string",
+      "description": "代码审查Agent产出路径，默认自动查找",
+      "default": "DOCS/{work_item_id}/代码审查/"
+    }
+  }
+}

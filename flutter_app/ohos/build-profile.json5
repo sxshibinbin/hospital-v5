@@ -1,0 +1,71 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "debug",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "./signing/com.sstkjgf.app.hm.debug.cer",
+          "keyAlias": "com.sstkjgf.app.hm",
+          "keyPassword": "sstkjgfapphmreleaseseystore2026!@#",
+          "profile": "./signing/com.sstkjgf.app.hm.debugDebug.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "./signing/com.sstkjgf.app.hm.p12",
+          "storePassword": "sstkjgfapphmreleaseseystore2026!@#"
+        }
+      },
+      {
+        "name": "release",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "./signing/com.sstkjgf.app.hm.cer",
+          "keyAlias": "com.sstkjgf.app.hm",
+          "keyPassword": "sstkjgfapphmreleaseseystore2026!@#",
+          "profile": "./signing/com.sstkjgf.app.hmRelease.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "./signing/com.sstkjgf.app.hm.p12",
+          "storePassword": "sstkjgfapphmreleaseseystore2026!@#"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "release",
+        "compatibleSdkVersion": "5.1.0(18)",
+        "runtimeOS": "HarmonyOS",
+        "targetSdkVersion": "6.1.0(23)",
+        "buildOption": {
+          "strictMode": {
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "profile"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

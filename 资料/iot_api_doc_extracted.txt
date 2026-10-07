@@ -1,0 +1,4382 @@
+Total pages: 86
+
+
+--- Page 1 ---
+智慧物联网云平台
+智慧物联网云平台接口文档（V4.8）
+目录
+一、
+文档介绍............................................................................................................................................3
+1.1 编写目的........................................................................................................................................................3
+1.2 适用人群........................................................................................................................................................3
+1.3 修订记录........................................................................................................................................................4
+二、
+平台数据订阅推送............................................................................................................................5
+2.1
+HTTP 订阅推送说明.................................................................................................................................... 5
+2.1.0 开发指南.................................................................................................................................................5
+2.1.1 设备事件订阅推送...............................................................................................................................10
+2.1.2 报警记录确认处置订阅推送...............................................................................................................13
+2.1.3 故障工单确认处置订阅推送...............................................................................................................14
+2.1.4 故障工单创建订阅推送.......................................................................................................................15
+2.1.5 设备信息变更（增、删、改）订阅推送...........................................................................................17
+2.1.6 隔离人员信息变更（增、改、完成隔离）订阅推送说明...............................................................18
+2.1.7 设备状态变更订阅推送........................................................................................................................23
+2.2 KAFKA 订阅推送说明................................................................................................................................... 24
+2.2.1 参数说明...............................................................................................................................................24
+2.2.2 kafka 消费说明...................................................................................................................................... 24
+三、
+平台API 接口...................................................................................................................................24
+认证鉴权.........................................................................................................................................................24
+3.1 设备管理.......................................................................................................................................................25
+3.1.1 查询-获取设备列表信息接口...............................................................................................................25
+3.1.2 查询-获取单个设备信息接口...............................................................................................................28
+3.1.3 查询-获取网关主机子设备列表信息...................................................................................................30
+3.1.4 查询-获取隔离人员列表信息...............................................................................................................33
+
+
+--- Page 2 ---
+智慧物联网云平台
+3.1.5 新增-设备信息接口（限厂商账号）...................................................................................................36
+3.1.6 删除-设备信息接口（限厂商账号）...................................................................................................37
+3.1.7 查询-设备批次信息接口（限厂商账号）...........................................................................................38
+3.1.8 查询-设备型号信息接口（限厂商账号）...........................................................................................39
+3.1.9 查询-低功耗摄像头视频地址接口.......................................................................................................40
+3.1.10 查询-流量卡信息接口........................................................................................................................ 41
+3.2 报警管理.......................................................................................................................................................42
+3.2.1 查询-设备报警信息接口.......................................................................................................................42
+3.2.2 查询-设备报警类型...............................................................................................................................45
+3.2.3 处理报警记录........................................................................................................................................46
+3.2.4 批量处理报警记录................................................................................................................................48
+3.3 巡检管理.......................................................................................................................................................50
+3.3.1 查询-获取巡检记录列表.......................................................................................................................50
+3.4 单位管理.......................................................................................................................................................52
+3.4.1 查询-单位列表.......................................................................................................................................52
+3.4.2 新增单位................................................................................................................................................53
+3.4.3 修改单位................................................................................................................................................55
+3.4.4 删除单位................................................................................................................................................56
+3.4.5 新增用户................................................................................................................................................57
+3.4.6 修改用户................................................................................................................................................58
+3.4.7 删除用户................................................................................................................................................59
+3.4.8 查询角色列表........................................................................................................................................60
+3.5 安装点管理...................................................................................................................................................61
+3.5.1 新增-安装点批量新增...........................................................................................................................61
+3.5.2 修改-安装点批量修改...........................................................................................................................63
+3.5.3 删除-安装点批量删除...........................................................................................................................66
+3.5.4 查询-批量任务结果查询.......................................................................................................................67
+3.5.5 新增-安装点批量新增(根据行政区划编码安装)................................................................................68
+3.6 指令管理.......................................................................................................................................................72
+
+
+--- Page 3 ---
+智慧物联网云平台
+3.6.1 创建指令下发任务...............................................................................................................................72
+3.6.2 查询指令下发任务详情.......................................................................................................................74
+3.6.3 取消指令...............................................................................................................................................76
+3.6.4 查询指令配置信息...............................................................................................................................77
+3.6.4 查询指令配置信息...............................................................................................错误！未定义书签。
+3.7 设备数据推送...............................................................................................................................................80
+3.7.1 查询事件列表........................................................................................................................................80
+3.7.2 查询属性列表........................................................................................................................................81
+3.7.3 实时数据推送........................................................................................................................................82
+3.7.4 离线推送................................................................................................................................................84
+四、
+附加参数详解..................................................................................................................................85
+7.1 HTTP 错误代码............................................................................................................................................. 85
+7.2 单位属性......................................................................................................................................................85
+一、
+文档介绍
+1.1 编写目的
+
+数据服务接口，提供于本平台与第三方应用的数据接口标准，保证数据的安全性。
+1.2 适用人群
+
+第三方应用开发人员
+
+
+--- Page 4 ---
+智慧物联网云平台
+1.3 修订记录
+版本
+修改日期
+修改内容
+修改人
+1.0.
+2019-11-06
+初始版本1.0
+XT
+2.0
+2020-03-17
+优化http 推送、部分接口数据格式
+XT
+2.1
+2020-05-22
+优化设备新增接口，返回设备id
+XT
+2.2
+2020-09-04
+增加http 设备离线数据
+XT
+3.0
+2021-04-27
+增加报警、故障处理相关推送和巡检记录接口
+等功能
+XT
+3.1
+2021-10-23
+调整目录结构
+YGB
+3.2
+2021-11-20
+优化部分接口参数内容
+XT
+3.3
+2021-12-28
+优化数据推送接口参数内容
+XT
+3.4
+2022-5-11
+增加隔离人员信息推送、接警人信息推送、优
+化api 拉取接口
+ZQW、XT
+3.5
+2022-05-17
+设备更新推送和查询列表中增加联系人信息
+XT
+3.6
+2022-10-20
+增加隔离人员删除推送；设备报警信息、流量
+卡信息查询接口
+ZQW、XT
+3.7
+2022-12-05
+增加低功耗摄像头视频地址的推送
+HK
+3.8
+2023-01-11
+增加设备状态变更数据推送
+ZQW
+3.9
+2023-07-03
+增加安装点图片信息推送、设备别名推送、网
+关主机子设备信息查询
+XT
+4.0
+2023-07-22
+增加安装绑定详细地址字段推送
+XT
+4.1
+2023-07-28
+增加KAFKA 对外推送
+MHY
+4.2
+2023-08-10
+查询设备报警记录接口增加住户信息字段
+XT
+4.3
+2023-11-03
+安装点批量安装修改删除
+LHC
+4.4
+2023-11-10
+用户管理、角色管理、单位管理
+MHY
+4.5
+2023-11-23
+增加指令相关功能、报警处理
+XT、ZQW
+4.6
+2023-12-20
+根据行政区划编码安装
+LHC
+4.7
+2024-01-06
+增加数据推送接口
+XT
+4.8
+2024-06-06
+第三方确认报警增加是否重置设备状态
+ZQW
+
+
+--- Page 5 ---
+智慧物联网云平台
+二、
+平台数据订阅推送
+2.1
+HTTP 订阅推送说明
+2.1.0 开发指南
+URL 验证流程
+在使用推送服务时，第三方应用需要支持URL 验证以及数据接收两部分服务。
+URL 验证流程如下图所示：
+用户在配置页面完成配置并点击“提交”时，智慧云平台会向填写URL 地址发送
+HTTP GET 请求进行URL 验证,请求形式示例如下：
+http://url?nonce=xxx&signature=xxx&timestamp=xxx
+其中，url 为用户在页面配置时填写的URL、nonce、timestamp 用于URL 及token 的验证token
+验证过程如下：
+
+
+--- Page 6 ---
+智慧物联网云平台
+1、将配置页面中配置的token 与nonce、timestamp 的值计算MD5
+2、将上一步中MD5 值通过与请求参数signature 的值进行对比，如果相等则表示token 验证成功如果token
+验证成功，返回nonce 参数值，表示URL 验证通过。
+3、验证通过后将通过POST 请求方式推送数据
+> 注：如果用户不想验证token，可以选择跳过MD5 计算过程，直接返回nonce 参数值
+HTTP 推送接收示例
+public class HttpReceive {
+private static String token ="abcdefghijkmlnopqrstuvwxyz";//用户自定义token 和
+第三方平台配置里的token 一致
+/**
+* 功能说明：URL&Token 验证接口。如果验证成功返回nonce 的值，否则返回其他值。
+* @param nonce 随机串
+* @param signature 签名
+* @param timestamp 时间戳
+* @return 验证成功返回nonce，失败返回error
+返回格式为text，注意不是json
+*/
+@RequestMapping(value = "/receive", method = RequestMethod.GET)
+@ResponseBody
+public String check(@RequestParam(value = "nonce") String nonce,
+@RequestParam(value = "signature") String signature,
+@RequestParam(value = "timestamp") String timestamp
+){
+logger.info("url&token check: nonce{}
+signature:{}"nonce,signature,timestamp);
+if (checkSignature(signature,timestamp,nonce,token)){
+return nonce;
+}else {
+return "error";
+}
+
+
+--- Page 7 ---
+智慧物联网云平台
+}
+/**
+* 功能描述：第三方平台数据接收。
+*
+每一次post 数据请求后，等待客户端的响应都设有时限，在规定时限内没有收到响应会认为发
+送失败。接收程序接收到数据时，尽量先缓存到mq 中，再做业务逻辑处理。
+* @param body json 数据消息
+* @return 任意字符串。智慧物联网云平台接收到http 200 的响应，才会认为数据推送成功，返回
+404 或者超时接口会被限制。
+*/
+@RequestMapping(value = "/receive",method = RequestMethod.POST)
+@ResponseBody
+public String receive(@RequestBody String body){
+//TODO
+相关操作
+}
+/**
+* 校验签名
+* @param signature 加密签名
+* @param timestamp 时间戳
+* @param nonce 随机数
+* @param token 自己配置的token
+* @return
+*/
+public static boolean checkSignature(String signature,String timestamp,String
+nonce,String token){
+if(signature==null || timestamp == null || nonce == null){
+return false;
+}
+//对token,timestamp,nonce 按字典排序
+String[] paramArr=new String[]{token,timestamp,nonce};
+Arrays.sort(paramArr);
+//将排序后的结果拼接成一个字符串
+String content=paramArr[0].concat(paramArr[1]).concat(paramArr[2]);
+String ciphertext=null;
+try {
+MessageDigest md=MessageDigest.getInstance("MD5");
+//对拼接后的字符串进行MD5 加密
+byte[] digest=md.digest(content.toString().getBytes());
+ciphertext=byteToStr(digest);
+} catch (Exception e) {
+
+
+--- Page 8 ---
+智慧物联网云平台
+// TODO: handle exception
+}
+//将md5 加密后的字符串与signature 进行对比
+return ciphertext!=null?ciphertext.equals(signature.toUpperCase()):false;
+}
+/**
+* 将字节数组转换成十六进制字符串
+* @param byteArray
+* @return
+*/
+public static String byteToStr(byte[] byteArray){
+String strDigest="";
+for (int i = 0; i < byteArray.length; i++) {
+strDigest+=byteToHexStr(byteArray[i]);
+}
+return strDigest;
+}
+/**
+* 功能描述:
+*
+字节转16 进制字符串
+* @param mByte
+* @return: java.lang.String
+*/
+public static String byteToHexStr(byte mByte){
+char[]Digit={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+char[] tempArr=new char[2];
+tempArr[0]=Digit[(mByte >>> 4) & 0X0F];
+tempArr[1]=Digit[mByte & 0X0F];
+String s=new String(tempArr);
+return s;
+}
+}
+签名计算方法示例
+/**
+* 校验签名
+* @param signature 加密签名
+
+
+--- Page 9 ---
+智慧物联网云平台
+* @param timestamp 时间戳
+* @param nonce 随机数
+* @param token 自己配置的token
+* @return
+*/
+public static boolean checkSignature(String signature,String timestamp,String
+nonce,String token){
+if(signature==null || timestamp == null || nonce == null){
+return false;
+}
+//对token,timestamp,nonce 按字典排序
+String[] paramArr=new String[]{token,timestamp,nonce};
+Arrays.sort(paramArr);
+//将排序后的结果拼接成一个字符串
+String content=paramArr[0].concat(paramArr[1]).concat(paramArr[2]);
+String ciphertext=null;
+try {
+MessageDigest md=MessageDigest.getInstance("MD5");
+//对拼接后的字符串进行MD5 加密
+byte[] digest=md.digest(content.toString().getBytes());
+ciphertext=byteToStr(digest);
+} catch (Exception e) {
+// TODO: handle exception
+}
+//将md5 加密后的字符串与signature 进行对比
+return ciphertext!=null?ciphertext.equals(signature.toUpperCase()):false;
+}
+/**
+* 将字节数组转换成十六进制字符串
+* @param byteArray
+* @return
+*/
+public static String byteToStr(byte[] byteArray){
+String strDigest="";
+for (int i = 0; i < byteArray.length; i++) {
+strDigest+=byteToHexStr(byteArray[i]);
+}
+return strDigest;
+}
+
+
+--- Page 10 ---
+智慧物联网云平台
+/**
+* 功能描述:
+*
+字节转16 进制字符串
+* @param mByte
+* @return: java.lang.String
+*/
+public static String byteToHexStr(byte mByte){
+char[]Digit={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+char[] tempArr=new char[2];
+tempArr[0]=Digit[(mByte >>> 4) & 0X0F];
+tempArr[1]=Digit[mByte & 0X0F];
+String s=new String(tempArr);
+return s;
+}
+2.1.1 设备事件订阅推送
+参数
+类型
+说明
+dataType
+int
+上传数据类型。0、表示正常1、表示故障2、表示报警8、隐患
+imei
+String
+设备编号
+imsi
+String
+SIM 卡的imsi 。设备没有上传该数据，则字段不显示
+iccid
+String
+sim 卡的iccid 号。设备没有上传该数据，则字段不显示
+signTime
+String
+数据上传标识时间。
+items
+Object
+设备数据。具体参数见items 表
+site
+String
+安装地址（当设备没绑定位置为空，则字段不显示）
+contactList
+list
+接警联系人列表
+deviceType
+String
+设备类型
+deviceVersion
+String
+设备型号
+
+
+--- Page 11 ---
+智慧物联网云平台
+参数
+类型
+说明
+longitude
+String
+经度（当设备没绑定位置为空，则字段不显示）
+latitude
+Stirng
+纬度（当设备没绑定位置为空，则字段不显示）
+eventName
+String
+上报事件
+conpanyName
+String
+公司名称
+deviceState
+int
+事件类型0:正常1:故障2:报警4:离线8:隐患
+enabledTime
+String
+设备首次安装时间。
+deviceAlias
+String
+设备别名
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+contactList 定义
+参数
+类型
+说明
+name
+String
+联系人名称
+phonenumber
+String
+手机号码
+contactType
+Int
+接警人类型。1：一级接警人2：二级接警人3:三级接警人4：四级接警人
+items 表
+参数
+类型
+说明
+
+
+--- Page 12 ---
+智慧物联网云平台
+参数
+类型
+说明
+attrName
+String
+属性名称。
+value
+String
+属性值。
+数据格式示例
+{
+"dataType":0,
+"imei":"864048043963838",
+"imei":"460042567812064",
+"iccid":"89861120234013551520",
+"longitude":"121.33200772715425",
+"latitude":"31.246862631826639",
+"site":"华源科技创新园B 座1 区210 测试点位",
+"deviceType":"烟感",
+"deviceVersion":"JTY-GD-K808",
+"timestamp":"1568713949",
+"signature":"2CBF69BA7516F886A9F1DB78671F7483",
+"nonce":"15107995",
+"eventName":"心跳",
+"conpanyName":"智慧物联网云平台",
+"deviceState":0,
+"enabledTime":"2019-09-12 15:11:08",
+"signTime":"2019-09-12 15:11:08",
+"deviceAlias":"设备别名"
+"items":[
+{
+"attrName":"温度",
+"value":”28.5℃”
+},
+{
+"attrName":"信号强度",
+"value":”10”
+}..
+]
+}
+
+
+--- Page 13 ---
+智慧物联网云平台
+2.1.2 报警记录确认处置订阅推送
+如果第三方平台需要开启该推送，那么智慧物联网云平台对报警进行了确认时也会推送给第三方平台
+数据格式说明
+参数
+类型
+说明
+uuid
+String
+数据uuid
+Imei
+String
+设备的唯一标识。
+deviceType
+String
+设备类型
+alarmReason
+String
+确认报警原因
+eventName
+String
+事件名称
+handler
+String
+处理人
+handleTime
+String
+处理时间。格式：yyyy-MM-dd HH:mm:ss
+alarmTime
+String
+报警时间。格式：yyyy-MM-dd HH:mm:ss
+remark
+String
+备注说明
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+推送方式
+请求方式
+数据格式
+Url（接收地址）
+Post
+Json
+对接方需要提供接收地址
+
+
+--- Page 14 ---
+智慧物联网云平台
+推送示例
+{
+"uuid":"75aac70054f141f58cda556250d7e29d",
+"imei":"864048043963838",
+"deviceType":"烟感",
+"handleTime":"2021-04-12 15:41:08",
+"handleTime":"2021-04-12 15:30:08",
+"handler":"管理员",
+"alarmReason":"测试",
+"eventName":"测试报警",
+"alarmTime":"2021-04-12 15:11:08"，
+"remark":"模拟测试",
+"timestamp":"1568713949",
+"signature":"2CBF69BA7516F886A9F1DB78671F7483",
+"nonce":"15107995"
+}
+2.1.3 故障工单确认处置订阅推送
+数据格式说明
+参数
+类型
+说明
+uuid
+String
+数据uuid
+Imei
+String
+设备的唯一标识。
+handleTime
+String
+处理时间。格式：yyyy-MM-dd HH:mm:ss
+status
+String
+处理状态
+createTime
+String
+创建时间
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+
+
+--- Page 15 ---
+智慧物联网云平台
+推送方式
+请求方式
+数据格式
+Url（接收地址）
+Post
+Json
+对接方需要提供接收地址
+推送示例
+{
+"uuid":"75aac70054f141f58cda556250d7e29d",
+"imei":"864048043963838",
+"handleTime":"2019-09-13 15:11:08"，
+"status":"已处理",
+"timestamp":"1568713949",
+"signature":"2CBF69BA7516F886A9F1DB78671F7483",
+"nonce":"15107995"
+}
+2.1.4 故障工单创建订阅推送
+数据格式说明
+参数
+类型
+说明
+uuid
+String
+数据uuid
+Imei
+String
+设备的唯一标识。
+deviceType
+String
+设备类型
+site
+String
+安装点位
+type
+String
+工单类型
+declarant
+String
+申报人
+
+
+--- Page 16 ---
+智慧物联网云平台
+参数
+类型
+说明
+createTime
+String
+创建时间。格式：yyyy-MM-dd HH:mm:ss
+status
+String
+处理状态
+description
+String
+故障描述
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+推送方式
+请求方式
+数据格式
+Url（接收地址）
+Post
+Json
+对接方需要提供接收地址
+推送示例
+{
+"uuid":"75aac70054f141f58cda556250d7e29d",
+"imei":"864048043963838",
+"site":"华源科技创新园B 座1 区210 测试点位",
+"deviceType":"烟感",
+"declarant":"系统",
+"type":"低电压",
+"createTime":"2019-09-12 15:11:08",
+"status":"未处理"，
+"description":"电量过低",
+"timestamp":"1568713949",
+"signature":"2CBF69BA7516F886A9F1DB78671F7483",
+"nonce":"15107995"
+}
+
+
+--- Page 17 ---
+智慧物联网云平台
+2.1.5 设备信息变更（增、删、改）订阅推送
+如果第三方平台开启设备修改通知，那么智慧物联网云平台对设备进行了修改也会推送给第三方平台，JSON 格
+式如下:
+{
+"action": "create", // create: 增加; update: 修改; delete: 删除
+"devices": [
+device, device, ...
+]
+}
+说明：当type 为create 时，device 包含部分创建信息；type 为update 时，device 仅包含修改内容；
+type 为delete 时，device 中仅包含deviceId
+device 对象通常包含下列字段：
+字段
+名称
+数据类型
+说明
+deviceId
+设备id
+Long
+示例：451315412
+deviceModel
+设备型号
+String
+示例：“LS-828-NB”
+deviceImei
+设备唯一标识
+String
+示例：867726037834563
+deviceTypeName
+设备类型名称
+String
+示例：烟感
+time
+数据产生时间
+String
+示例：2018-08-13 09:18:05
+installAddress
+设备安装点位置
+String
+示例：测试点
+longitude
+经度
+Double
+示例：113.872535
+latitude
+纬度
+Double
+示例：22.615108
+deviceBatchNum
+设备批次编号
+String
+示例:
+191111-01
+companyName
+公司名称
+String
+示例：智慧物联网云平台
+region
+归属地区
+String
+示例：广东省-深圳市-宝安区-西乡街道办事处
+contact
+联系人
+String
+张三
+phonenumber
+电话号码
+String
+13888888888
+imgPath
+图片信息
+String
+图片url-多个,逗号分隔
+detailedAddress
+详细安装地址
+String
+示例：深圳市华源科技园B 座205 测试点
+
+
+--- Page 18 ---
+智慧物联网云平台
+2.1.6 隔离人员信息变更（增、改、完成隔离）订阅推送说明
+隔离对象字段说明：
+新增时的isolatePersonnelList 和修改时的isolatePersonnel 字段一般包含以下内容：
+参数
+类型
+说明
+sex
+String
+0 男1 女2 未知
+name
+String
+姓名
+uuid
+String
+唯一标识
+idCard
+String
+身份证号
+status
+String
+2. 隔离中3. 已隔离
+cityName
+String
+市
+isolateDay
+Integer
+隔离天数
+isolateTime
+String
+隔离时间
+isolateType
+String
+隔离类型1: 居家隔离，2: 酒店隔离，3 定点医院隔离，4 其他隔离
+otherRemark
+String
+用户备注（其他备注）
+phoneNumber
+String
+手机号码
+districtName
+String
+区
+provinceName
+String
+省
+isolateNumber
+Integer
+隔离人数
+useIsolateDay
+Integer
+已隔离天数
+isolateCompleteTime
+String
+隔离完成时间
+
+
+--- Page 19 ---
+智慧物联网云平台
+参数
+类型
+说明
+placeRoomName
+String
+安装点
+deviceImei
+String
+设备imei
+导入/新增数据格式说明
+参数
+类型
+说明
+type
+String
+type = create
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+isolatePersonnelList
+String
+新增内容
+3.6.2.1 示例
+{
+"type":"create",
+"nonce":"javaka",
+"signature":"0AE66282D2EB343DAADF341F7ABD9A86",
+"timeStamp":"1650792254",
+"isolatePersonnelList":[
+{
+"sex":"0",
+"name":"突突突",
+"uuid":"edc68c09bc5e41cb8b45ee2a68f76ff3",
+"idCard":"441502199603162134",
+"status":"3",
+"cityName":"邯郸市",
+"isolateDay":3,
+"isolateTime":"2022-04-20 00:00:00",
+
+
+--- Page 20 ---
+智慧物联网云平台
+"isolateType":"1",
+"otherRemark":"123",
+"phoneNumber":"13200132000",
+"districtName":"复兴区",
+"provinceName":"河北省",
+"isolateNumber":3,
+"useIsolateDay":3,
+"isolateCompleteTime":"2022-04-24 00:00:00"
+},
+{
+"sex":"0",
+"name":"突突突",
+"uuid":"cfb5035b525d4a34ab7fc1e7ce7b79e3",
+"idCard":"441502199603162134",
+"status":"3",
+"cityName":"邯郸市",
+"isolateDay":3,
+"isolateTime":"2022-04-20 00:00:00",
+"isolateType":"1",
+"otherRemark":"123",
+"phoneNumber":"13200132000",
+"districtName":"复兴区",
+"provinceName":"河北省",
+"isolateNumber":3,
+"useIsolateDay":3,
+"isolateCompleteTime":"2022-04-24 00:00:00"
+}
+]
+}
+更新数据格式说明
+参数
+类型
+说明
+type
+String
+type = update
+nonce
+String
+随机数。
+signature
+String
+签名。
+
+
+--- Page 21 ---
+智慧物联网云平台
+参数
+类型
+说明
+timestamp
+String
+时间戳。
+isolatePersonnel
+String
+更新内容
+3.6.3.1 示例
+{
+"type":"update",
+"nonce":"vvvv1j",
+"signature":"364B7E40ABEF1C522080752CFA1398AB",
+"timeStamp":"1650791049",
+"isolatePersonnel":{
+"sex":"0",
+"name":"yy",
+"idCard":"441521541210",
+"status":"2",
+"cityName":"欧洲",
+"deviceImei":"0004000",
+"isolateDay":12,
+"isolateType":"2",
+"otherRemark":"232112",
+"phoneNumber":"13200132000",
+"districtName":"意大利",
+"provinceName":"海外地区",
+"isolateNumber":2,
+"placeRoomName":"消防主机",
+"useIsolateDay":0
+}
+}
+完成隔离数据格式说明
+参数
+类型
+说明
+type
+String
+type = complete
+
+
+--- Page 22 ---
+智慧物联网云平台
+参数
+类型
+说明
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+uuids
+String
+数据唯一标识（包含多个uuid 标识，可以用此id 关联唯一隔离人员信息）
+isolateCompleteTime
+String
+隔离完成时间
+remark
+String
+备注
+3.6.4.1 示例
+{
+"type":"complete",
+"nonce":"vj13av",
+"uudis":"167c2d767db146bd99367776f7190464,8b06cdb0919641a89619d1ef8c03d5bf",
+"isolateCompleteTime":"2022-04-25 22:35:20",
+"remark":"完成隔离",
+"signature":"CEFB617636C2CE1AA1C8B106F1C6B978",
+"timestamp":"1650878843"
+}
+删除数据格式说明
+参数
+类型
+说明
+type
+String
+type = delete
+nonce
+String
+随机数。
+signature
+String
+签名。
+timestamp
+String
+时间戳。
+uuids
+String
+数据唯一标识（包含多个uuid 标识，可以用此id 关联唯一隔离人员信息）
+
+
+--- Page 23 ---
+智慧物联网云平台
+3.6.3.1 示例
+{
+"type":"delete",
+"nonce":"vj13av",
+"uudis":"167c2d767db146bd99367776f7190464,8b06cdb0919641a89619d1ef8c03d5bf",
+"signature":"CEFB617636C2CE1AA1C8B106F1C6B978",
+"timestamp":"1650878843"
+}
+2.1.7 设备状态变更订阅推送
+如果第三方平台开启设备增删改通知，那么智慧物联网云平台对设备进行了修改也会推送给第三方平台，JSON
+格式如下:
+{
+"action": "updateState",
+"devices": [
+{
+"time": "2023-01-11 10:05:06",
+"state": "4",
+"deviceId": 4428879,
+"deviceImei": "877891234315653",
+"stateRemark": "2",
+"operationName": "启用"
+}
+]
+}
+device 对象通常包含下列字段：
+字段
+名称
+数据类型
+说明
+deviceId
+设备id
+Long
+示例：451315412
+deviceImei
+设备唯一标识
+String
+示例：867726037834563
+time
+数据产生时间
+String
+示例：2018-08-13 09:18:05
+state
+操作状态
+String
+示例：0 （0：状态复位; 4：取消停用; 6：停用设备）
+stateRemark
+备注说明
+String
+示例：2
+(停用/启用设备备注说明)
+operationName
+操作名称
+String
+示例：启用
+
+
+--- Page 24 ---
+智慧物联网云平台
+2.2 KAFKA 订阅推送说明
+2.2.1 参数说明
+功能及参数与HTTP 方式相同，增加了一个参数mqPushType：参数值为1 到6；
+参数值
+说明
+1
+设备事件上报
+2
+设备增删改
+3
+报警工单确认
+4
+故障工单确认
+5
+故障工单创建
+6
+隔离人员信息
+2.2.2 kafka 消费说明
+Kafka 地址及topic 从平台openApi 菜单中获取
+三、
+平台API 接口
+认证鉴权
+第三方应用再调用智慧物联网云平台其它接口前需要在请求Headers 中包含以下字段：
+字段
+字段类
+型
+必
+填
+说明
+timestamp
+String
+true
+时间的毫秒数
+signature
+String
+true
+MD5(path+timestamp+appSecret),path 为原始请求URL，如：请求
+
+
+--- Page 25 ---
+智慧物联网云平台
+字段
+字段类
+型
+必
+填
+说明
+https://api.domain.com/path?param=123 的path 是/path?param=123
+appKey
+String
+true
+由智慧物联网云平台生成
+其中，appSecret 是由智慧物联网云平台生成。
+
+如无特殊声明，请求的Content-Type 均为application/json; charset=UTF-8。
+
+除GET 请求或URL 路径中的参数以外，其他请求参数均使用JSON 格式从请求的Body
+中发送。
+
+接口请求返回结果code 值为OK 表示操作成功
+3.1 设备管理
+3.1.1 查询-获取设备列表信息接口
+请求说明
+
+描述：通过条件字段筛选获取设备列表
+
+请求方式：Post
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/getList
+请求参数
+字段
+字段类
+型
+必填
+说明
+deviceModelName
+String
+false
+要查询的设备型号
+pageNum
+Int
+true
+查询的开始页位置，取值范围1-n
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+startTime
+String
+false
+开始时间
+endTime
+String
+false
+结束时间
+fullFlag
+Int
+true
+全量查询标识0：表示查询本级1：表示查询所有
+state
+Int
+false
+设备状态0:正常1:故障2:报警3:手动报警4:离线5:待删除6:
+停用7:未激活
+
+
+--- Page 26 ---
+智慧物联网云平台
+字段
+字段类
+型
+必填
+说明
+registerSign
+Int
+false
+入网注册标志0 未注册1 注册
+返回参数说明
+字段
+字段类
+型
+说明
+deviceId
+Long
+设备Id
+deviceImei
+String
+设备imei
+deviceImsi
+String
+设备imsi
+iccid
+String
+设备iccid
+deviceTypeName
+String
+设备类型名称
+deviceModelName
+String
+设备型号名称
+registerSign
+Int
+入网注册标志0 未注册1 注册
+state
+Int
+设备状态0:正常1:故障2:报警3:手动报警4:离线5:
+待删除6:停用7:未激活
+latitude
+Double
+纬度
+longitude
+Double
+经度
+installAddress
+String
+设备详细安装地址
+contact
+String
+联系人
+phonenumber
+String
+电话号码
+companyName
+String
+公司名称
+floorName
+String
+楼层名称
+buildingName
+String
+建筑物名称
+roomName
+String
+安装点名称
+region
+Stirng
+归属地区
+
+
+--- Page 27 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+createTime
+String
+创建时间
+updateTime
+String
+更新时间
+pageSize
+Int
+查询页大小
+pageCount
+Int
+查询页总数量
+currentPage
+Int
+查询页数
+total
+Int
+总条数
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+"data": [
+{
+"deviceId": 111,
+"deviceImei": "869975034773484",
+"deviceImsi": "432225034773484",
+"registerSign": 1,
+"deviceTypeName": "水压",
+"deviceModelName": "TSM-01",
+"state": 2,
+"latitude": "22.573806",
+"longitude": "113.872535",
+"installAddress": "深圳市宝安区华丰华源科技创新园-B 座",
+"contact": "张三",
+"companyName": "智慧物联网云平台",
+"phonenumber": "1380888888",
+"createTime": "2019-09-19 18:16:55",
+
+
+--- Page 28 ---
+智慧物联网云平台
+"updateTime": "2019-11-12 15:01:01"
+....
+}
+]
+"pageSize": 10,
+"pageCount": 5,
+"currentPage": 1,
+"total": 47
+}
+}
+3.1.2 查询-获取单个设备信息接口
+请求说明
+
+描述：获取单个设备信息
+
+请求方式：Post
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/get
+请求参数
+字段
+字段类型
+必填
+说明
+deviceId
+Long
+true
+设备唯一ID
+deviceImei
+String
+true
+设备imei
+fullFlag
+int
+true
+全量查询标识0：表示查询本级
+1：表示查询所有默认为0
+备注：deviceId 和deviceImei 只需要传一个
+返回参数说明
+字段
+字段类
+型
+说明
+deviceId
+Long
+设备Id
+
+
+--- Page 29 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+deviceImei
+String
+设备imei
+deviceImsi
+String
+设备imsi
+iccid
+String
+设备iccid
+deviceTypeName
+String
+设备类型名称
+deviceModelName
+String
+设备型号名称
+registerSign
+Int
+入网注册标志0 未注册1 注册
+state
+Int
+设备状态0:正常1:故障2:报警3:手动报警4:离线5:
+待删除6:停用7:未激活
+latitude
+Double
+纬度
+longitude
+Double
+经度
+installAddress
+String
+设备详细安装地址
+contact
+String
+联系人
+phonenumber
+String
+电话号码
+companyName
+String
+公司名称
+floorName
+String
+楼层名称
+buildingName
+String
+建筑物名称
+roomName
+String
+安装点名称
+region
+Stirng
+归属地区
+createTime
+String
+创建时间
+updateTime
+String
+更新时间
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+
+
+--- Page 30 ---
+智慧物联网云平台
+"deviceId": 211,
+"deviceImei": "869975034773484",
+"deviceImsi": "460041143509491",
+"deviceTypeName": "水压",
+"deviceModelName": "TSM-01",
+"registerSign": 1,
+"state": 2,
+"latitude": "22.573806",
+"longitude": "113.872535",
+"installAddress": "深圳市宝安区华丰华源科技创新园-B 座",
+"contact": "张三",
+"phonenumber": "1380888888",
+"createTime": "2019-09-19 18:16:55",
+"updateTime": "2019-11-12 15:01:01"
+}
+}
+3.1.3 查询-获取网关主机子设备列表信息
+请求说明
+
+描述：通过条件字段筛选获取主机子设备列表
+
+请求方式：POST
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/gateway/sublist
+请求参数
+字段
+字段类型
+必填
+说明
+hostImei
+String
+true
+主机设备imei
+fullFlag
+int
+true
+全量查询标识0：表示查询本级1：表示查询所有默认为0
+pageNum
+Int
+true
+查询的开始页位置，取值范围1-n
+
+
+--- Page 31 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+返回参数说明
+字段
+字段类
+型
+说明
+deviceId
+Long
+设备Id
+deviceImei
+String
+设备imei
+deviceTypeName
+String
+设备类型名称
+deviceModelName
+String
+设备型号名称
+state
+Int
+设备状态0:正常1:故障2:报警3:手动报警4:离线5:
+待删除6:停用7:未激活
+latitude
+Double
+纬度
+longitude
+Double
+经度
+installAddress
+String
+设备安装地址
+contact
+String
+联系人
+phonenumber
+String
+电话号码
+companyName
+String
+公司名称
+floorName
+String
+楼层名称
+buildingName
+String
+建筑物名称
+roomName
+String
+安装点名称
+region
+Stirng
+归属地区
+createTime
+String
+创建时间
+updateTime
+String
+更新时间
+
+
+--- Page 32 ---
+智慧物联网云平台
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+"data": [
+{
+"deviceId": 4255021,
+"deviceTypeName": "烟雾报警器",
+"state": 2,
+"latitude": "22.715149844175183",
+"longitude": "114.07140554830417",
+"deviceModelName": "KW-YG",
+"roomName": "昌玮工业区012",
+"floorName": "1 楼",
+"buildingName": "昌玮工业区012",
+"installAddress": "昌玮工业区012",
+"createTime": "2021-09-10 19:34:46",
+"updateTime": "2022-11-30 20:25:39.513",
+"deviceImei": "86631905704241503",
+"contact": "测试2",
+"phonenumber": "138888888888",
+"region": "广东省-深圳市-龙华区-观湖街道",
+"companyName": "智慧云平台"
+},
+{
+"deviceId": 4255022,
+"deviceTypeName": "烟雾报警器",
+"state": 2,
+"latitude": "22.715149844175183",
+"longitude": "114.07140554830417",
+"deviceModelName": "KW-YG",
+"roomName": "昌玮工业区012-04",
+"floorName": "1 楼",
+"buildingName": "昌玮工业区012",
+"installAddress": "昌玮工业区012-04",
+"createTime": "2021-09-10 19:36:20",
+"updateTime": "2022-11-30 20:25:39.513",
+"deviceImei": "86631905704241504",
+"contact": "测试1",
+"phonenumber": "138888888888",
+
+
+--- Page 33 ---
+智慧物联网云平台
+"region": "广东省-深圳市-龙华区-观湖街道",
+"companyName": "智慧云平台"
+}
+],
+"pageSize": 99,
+"pageCount": 1,
+"currentPage": 1,
+"total": 2
+}
+}
+3.1.4 查询-获取隔离人员列表信息
+请求说明
+
+描述：通过条件字段筛选获取隔离人员列表
+
+请求方式：GET
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/isolatePersonnel/list
+请求参数
+字段
+字段类型
+必填
+说明
+pageNum
+Int
+true
+查询的开始位置，取值范围1-n
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+返回参数说明
+字段
+字段类
+型
+说明
+name
+String
+姓名
+placeRoomName
+String
+安装点名称
+deviceImei
+String
+设备imei
+deptName
+String
+单位名称
+
+
+--- Page 34 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+uuid
+String
+数据唯一标识
+isolateType
+String
+隔离类型1: 居家隔离，2: 酒店隔离，3 定点医院隔离，
+4 其他隔离
+isolateTime
+String
+隔离时间yyyy-MM-dd
+isolateCompleteTime
+String
+隔离完成时间yyyy-MM-dd HH:mm:ss
+useIsolateDay
+Integer
+已隔离天数
+isolateDay
+Integer
+隔离天数
+sex
+String
+用户性别（0 男1 女2 未知）
+status
+String
+状态
+2. 隔离中3. 已隔离
+idCard
+String
+身份证
+phoneNumber
+String
+手机号码
+provinceName
+String
+省名
+cityName
+String
+市名
+districtName
+String
+区名
+remark
+String
+完成隔离备注
+otherRemark
+String
+用户备注(其他备注)
+createTime
+String
+创建时间yyyy-MM-dd HH:mm:ss
+updateTime
+String
+更新时间yyyy-MM-dd HH:mm:ss
+pageSize
+Int
+总页数
+pageCount
+Int
+当前页数量
+currentPage
+Int
+当前页
+total
+Int
+总条数
+
+
+--- Page 35 ---
+智慧物联网云平台
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+"data": [
+{
+"name": "11",
+"placeRoomName": "2",
+"deviceImei": "32009259",
+"isolateType": "1",
+"isolateTime": "2022-04-24",
+"isolateCompleteTime": "2022-04-25 06:58:45",
+"useIsolateDay": 0,
+"isolateDay": 1,
+"isolateNumber": 1,
+"sex": "0",
+"status": "3",
+"idCard": "11",
+"phoneNumber": "13265512541",
+"provinceName": "海外地区",
+"cityName": "欧洲",
+"districtName": "意大利",
+"remark": "完成隔离",
+"otherRemark": "1111",
+"createTime": "2022-04-25 06:56:37",
+"deptName": "智能云平台",
+"uuid": "d8ae600b5e104e06b9b0cb785e672cec"
+},
+{
+"name": "12",
+"placeRoomName": "01 测试",
+"deviceImei": "32004968",
+"isolateType": "1",
+"isolateTime": "2022-04-21",
+"isolateCompleteTime": "2022-04-25 06:58:45",
+"useIsolateDay": 0,
+"isolateDay": 1,
+"isolateNumber": 1,
+"status": "3",
+"phoneNumber": "",
+
+
+--- Page 36 ---
+智慧物联网云平台
+"provinceName": "海外地区",
+"cityName": "欧洲",
+"districtName": "英国",
+"remark": "完成隔离",
+"createTime": "2022-04-22 07:01:01",
+"deptName": "智能云平台",
+"uuid": "8cfc2c639e00404c893fbd78bc19e4b5"
+}
+],
+"pageSize": 2,
+"pageCount": 97089,
+"currentPage": 1,
+"total": 970890
+}
+}
+3.1.5 新增-设备信息接口（限厂商账号）
+请求说明
+
+描述：新增设备
+
+请求方式：POST
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/add
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+设备imei
+deviceBatchId
+Long
+false
+设备批次id
+deviceModelId
+Long
+true
+设备型号id
+comment
+String
+false
+备注
+请求参数说明
+
+Json 格式
+
+
+--- Page 37 ---
+智慧物联网云平台
+{
+"deviceImei":"869975030003275",
+"deviceBatchId":30,
+"deviceModelId":33
+}
+返回结果
+{
+"code": "OK",
+"success": true,
+"message": {"deviceId":1213121}
+}
+3.1.6 删除-设备信息接口（限厂商账号）
+请求说明
+
+描述：从设备列表中删除一个设备
+
+请求方式：DELETE
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/{deviceId}
+请求参数
+字段
+字段类型
+必填
+说明
+deviceId
+Long
+true
+替换路径中的{deviceId}
+返回结果
+{
+"code": "OK",
+"success": true,
+"message": "删除成功！"
+}
+
+
+--- Page 38 ---
+智慧物联网云平台
+3.1.7 查询-设备批次信息接口（限厂商账号）
+请求说明
+
+描述：获取设备批次列表
+
+请求方式：GET
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/batch
+返回结果
+{
+"code": "OK",
+"success": true,
+"message": [
+{
+"id": 16,
+"batchNum": "191111-89",
+"createTime": "2019-11-12 14:40:31",
+"updateTime": "2019-11-14 21:17:09"
+}
+],
+"pageSize": 1,
+"pageCount": 1,
+"currentPage": 1,
+"total": 1
+}
+}
+返回参数说明
+字段
+字段类型
+说明
+id
+Long
+设备批次id
+batchNum
+String
+设备批次编号
+createTime
+String
+创建时间
+updateTime
+String
+更新时间
+
+
+--- Page 39 ---
+智慧物联网云平台
+3.1.8 查询-设备型号信息接口（限厂商账号）
+请求说明
+
+描述：获取设备批次列表
+
+请求方式：GET
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/dev/model
+返回结果
+{
+"code": "OK",
+"success": true,
+"message": [
+{
+"id": 33,
+"modelCode": "ZY-YG-LX-YD-KWXZYYGK808",
+"modelName": "铠威信中移烟感K808",
+"createTime": "2019-09-19 16:58:03",
+"updateTime": "2019-11-05 11:17:20"
+}
+],
+"pageSize": 1,
+"pageCount": 1,
+"currentPage": 1,
+"total": 1
+}
+}
+返回参数说明
+字段
+字段类型
+说明
+id
+Long
+设备型号id
+modelCode
+String
+设备型号code
+modelName
+String
+设备型号名称
+createTime
+String
+创建时间
+
+
+--- Page 40 ---
+智慧物联网云平台
+字段
+字段类型
+说明
+updateTime
+String
+更新时间
+3.1.9 查询-低功耗摄像头视频地址接口
+请求说明
+
+描述：低功耗摄像头视频地址
+
+请求方式：POST
+
+请求URL：https://webapi.nbiotyun.com/api/v1/cameraRecord
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+摄像机设备的IMEI
+fileId
+String
+true
+资源名称ID (事件推送记录中资源名称的value)
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": [“地址1”,”地址2”,”地址3”]
+}
+{
+"code": "iot.dev.OperationFail",
+"success": false,
+"message": "录播地址为空"
+}
+
+
+--- Page 41 ---
+智慧物联网云平台
+3.1.10 查询-流量卡信息接口
+请求说明
+
+描述：获取流量卡信息列表assetTrafficCard/list
+
+请求方式：GET
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/assetTrafficCard/list
+请求参数
+字段
+字段类型
+必填
+说明
+pageNum
+Int
+true
+查询的开始位置，取值范围1-n
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+iccids
+String
+false
+多个iccid 用英文逗号隔开
+返回参数说明
+字段
+字段类
+型
+说明
+iccid
+String
+iccid
+msisdn
+String
+卡号
+operatorType
+String
+运营商（1.电信2.移动3.联通）
+activationTime
+datetime
+激活时间
+validTime
+datetime
+有效时间
+totalFlow
+Decimal
+总流量单位：KB
+cardFlow
+Decimal
+使用流量单位：KB
+cardStatus
+String
+卡状态（1.正常2.停机3.待激活4.过期3.未确认）
+
+
+--- Page 42 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+packageType
+String
+套餐类型（1. 年卡2.月卡）
+cardType
+String
+卡类型（1.单卡2.池卡）
+deptName
+String
+流量卡所属部门名称
+deviceImei
+String
+设备imei
+deviceDeptName
+String
+设备所属部门名称
+createTime
+datetime
+创建时间yyyy-MM-dd HH:mm:ss
+updateTime
+datetime
+更新时间yyyy-MM-dd HH:mm:ss
+pageSize
+Int
+总页数
+pageCount
+Int
+当前页数量
+currentPage
+Int
+当前页
+total
+Int
+总条数
+3.2 报警管理
+3.2.1 查询-设备报警信息接口
+请求说明
+
+描述：获取设备报警信息列表
+
+请求方式：POST
+
+请求URL：https://webapi.nbiotyun.com/api/v1/dev/alarmRecord
+请求参数
+字段
+字段类型
+必填
+说明
+pageNum
+Int
+true
+查询的开始页数位置，取值范围1-n
+
+
+--- Page 43 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+startTime
+String
+true
+查询开始时间
+（只能按照天来查询）yyyy-MM-dd
+HH:mm:ss
+endTime
+String
+true
+查询结束时间
+（只能按照天来查询）yyyy-MM-dd
+HH:mm:ss
+imeiList
+List
+false
+可以通过批量imei 号来查询
+返回参数说明
+字段
+字段类
+型
+说明
+id
+Long
+报警记录id
+alarmTime
+String
+报警时间
+deviceImei
+String
+设备imei
+deptName
+String
+设备所属单位名称
+deviceTypeName
+String
+设备名称
+deviceState
+String
+设备状态
+deviceVersionName
+String
+设备型号名称
+deviceEventName
+String
+事件名称
+deviceAttrValue
+String
+设备属性
+hanldeTime
+String
+处理时间
+handler
+String
+处理人
+contactList
+List
+接警联系人列表
+householdList
+List
+住户信息
+alarmReason
+String
+人工确认报警原因
+detailedLocation
+String
+设备详细安装地址
+remark
+String
+备注
+
+
+--- Page 44 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+createTime
+datetime
+创建时间
+updateTime
+datetime
+更新时间
+contactList 定义：
+参数
+类型
+说明
+name
+String
+联系人名称
+phonenumber
+String
+手机号码
+contactType
+Int
+接警人类型。1：一级接警人2：二级接警人3:三级接警人4：四级接警人
+householdList 定义：
+参数
+类型
+说明
+name
+String
+住户名称
+phonenumber
+String
+手机号码
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+[
+{
+....
+}
+]
+}
+}
+
+
+--- Page 45 ---
+智慧物联网云平台
+3.2.2 查询-设备报警类型
+请求说明
+
+描述：获取设备报警类型
+
+请求方式：GET
+
+请求URL：https://webapi.nbiotyun.com/api/alarm/selectDeviceAlarmTypes
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+通过imei 号来查询设备报警类型
+返回参数说明
+字段
+字段类
+型
+说明
+id
+String
+报警类型id
+name
+String
+类型名称
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": [
+{
+"id": "9",
+"name": "测温",
+"btnType": "warning",
+"mobileIcon":
+"https://rescommcdn.nbiotyun.com/res/kaiwan/miniprogram/static/temperature.png",
+
+
+--- Page 46 ---
+智慧物联网云平台
+"mobileColor": "#F08300"
+},
+{
+"id": "10",
+"name": "送药",
+"btnType": "success",
+"mobileIcon":
+"https://rescommcdn.nbiotyun.com/res/kaiwan/miniprogram/static/drugs.png",
+"mobileColor": "#31BBC7"
+},
+{
+"id": "11",
+"name": "送物资",
+"btnType": "primary",
+"mobileIcon":
+"https://rescommcdn.nbiotyun.com/res/kaiwan/miniprogram/static/materials.png",
+"mobileColor": "#01D0A4"
+},
+{
+"id": "12",
+"name": "收垃圾",
+"btnType": "green",
+"mobileIcon":
+"https://rescommcdn.nbiotyun.com/res/kaiwan/miniprogram/static/garbage.png",
+"mobileColor": "#2C7CFB"
+}
+]
+}
+3.2.3 处理报警记录
+请求说明
+
+描述：处理报警记录, 该接口处理报警记录只允许处理一条记录，可上传图片和视频，图片只允
+许3 张，视频只允许上传一条
+
+请求方式：POST
+
+请求URL：https://webapi.nbiotyun.com/api/alarm/executeOperation
+
+
+--- Page 47 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+alarmReasonId
+String
+true
+设备报警类型接口的id 字段
+fileType
+String
+true
+上传的文件类型1：图片2：视频
+uploadType
+String
+true
+上传文件类型的格式1：二进制2：url
+imageFiles
+File
+False
+uploadType 值为1 时，必传
+fileUrls
+String
+False
+uploadType 值为2 时，必传(多个值用英文逗号分割)
+formData
+String
+true
+Json 字符串
+formData 示例
+[
+{
+"deviceImei": "8016811587",
+"alarmTime": "2023-11-13 15:45:44.000",
+"detailedLocation": "
+GZ19611961GZYQ1961",
+"deviceEventName": "报警",
+"isReset":"1",
+"deviceEventId": null
+}
+]
+formData 定义：
+参数
+类型
+说明
+deviceImei
+String
+设备imei
+alarmTime
+String
+处理的报警时间
+detailedLocation
+String
+设备详细安装地址
+
+
+--- Page 48 ---
+智慧物联网云平台
+参数
+类型
+说明
+deviceEventName
+String
+报警类型的名称
+isReset
+String
+是否重置设备状态标识0-不重置，1-重置
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message":
+"OK"
+}
+3.2.4 批量处理报警记录
+请求说明
+
+描述：处理报警记录, 该接口处理报警记录可进行批量操作相同的设备类型和型号的数据，不允
+许上传图片和视频
+
+请求方式：POST
+
+请求URL：https://webapi.nbiotyun.com/api/alarm/batchExecuteOperation
+请求参数
+字段
+字段类型
+必填
+说明
+alarmReasonId
+String
+true
+设备报警类型接口的id 字段
+formData
+String
+true
+Json 字符串
+formData 示例
+[
+{
+"deviceImei": "8016811587",
+
+
+--- Page 49 ---
+智慧物联网云平台
+"alarmTime": "2023-11-13 15:45:44.000",
+"detailedLocation": "
+GZ19611961GZYQ1961",
+"deviceEventName": "报警",
+"isReset":"1",
+"deviceEventId": null
+},
+{
+"deviceImei": "8016811588",
+"alarmTime": "2023-11-13 15:45:44.000",
+"detailedLocation": "
+GZ19611961GZYQ1961",
+"deviceEventName": "报警",
+"isReset":"1",
+"deviceEventId": null
+}
+]
+formData 定义：
+参数
+类型
+说明
+deviceImei
+String
+设备imei
+alarmTime
+String
+处理的报警时间
+detailedLocation
+String
+设备详细安装地址
+deviceEventName
+String
+报警类型的名称
+isReset
+String
+是否重置设备状态标识0-不重置，1-重置
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message":
+"OK"
+}
+
+
+--- Page 50 ---
+智慧物联网云平台
+3.3 巡检管理
+3.3.1 查询-获取巡检记录列表
+请求说明
+
+描述：获取巡检记录列表
+
+请求方式：POST
+
+请求URL：http(s)://webapi.nbiotyun.com/api/v1/inspection/list
+请求参数
+字段
+字段类型
+必填
+说明
+pageNum
+Int
+true
+查询的开始位置/页数，取值范围1-n
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+startTime
+String
+false
+查询开始时间
+endTime
+String
+false
+查询结束时间
+返回参数说明
+字段
+字段类型
+说明
+id
+Long
+记录id
+inspectTargetId
+Long
+巡查目标id
+inspectTarget
+String
+巡查目标
+build
+String
+建筑物
+inspectPeriod
+String
+巡查周期
+result
+String
+结果
+score
+Int
+分数
+passScore
+Int
+合格分数
+
+
+--- Page 51 ---
+智慧物联网云平台
+字段
+字段类型
+说明
+inspector
+String
+检查人员
+inspectTime
+String
+检查时间
+detailedAddress
+String
+详细地址
+phone
+String
+巡检主体手机号码
+contactName
+String
+巡检主体联系人名字
+remark
+String
+巡查目标备注
+返回结果示例
+{
+"code": "OK",
+"success": true,
+"message": {
+"data": [
+{
+"id": 111,
+"inspectTargetId": 10,
+"inspectTarget": "测试",
+"build": "深圳市宝安区华源科技创新园",
+"inspectPeriod":"日巡查",
+"result": "合格",
+"score": 100,
+"passScore": "100",
+"inspector": "管理员",
+"inspectTime": "2019-09-19 18:16:55",
+"detailedAddress":"详细地址",
+"phone":"12313131",
+"contactName":"测试",
+"remark": "做个测试"
+
+
+--- Page 52 ---
+智慧物联网云平台
+}…
+]
+"pageSize": 10,
+"pageCount": 5,
+"currentPage":1,
+"total": 47
+}
+}
+3.4 单位管理
+3.4.1 查询-单位列表
+请求说明
+
+描述：查询本级及下级单位列表
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/getDeptList
+请求参数
+字段
+字段类型
+必填
+说明
+pageNum
+Int
+true
+查询的开始页位置，取值范围1-n
+pageSize
+Int
+true
+查询的数量，取值范围1-100
+deptName
+String
+false
+单位名称
+返回参数说明
+字段
+字段类
+型
+说明
+
+
+--- Page 53 ---
+智慧物联网云平台
+字段
+字段类
+型
+说明
+deptId
+Long
+单位ID
+deptName
+String
+单位名称
+parentId
+String
+父单位ID
+返回结果示例
+{
+"code": "OK",
+"msg": "OK",
+"rows": [
+{
+"deptId": "7456d274c99a6269c8b44bdae0ca325e",
+"deptName": "XX 技术有限公司",
+"orderNum": "1",
+"parentId": "bdda28db8c065be4236ab19f7b0e7ca2"
+},
+{
+......
+},
+......
+],
+"success": true,
+"total": 168900
+}
+3.4.2 新增单位
+请求说明
+
+描述：新增单位
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/addDept
+
+
+--- Page 54 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+parentId
+String
+false
+上级单位id，不传的时候默认用当前单位
+deptTypeId
+Long
+True
+参照7.2
+deptName
+String
+true
+单位名称
+leader
+String
+false
+单位负责人
+phone
+String
+false
+单位电话
+remark
+String
+false
+备注
+saleman
+String
+false
+业务员
+address
+String
+false
+单位地址
+orgLicense
+String
+false
+统一社会信用代码
+corporator
+String
+false
+法人代表名称
+corporatorId
+String
+false
+法人代表身份证
+corporatorTel
+String
+false
+法人代表电话
+返回参数说明
+字段
+字段类
+型
+说明
+roleId
+String
+角色id
+roleName
+String
+角色名0
+
+
+--- Page 55 ---
+智慧物联网云平台
+返回结果示例
+{
+"code": "0",
+"data": null,
+"msg": "操作成功",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.3 修改单位
+请求说明
+
+描述：根据deptId 查询角色列表，可用于获取roleId
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/editDept
+请求参数
+字段
+字段类型
+必填
+说明
+parentId
+String
+true
+上级单位id
+deptId
+String
+true
+单位id
+deptTypeId
+Long
+true
+参照7.2
+deptName
+String
+true
+单位名称
+leader
+String
+false
+单位负责人
+phone
+String
+false
+单位电话
+remark
+String
+false
+备注
+
+
+--- Page 56 ---
+智慧物联网云平台
+saleman
+String
+false
+业务员
+address
+String
+false
+单位地址
+orgLicense
+String
+false
+统一社会信用代码
+corporator
+String
+false
+法人代表名称
+corporatorId
+String
+false
+法人代表身份证
+corporatorTel
+String
+false
+法人代表电话
+返回参数说明
+字段
+字段类
+型
+说明
+返回结果示例
+{
+"code": "0",
+"data": null,
+"msg": "操作成功",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.4 删除单位
+请求说明
+
+描述：根据deptId 删除单位
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/delDept
+
+
+--- Page 57 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+deptId
+String
+true
+单位id
+返回参数说明
+字段
+字段类
+型
+说明
+返回结果示例
+{
+"code": "0",
+"data": null,
+"msg": "操作成功",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.5 新增用户
+请求说明
+
+描述：如果不通过角色api 查询到的roleId 传参，那么默认为系统管理员
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/addUser
+请求参数
+字段
+字段类型
+必填
+说明
+
+
+--- Page 58 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+roleId
+String
+false
+角色id
+phoneNumber
+String
+true
+电话
+deptId
+String
+true
+单位id
+userName
+String
+true
+姓名
+返回参数说明
+字段
+字段类型
+说明
+password
+String
+如果该账户已存在在其他单位中，密码返回为空，使用原
+密码
+返回结果示例
+{
+"code": "OK",
+"data": {
+"password": "Eh6hZcOQ"
+},
+"msg": "OK",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.6 修改用户
+请求说明
+
+描述：根据电话修改用户uid 和名称
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/editUser
+
+
+--- Page 59 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+phoneNumber
+String
+true
+电话
+uid
+String
+false
+第三方id
+userName
+String
+false
+姓名
+返回参数说明
+字段
+字段类
+型
+说明
+返回结果示例
+{
+"code": "0",
+"data": null,
+"msg": "操作成功",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.7 删除用户
+请求说明
+
+描述：根据电话删除用户
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/delUser
+
+
+--- Page 60 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+phoneNumber
+String
+true
+电话
+返回参数说明
+字段
+字段类
+型
+说明
+返回结果示例
+{
+"code": "0",
+"data": null,
+"msg": "操作成功",
+"rows": [],
+"success": true,
+"total": 0
+}
+3.4.8 查询角色列表
+请求说明
+
+描述：根据deptId 查询角色列表，可用于获取roleId
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/getRoleList
+请求参数
+字段
+字段类型
+必填
+说明
+
+
+--- Page 61 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+deptId
+String
+true
+单位id
+返回参数说明
+字段
+字段类
+型
+说明
+roleId
+String
+角色id
+roleName
+String
+角色名0
+返回结果示例
+{
+"code": "OK",
+"msg": "OK",
+"rows": [],
+"success": true,
+"total": 0,
+" data": [
+{
+"roleId": "9f5e75cd3133801237561754b7b5df4e",
+"roleName": "系统管理员"
+}
+]
+3.5 安装点管理
+3.5.1 新增-安装点批量新增
+请求说明
+
+描述：设备批量安装
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/roomAddBatch
+
+
+--- Page 62 ---
+智慧物联网云平台
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+摄像机设备的IMEI
+deptId
+String
+false
+安装至单位ID，如果为空则为本单位
+roomName
+String
+true
+安装点名称
+roomDetailed
+String
+true
+安装详细地址
+longitude
+String
+true
+经度，百度系坐标
+latitude
+String
+true
+纬度，百度系坐标
+regionCodeAll
+String
+true
+省市区县地区代码逗号分隔
+streetCode
+String
+false
+街道代码按国家统计局数据地区代码
+为准
+remark
+String
+false
+备注非必填
+contacts.phonenumber
+String
+true
+手机或电话号码不需要带国家码，固话
+不需要带”-”,如果号码已存在单位中，则
+使用原号码和姓名，不存在号码则自动
+创建一个新接警人
+contacts.name
+String
+true
+姓名
+contacts.contactType
+String
+true
+联系人类型,1:一级接警人2:二级接警
+人3:三级接警人，4：四级接警人
+placeBuilding.buildingName
+String
+false
+建筑物名称
+placeBuilding.longitude
+String
+false
+经度，百度系坐标
+placeBuilding.latitude
+String
+false
+纬度，百度系坐标
+
+
+--- Page 63 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+placeFloor.floorName
+String
+false
+楼层名称
+placeCommunity.name
+String
+false
+小区名称
+placeCommunity.detailedAddress
+String
+false
+小区详细地址
+households.name
+String
+false
+住户姓名
+households.phonenumber
+String
+false
+住户手机号
+返回参数说明
+字段
+字段类
+型
+说明
+taskNo
+String
+批量任务编号
+返回结果示例
+{
+"code": "OK",
+"data": {
+"taskNo": "1720018084892430336"
+},
+"msg": "OK",
+"success": true
+}
+3.5.2 修改-安装点批量修改
+请求说明
+
+描述：批量修改安装点信息
+
+请求方式：POST
+
+Content-Type : application/json
+
+
+--- Page 64 ---
+智慧物联网云平台
+
+请求URL：https://webapi.nbiotyun.com/api/v1/roomUpdateBatch
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+摄像机设备的IMEI
+roomName
+String
+true
+安装点名称
+roomDetailed
+String
+true
+安装详细地址
+longitude
+String
+true
+经度，百度系坐标
+latitude
+String
+true
+纬度，百度系坐标
+regionCodeAll
+String
+true
+省市区县地区代码逗号分隔
+streetCode
+String
+false
+街道代码按国家统计局数据地区代码为准
+remark
+String
+false
+备注非必填
+contactHandleFlag
+String
+false
+联系人处理标识，0：覆盖（先删除后新增），
+1：增量（contacts 为空不处理，重复的会
+替换原来的）
+contacts.phonenumber
+String
+false
+手机或电话号码不需要带国家码，固话不需
+要带”-”,如果号码已存在单位中，则使用原
+号码和姓名，不存在号码则自动创建一个新
+接警人
+contacts.name
+String
+false
+姓名
+contacts.contactType
+String
+false
+联系人类型,1:一级接警人2:二级接警人
+3:三级接警人，4：四级接警人
+placeBuilding.buildingName
+String
+false
+建筑物名称
+placeBuilding.longitude
+String
+false
+经度，百度系坐标
+placeBuilding.latitude
+String
+false
+纬度，百度系坐标
+
+
+--- Page 65 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+placeFloor.floorName
+String
+false
+楼层名称
+placeCommunity.name
+String
+false
+小区名称
+placeCommunity.detailedAddress
+String
+false
+小区详细地址
+householdHandleFlag
+String
+false
+住户处理标识，0：覆盖（先删除后新增），
+1：增量（households 为空不处理，重复的
+会替换原来的）
+households.name
+String
+false
+住户姓名
+households.phonenumber
+String
+false
+住户手机号
+返回参数说明
+字段
+字段类
+型
+说明
+taskNo
+String
+批量任务编号
+返回结果示例
+{
+"code": "OK",
+"data": {
+"taskNo": "1720018084892430336"
+},
+"msg": "OK",
+"success": true
+}
+
+
+--- Page 66 ---
+智慧物联网云平台
+3.5.3 删除-安装点批量删除
+请求说明
+
+描述：低功耗摄像头视频地址
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/roomDeleteBatch
+请求参数
+字段
+字段类型
+必填
+说明
+transferFlag
+String
+true
+解绑后设备所属单位是否需要返回上级标识，0：返回上级（设
+备厂商单位）1：留在本单位
+deviceImeis
+array<string>
+true
+设备IMEI
+返回参数说明
+字段
+字段类
+型
+说明
+taskNo
+String
+批量任务编号
+返回结果示例
+{
+"code": "OK",
+"data": {
+"taskNo": "1720018084892430336"
+},
+"msg": "OK",
+"success": true
+}
+
+
+--- Page 67 ---
+智慧物联网云平台
+3.5.4 查询-批量任务结果查询
+请求说明
+
+描述：低功耗摄像头视频地址
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/roomTaskResult
+请求参数
+字段
+字段类型
+必填
+说明
+taskNo
+String
+true
+任务列表
+返回参数说明
+字段
+字段类
+型
+说明
+createTime
+String
+创建时间
+finishNumber
+String
+完成数量
+succeedNumber
+String
+成功数量
+failNumber
+String
+失败数量
+taskNo
+String
+任务编号
+totalNumber
+String
+任务总数
+返回结果示例
+{
+"code": "OK",
+"data": {
+"createTime": "2022-06-13 10:49:11",
+"failNumber": 1,
+
+
+--- Page 68 ---
+智慧物联网云平台
+"finishNumber": 1,
+"succeedNumber": 0,
+"taskNo": "202206131049114450442",
+"totalNumber": 1
+},
+"msg": "OK",
+"success": true
+}
+3.5.5 新增-安装点批量新增(根据行政区划编码安装)
+a)请求说明
+
+描述：设备批量安装
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/roomAddBatchV2
+b)请求参数
+字段
+字段类型
+必填
+说明
+deptId
+String
+false
+安装至单位ID
+areaCode
+String
+false
+行政区划编码
+deviceImei
+String
+true
+摄像机设备的IMEI
+roomName
+String
+true
+安装点名称
+roomDetailed
+String
+true
+安装详细地址
+longitude
+String
+true
+经度，百度系坐标
+latitude
+String
+true
+纬度，百度系坐标
+regionCodeAll
+String
+true
+省市区县地区代码逗号分隔
+
+
+--- Page 69 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+streetCode
+String
+false
+街道代码按国家统计局数据地区代码
+为准
+remark
+String
+false
+备注非必填
+contacts.phonenumber
+String
+true
+手机或电话号码不需要带国家码，固话
+不需要带”-”,如果号码已存在单位中，则
+使用原号码和姓名，不存在号码则自动
+创建一个新接警人
+contacts.name
+String
+true
+姓名
+contacts.contactType
+String
+true
+联系人类型,1:一级接警人2:二级接警
+人3:三级接警人，4：四级接警人
+placeBuilding.buildingName
+String
+false
+建筑物名称
+placeBuilding.longitude
+String
+false
+经度，百度系坐标
+placeBuilding.latitude
+String
+false
+纬度，百度系坐标
+placeFloor.floorName
+String
+false
+楼层名称
+placeCommunity.name
+String
+false
+小区名称
+placeCommunity.detailedAddress
+String
+false
+小区详细地址
+households.name
+String
+false
+住户姓名
+households.phonenumber
+String
+false
+住户手机号
+C)请求参数示例
+{
+"deptId":"deptId 和areaCode 二选一，都填优先deptId，都为空安装到应用秘钥所属单
+位",
+"areaCode":"650102003000",
+
+
+--- Page 70 ---
+智慧物联网云平台
+"roomInfos":[
+{
+"deviceImei": "123456",
+"roomName": "安装点名称1",
+"roomDetailed": "安装点名称1 详细地址",
+"longitude": "119.428816",
+"latitude": "32.408556",
+"regionCodeAll":
+"650000000000,650100000000,650102000000,650102002000",
+"remark": "备注非必填",
+"contacts": [
+{
+"phonenumber": "13800138000",
+"name": "刘管",
+"contactType": "1"
+}
+],
+"placeBuilding": {
+"buildingName": "楼栋1"
+},
+"placeFloor": {
+"floorName": "楼层1"
+},
+"placeCommunity": {
+"name": "小区1",
+"detailedAddress": "小区详细地址"
+},
+"households": [
+{
+"name": "住户1",
+"phonenumber": "13800138000"
+}
+]
+},
+
+
+--- Page 71 ---
+智慧物联网云平台
+{
+"deviceImei": "1234567",
+"roomName": "安装点名称1",
+"roomDetailed": "安装点名称1 详细地址",
+"longitude": "119.428816",
+"latitude": "32.408556",
+"regionCodeAll":
+"650000000000,650100000000,650102000000,650102002000",
+"remark": "备注非必填",
+"contacts": [
+{
+"phonenumber": "13800138000",
+"name": "刘管",
+"contactType": "1"
+}
+],
+"placeBuilding": {
+"buildingName": "楼栋1"
+},
+"placeFloor": {
+"floorName": "楼层1"
+},
+"placeCommunity": {
+"name": "小区1",
+"detailedAddress": "小区详细地址"
+},
+"households": [
+{
+"name": "住户1",
+"phonenumber": "13800138000"
+}
+]
+}
+]
+
+
+--- Page 72 ---
+智慧物联网云平台
+}
+d)返回参数说明
+字段
+字段类
+型
+说明
+taskNo
+String
+批量任务编号
+e)返回结果示例
+{
+"code": "OK",
+"data": {
+"taskNo": "1720018084892430336"
+},
+"msg": "OK",
+"success": true
+}
+3.6 指令管理
+3.6.1 创建指令下发任务
+请求说明
+
+描述：创建指令下发任务
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/cmd/createTask
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+string
+true
+设备imei
+
+
+--- Page 73 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+paramCode
+string
+true
+下发指令类型
+paramValue
+string
+true
+下发指令内容
+createBy
+string
+true
+操作者
+ttl
+int
+false
+指令缓存时长,范围0-864000s
+返回参数说明
+字段
+字段类型
+说明
+deviceImei
+String
+设备imei
+commandStatus
+Int
+指令状态
+Ip
+String
+Ip 地址
+ttl
+Int
+指令缓存时长
+commandStatusName
+String
+指令状态名称
+cmdName
+String
+下发指令名称
+cmdType
+String
+下发指令类型
+cmdParams
+String
+指令参数
+createBy
+String
+操作人
+createTime
+String
+创建时间yyyy-MM-dd HH:mm:ss
+updateTime
+String
+更新时间yyyy-MM-dd HH:mm:ss
+返回结果示例
+{
+"success": true,
+"code": "OK",
+"msg": "OK",
+"data": {
+"createBy": "测试",
+"deviceImei": "869465055098839",
+
+
+--- Page 74 ---
+智慧物联网云平台
+"commandStatus": 3,
+"createTime": "2023-12-01 15:03:01",
+"cmdType": "6",
+"cmdParams": "01",
+"ip": "192.168.2.86",
+"cmdName": "消音",
+"commandStatusName": "指令已保存",
+"updateTime": "2023-12-01 15:03:01",
+"ttl": 86400,
+"taskId": "1701414181"
+}
+}
+3.6.2 查询指令下发任务详情
+请求说明
+
+描述：查询指令下发任务详情
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/cmd/queryTask
+请求参数
+字段
+字段类型
+必填
+说明
+taskId
+String
+false
+指令任务id
+deviceImei
+String
+false
+设备imei
+commandStatus
+Int
+false
+指令状态
+startTime
+String
+false
+查询开始时间yyyy-MM-dd HH:mm:ss
+endTime
+String
+false
+查询结束时间yyyy-MM-dd HH:mm:ss
+pageNum
+Int
+false
+查询当前页
+pageSize
+Int
+false
+每页记录数（最大100）
+
+
+--- Page 75 ---
+智慧物联网云平台
+返回参数说明
+字段
+字段类型
+说明
+deviceImei
+String
+设备imei
+commandStatus
+Int
+指令状态
+commandStatusName
+String
+指令状态名称
+cmdName
+String
+下发指令名称
+cmdType
+String
+下发指令类型
+ip
+String
+IP 地址
+cmdParams
+String
+指令参数
+sendResult
+String
+指令发送执行结果
+createBy
+String
+操作人
+createTime
+String
+创建时间yyyy-MM-dd HH:mm:ss
+updateTime
+String
+更新时间yyyy-MM-dd HH:mm:ss
+返回结果示例
+{
+"success": true,
+"code": "OK",
+"msg": "OK",
+"rows": [
+{
+"cmdType": "6",
+"ip": "192.168.2.86",
+"cmdName": "消音",
+"updateTime": "2023-12-01 15:03:01",
+"ttl": 86400,
+"createBy": "测试",
+"deviceImei": "869465055098839",
+"commandStatus": 3,
+"createTime": "2023-12-01 15:03:01",
+"cmdParams": "01",
+
+
+--- Page 76 ---
+智慧物联网云平台
+"commandContent": "6B220702010177",
+"commandStatusName": "指令已保存",
+"taskId": "1701414181"
+}
+],
+"total": 1,
+"pageNum": 1,
+"pageSize": 15
+}
+3.6.3 取消指令
+请求说明
+
+描述：取消指令
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/cmd/cancelTask
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+设备imei
+taskId
+String
+true
+任务id
+返回结果示例
+{
+"success": true,
+"code": "OK",
+"msg": "OK"
+}
+
+
+--- Page 77 ---
+智慧物联网云平台
+3.6.4 查询指令配置信息
+请求说明
+
+描述：查询指令配置信息
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/cmd/queryConfig
+请求参数
+字段
+字段类型
+必填
+说明
+deviceVersionName
+String
+true
+设备型号
+返回参数说明
+字段
+字段类型
+说明
+deviceVersionName
+String
+设备型号
+cmdConfig
+String
+指令配置模版（见详细说明）
+cmdConfig 配置说明
+字段
+说明
+instructionsType
+指令下发类型(switch、single、textarea、customInput、input、
+input2、switch、popupChoic、slider、multiple、multiple2)。input
+和input2 的输入框类型固定为number，其中input 不能为空、
+如果最大值和最小值有设置需要有校验，input2 则可为空，不做
+最大值最小值校验
+titleName
+标题
+subTitleName
+副标题
+confirmName
+下发指令按钮的名称
+
+
+--- Page 78 ---
+智慧物联网云平台
+字段
+说明
+instructionsData
+下发指令数据，一般用于存放指令code，如‘popupChoice’存
+放各个选项的数据对象，‘multiple、multiple2’存放多个参数
+的数据
+attrCode
+指令类型
+attrValue
+指令值
+checked
+‘switch’ 类型的开关默认值
+openAttrValue
+‘switch’ 类型的开启值
+openAttrName
+‘switch’ 类型的开启名称
+openHintContent
+‘switch’ 类型的下发开启指令二次确认提示内容
+shutAttrValue
+‘switch’ 类型的关闭名称
+shutHintContent
+‘switch’ 类型的下发关闭指令二次确认提示内容
+textareaMaxlength
+‘textarea’ 类型的最大输入长度
+textareaPlaceholder
+‘textarea’ 类型的最大输入长度
+operationPromptHead
+‘textarea、customInput’ 类型的下发指令提示
+operationPromptTail
+‘textarea、customInput’ 类型的下发指令提示（和头部提示语拼
+接提示，也可在两者中间拼接需要下发的value，进行二次确认
+下发）
+inputType
+‘customInput’ 类型的最大输入长度
+titleUnit
+‘customInput、input’ 类型的标题单位
+inputMaxlength
+‘customInput、input’ 输入框最大长度
+inputValueMin
+‘customInput、input’ 类型的最小值
+inputValueMax
+‘customInput、input’ 类型的最大值
+inputPlaceholder
+‘customInput、input’ 类型的占位符
+inputTips
+‘customInput、input’ 类型的输入提示（如果有判断最大值，当
+超出时可用这个字段来提示）
+inputTipsUnit
+‘customInput、input’ 类型的输入提示单位
+titleValue
+‘slider’ 类型的副标题
+
+
+--- Page 79 ---
+智慧物联网云平台
+字段
+说明
+defaultValue
+‘slider’ 类型的默认值
+minValue
+‘slider’ 类型的最小值
+maxValue
+‘slider’ 类型的最大值
+stepValue
+‘slider’ 类型的步长
+chooseAttrCode
+‘input3、multiple、multiple2’类型的指令code
+newAddWholeMaxLength
+‘multiple2’ 类型的最大新增长度
+newAddInputMaxLength
+‘input3’类型的最大新增长度（用来设置不确定数量的输入下发）
+type
+‘multiple、multiple2’ 类型的指令类型
+fieldName
+‘multiple、multiple2’ 类型的下发指令key 名称，下发指令是拼
+接最后下发结果示例：fieldName:'id' => {id:1}
+chooseAttrName
+‘multiple、multiple2’ 类型的指令名
+chooseAttrValue
+‘multiple、multiple2’ 类型的指令值
+返回结果示例
+{
+"success": true,
+"code": "OK",
+"msg": "OK",
+"data": {
+"cmdConfig": "[{\"id\": \"1\", \"titleName\": \"设备自检
+\", \"instructionsData\": [{\"name\": \"点击自检
+\", \"attrCode\": \"208\", \"attrValue\": \"0\", \"hintContent\": \"你确定要下发自检操作吗？
+\"}], \"instructionsType\": \"single\", \"instructionsSelectState\": \"\"}, {\"id\": \"2\",
+\"titleName\": \"报警开关\", \"instructionsData\": [{\"name\": \"关
+\", \"attrCode\": \"249\", \"attrValue\": \"0\", \"hintContent\": \"你确定关闭报警开关吗？
+\"}, {\"name\": \"开\", \"attrCode\": \"249\", \"attrValue\": \"1\", \"hintContent\": \"你确定
+打开报警开关吗？
+\"}], \"instructionsType\": \"btn2\", \"instructionsSelectState\": \"\"}, {\"id\": \"3\", \"
+titleName\": \"消音\", \"instructionsData\": [{\"name\": \"关
+\", \"attrCode\": \"6\", \"attrValue\": \"0\", \"hintContent\": \"你确定关闭消音吗？
+\"}, {\"name\": \"开\", \"attrCode\": \"6\", \"attrValue\": \"1\", \"hintContent\": \"你确定打
+开消音吗？\"}], \"instructionsType\": \"btn2\", \"instructionsSelectState\": \"\"}]",
+
+
+--- Page 80 ---
+智慧物联网云平台
+"deviceVersionName": "TEST-01"
+}
+}
+3.7 设备数据推送
+3.7.1 查询事件列表
+请求说明
+
+描述：通过型号查询对应事件列表推送接口
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/event/getList
+请求参数
+字段
+字段类型
+必填
+说明
+deviceModelName
+String
+true
+设备型号
+返回参数说明
+字段
+字段类型
+说明
+eventCode
+String
+事件code
+eventName
+String
+事件名称
+eventState
+Int
+事件状态0:正常1:故障2:报
+警8:隐患
+
+
+--- Page 81 ---
+智慧物联网云平台
+返回结果示例
+3.7.2 查询属性列表
+请求说明
+
+描述：通过型号查询对应属性列表推送接口
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://webapi.nbiotyun.com/api/v1/attribute/getList
+请求参数
+字段
+字段类型
+必填
+说明
+deviceModelName
+String
+true
+设备型号
+返回参数说明
+字段
+字段类型
+说明
+attrCode
+String
+属性code
+attrName
+String
+属性名称
+unit
+String
+单位
+返回结果示例
+
+
+--- Page 82 ---
+智慧物联网云平台
+3.7.3 实时数据推送
+请求说明
+
+描述：设备上报实时数据推送接口
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://devices.nbiotyun.com/api/v1/dataPush/realData
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+设备编号
+1、独立设备或者子设备编号
+2、主机上报时不需要传，只需
+要传hostImei
+hostImei
+String
+true
+主机设备编号,
+1、有主机编号时需要要传
+2、独立设备不需要传该字段
+subType
+String
+false
+子设备类型,子设备上报时必传
+subModel
+String
+false
+子设备型号,子设备上报时必传
+imsi
+String
+false
+SIM 卡的imsi
+iccid
+String
+false
+SIM 卡的iccid
+timestamp
+Long
+true
+时间戳13 位毫秒级别
+body
+json
+true
+实时数据信息
+body 参数说明:
+字段
+字段类型
+必填
+说明
+eventCode
+String
+true
+事件code，通过查询事件列表
+获取,详见3.7.1
+eventName
+String
+true
+事件名称，通过查询事件列表获
+取,详见3.7.1
+
+
+--- Page 83 ---
+智慧物联网云平台
+字段
+字段类型
+必填
+说明
+attrList
+list
+true
+属性列表，通过查询属性列表获
+取, 详见3.7.2
+restoreStatus
+boolean
+true
+设备状态恢复标识
+true:表示设备从报警、故障或者隐
+患状态恢复正常的数据
+false:表示不是状态恢复的数据
+attrList 参数说明:
+字段
+字段类型
+必填
+说明
+attrCode
+String
+true
+属性code
+attrName
+String
+true
+属性名称
+attrValue
+String
+true
+属性值
+unit
+String
+true
+单位
+完整示例:
+{
+"deviceImei": "861658060415234",
+"timestamp": 1704533634316,
+"body": {
+"restoreStatus": false,
+"eventCode": "A1",
+"eventName": "心跳",
+"attrList": [
+{
+"attrCode": "5",
+"attrName": "电池电量",
+"attrValue": "50",
+"unit": "%"
+}
+]
+}
+}
+返回结果示例
+{
+
+
+--- Page 84 ---
+智慧物联网云平台
+"success": true,
+"code": "OK",
+"msg": "OK"
+}
+3.7.4 离线推送
+请求说明
+
+描述：设备发生离线时推送对应的离线数据推送接口
+
+请求方式：POST
+
+Content-Type : application/json
+
+请求URL：https://devices.nbiotyun.com/api/v1/dataPush/offline
+请求参数
+字段
+字段类型
+必填
+说明
+deviceImei
+String
+true
+设备编号
+timestamp
+Long
+true
+离线数据时间戳13 位毫秒级别
+完整示例:
+{
+"deviceImei": "861658060415234",
+"timestamp": 1704533634316
+}
+返回结果示例
+{
+"success": true,
+"code": "OK",
+"msg": "OK"
+}
+
+
+--- Page 85 ---
+智慧物联网云平台
+四、
+附加参数详解
+7.1 HTTP 错误代码
+错误码
+说明
+iot.system.SystemException
+系统内部处理异常,请联系平台相关人员
+iot.commom.LackRequestHeaderParams
+缺少请求头参数
+iot.commom.AppKeyIsError
+请求头中appKey 输入有误
+iot.common.WrongSignatureCalculation
+签名计算有误
+iot.dev.RequestParamFail
+请求参数错误
+iot.dev.PageSizeOverRange
+查询页数超过取值范围
+iot.dev.OperationFail
+操作失败
+iot.dev.Exist
+设备编号已存在
+iot.dev.HandCmdTypeError
+手报下发控制指令类型有误
+iot.dev.LackRequestParams
+缺少请求参数
+iot.common.TimestampOverTime
+签名时间戳超时,请确认保证不超过当前
+时间戳3s
+iot.common.tokenLimit
+请求频繁,每秒只能访问一次
+7.2 单位属性
+code
+说明
+52
+维保单位
+53
+监管单位
+54
+社会单位
+55
+事业单位
+56
+联网单位
+
+
+--- Page 86 ---
+智慧物联网云平台
+code
+说明
+57
+派遣单位
+

@@ -1,0 +1,14 @@
+services:
+  nginx-web:
+    image: nginx:alpine
+    container_name: hospital-nginx
+    restart: unless-stopped
+    ports:
+      # 将云服务器的 5174 端口映射给 Frontend
+      - "5174:80"
+      # 将云服务器的 5173 端口映射给 Admin Web
+      - "5173:8080"
+    volumes:
+      - ./frontend:/usr/share/nginx/html/frontend
+      - ./admin_web:/usr/share/nginx/html/admin_web
+      - ./nginx.conf:/etc/nginx/nginx.conf

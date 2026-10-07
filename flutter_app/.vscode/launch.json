@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // ==================== 1. Flutter 运行（调试模式） ====================
+        {
+            "name": "Flutter: Run Debug",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "flutterMode": "debug",
+            "args": [
+                "--dart-define=ADMIN_FRONT_CHAT_URL=http://192.168.0.250:5173/chat",
+                "--dart-define=API_BASE_URL=http://192.168.0.250:8000",
+                "--dart-define=ENV=debug"
+            ],
+            "deviceId": null // 设为 null 则手动选择设备；可指定具体设备ID
+        },
+        // ==================== 2. Flutter 运行（Release 模式） ====================
+        {
+            "name": "Flutter: Run Release",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=ADMIN_FRONT_CHAT_URL=http://192.168.0.250:5173/chat",
+                "--dart-define=API_BASE_URL=http://192.168.0.250:8000",
+                "--dart-define=ENV=prod"
+            ]
+        },
+    ],
+}

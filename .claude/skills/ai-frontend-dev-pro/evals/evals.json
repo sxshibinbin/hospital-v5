@@ -1,0 +1,177 @@
+{
+  "skill_name": "frontend-dev-pro",
+  "version": "1.0.0",
+  "description": "卫宁健康多前端技术栈自适应编码执行 Agent Skill 评估用例",
+  "evals": [
+    {
+      "id": 1,
+      "name": "vue3-spark-list-page",
+      "prompt": "前端开发需求：实现一个用户列表页面\n\n功能要求：\n1. 用户表格（显示姓名、邮箱、状态）\n2. 搜索功能（按姓名搜索）\n3. 分页功能\n4. 新增/编辑按钮\n\n项目技术栈：Vue 3 + Spark 框架 + win-design-next 组件库\n需求号：20260518",
+      "expected_output": "生成符合 Vue 3 + Spark 框架规范的用户列表页面组件，使用 win-design 组件（w-table, w-input, w-button 等），从 spark 导入 API，使用 TypeScript 类型定义，遵循医疗后台系统 UI 规范",
+      "assertions": [
+        {
+          "name": "使用 script setup lang=ts",
+          "description": "必须使用 <script setup lang=\"ts\"> 语法"
+        },
+        {
+          "name": "从 spark 导入",
+          "description": "必须从 spark 导入 ref、computed、onMounted 等 API，禁止从 vue 直接导入"
+        },
+        {
+          "name": "使用 win-design 组件",
+          "description": "必须使用 w-* 前缀的 win-design 组件（w-table, w-button, w-input 等）"
+        },
+        {
+          "name": "TypeScript 类型定义",
+          "description": "必须定义 Props 接口和 User 类型，禁止使用 any"
+        },
+        {
+          "name": "使用 i18n",
+          "description": "文案应使用 $t() 或 t() 进行国际化，禁止硬编码"
+        },
+        {
+          "name": "执行进度记录",
+          "description": "应创建 DOCS/{需求号}/前端编码/exec_prog.md 进度记录文件"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "vue2-to-vue3-migration",
+      "prompt": "将以下 Vue2 组件迁移到 Vue3 Composition API + Spark 框架：\n\n```vue\n<template>\n  <div class=\"user-form\">\n    <el-form ref=\"form\" :model=\"form\" :rules=\"rules\">\n      <el-form-item label=\"姓名\" prop=\"name\">\n        <el-input v-model=\"form.name\" />\n      </el-form-item>\n      <el-form-item label=\"邮箱\" prop=\"email\">\n        <el-input v-model=\"form.email\" />\n      </el-form-item>\n    </el-form>\n    <el-button type=\"primary\" @click=\"submit\">提交</el-button>\n  </div>\n</template>\n\n<script>\nexport default {\n  name: 'UserForm',\n  props: {\n    visible: Boolean,\n    userData: Object\n  },\n  data() {\n    return {\n      form: { name: '', email: '' },\n      rules: {\n        name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],\n        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]\n      }\n    };\n  },\n  computed: {\n    isEdit() {\n      return !!this.userData;\n    }\n  },\n  watch: {\n    userData(val) {\n      if (val) this.form = { ...val };n    }\n  },\n  methods: {\n    submit() {\n      this.$refs.form.validate(valid => {\n        if (valid) this.$emit('submit', this.form);\n      });\n    }\n  }\n};\n</script>\n```\n\n请迁移为 Vue3 Composition API + win-design 组件库 + Spark 框架",
+      "expected_output": "迁移后的 Vue3 组件，使用 <script setup lang=\"ts\">，使用 win-design 组件（w-form, w-input, w-button），从 spark 导入 API，保持行为等价，输出迁移审计报告",
+      "assertions": [
+        {
+          "name": "使用 script setup lang=ts",
+          "description": "必须使用 <script setup lang=\"ts\"> 语法"
+        },
+        {
+          "name": "el-form 替换为 w-form",
+          "description": "Element Plus 组件必须替换为 win-design 组件（w-form, w-input, w-button）"
+        },
+        {
+          "name": "defineProps 定义 Props",
+          "description": "必须使用 defineProps<T>() 定义 props，使用 TypeScript 接口"
+        },
+        {
+          "name": "defineEmits 定义事件",
+          "description": "必须使用 defineEmits 定义 emit 事件"
+        },
+        {
+          "name": "响应式使用 ref/reactive",
+          "description": "data() 必须迁移为 ref() 或 reactive()，从 spark 导入"
+        },
+        {
+          "name": "行为等价",
+          "description": "迁移后的组件行为必须与原组件等价（props、emits、功能）"
+        },
+        {
+          "name": "输出审计报告",
+          "description": "必须输出 Refactor Audit Block，包含行为等价性验证和回滚能力说明"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "permission-constraint-check",
+      "prompt": "我需要在 src/global.ts 中添加一个全局工具函数，用于格式化日期。请帮我实现这个功能。\n\n需求号：20260518",
+      "expected_output": "AI 应该拒绝修改 src/global.ts，说明权限限制，并提供替代方案（如在 src/utils/ 或模块内创建工具函数）",
+      "assertions": [
+        {
+          "name": "拒绝修改禁止文件",
+          "description": "必须拒绝修改 src/global.ts，明确说明这是禁止修改的文件"
+        },
+        {
+          "name": "提供替代方案",
+          "description": "必须提供在允许路径内的替代方案（src/utils/ 或模块内）"
+        },
+        {
+          "name": "权限规则说明",
+          "description": "应该引用权限约束检查规则，说明哪些路径允许修改"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "rdf-framework-development",
+      "prompt": "用快开框架开发一个患者查询页面\n\n功能要求：\n1. 患者信息表格\n2. 搜索功能（按姓名、身份证号）\n3. 分页功能\n\npageCode: patientQuery\n需求号：20260518",
+      "expected_output": "生成快开框架 RDF 的 XML 配置文件（.page.meta.xml, .view.xml）和 TypeScript 控制类代码",
+      "assertions": [
+        {
+          "name": "生成 page.meta.xml",
+          "description": "必须生成 [pageCode].page.meta.xml 文件，包含页面元数据配置"
+        },
+        {
+          "name": "生成 view.xml",
+          "description": "必须生成 [pageCode].view.xml 文件，包含视图配置"
+        },
+        {
+          "name": "生成 controller.ts",
+          "description": "必须生成 controller/[pageCode].controller.ts 控制类文件"
+        },
+        {
+          "name": "使用 pango-framework",
+          "description": "代码应符合 pango-framework 规范"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "tech-stack-auto-identification",
+      "prompt": "开发一个用户管理页面\n\n功能要求：\n1. 用户列表表格\n2. 新增/编辑/删除功能\n3. 搜索筛选\n\n需求号：20260518\n\n请先识别项目技术栈，然后生成代码。",
+      "expected_output": "AI 应先执行技术栈识别流程（CLAUDE.md → package.json → 代码结构），输出识别结果，然后按识别的技术栈生成代码",
+      "assertions": [
+        {
+          "name": "执行技术栈识别",
+          "description": "必须执行 Step 1 技术栈识别流程，读取项目上下文"
+        },
+        {
+          "name": "输出识别结果",
+          "description": "必须输出技术栈识别结果（框架、UI库、状态管理、代码风格）"
+        },
+        {
+          "name": "按技术栈生成代码",
+          "description": "生成的代码必须符合识别的技术栈规范"
+        },
+        {
+          "name": "记录到 exec_prog.md",
+          "description": "技术栈识别结果应记录到 DOCS/{需求号}/前端编码/exec_prog.md"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "win-design-component-usage",
+      "prompt": "前端开发需求：创建一个弹窗表单组件\n\n功能要求：\n1. 点击按钮弹出弹窗\n2. 弹窗内包含表单（姓名、性别、出生日期）\n3. 表单校验\n4. 提交和取消按钮\n\n项目技术栈：Vue 3 + Spark 框架 + win-design-next\n需求号：20260518",
+      "expected_output": "生成符合 WinDesign 组件库规范的弹窗表单组件，使用 w-dialog/w-modal、w-form、w-input、w-radio-group、w-date-picker 等组件",
+      "assertions": [
+        {
+          "name": "使用 w-dialog 或 w-modal",
+          "description": "必须使用 win-design 的弹窗组件（w-dialog 或 w-modal）"
+        },
+        {
+          "name": "弹窗尺寸规范",
+          "description": "弹窗尺寸应遵循规范（480/640/1000px 或 50%/85%）"
+        },
+        {
+          "name": "使用 w-form 包裹",
+          "description": "表单必须使用 w-form 包裹，定义 rules 校验规则"
+        },
+        {
+          "name": "组件前缀正确",
+          "description": "所有组件必须使用 w- 前缀，禁止使用 el- 前缀"
+        },
+        {
+          "name": "使用 i18n",
+          "description": "文案应使用 $t() 或 t() 进行国际化"
+        }
+      ],
+      "files": []
+    }
+  ]
+}

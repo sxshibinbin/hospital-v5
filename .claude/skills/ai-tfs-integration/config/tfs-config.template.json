@@ -1,0 +1,8 @@
+{
+  "_comment": "This is a template configuration file. Rename to tfs-config.json and fill in your PAT token.",
+  "serverUrl": "http://tfs2018-web.winning.com.cn:8080/tfs/WINNING-6.0",
+  "pat": "your-personal-access-token-here",
+  "defaultCollection": "WINNING-6.0",
+  "defaultProject": "WiNEX-Agent",
+  "defaultAssignee": "WINNING\\jia_wl"
+}

@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "description": "Level 3: 病历质控产品线规则",
+  "rules": [
+    {
+      "rule_id": "MR-QC-001",
+      "rule_name": "病历完整性检查",
+      "category": "compliance",
+      "severity": "warning",
+      "description": "病历记录必须包含必要的字段（主诉、现病史、诊断等）",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "class\\s+MedicalRecord|class\\s+EmrRecord",
+        "file_pattern": "**/entity/**/*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "确保病历实体类包含必填字段校验注解",
+        "code_example": "@Entity\npublic class MedicalRecord {\n    @NotBlank(message = \"主诉不能为空\")\n    private String chiefComplaint;\n    \n    @NotBlank(message = \"现病史不能为空\")\n    private String presentIllness;\n    \n    @NotBlank(message = \"诊断不能为空\")\n    private String diagnosis;\n}",
+        "auto_fixable": false
+      },
+      "tags": ["病历质控", "数据完整性", "医疗合规"],
+      "references": ["病历书写基本规范"]
+    },
+    {
+      "rule_id": "MR-QC-002",
+      "rule_name": "质控规则引擎检查",
+      "category": "standard",
+      "severity": "info",
+      "description": "质控评分逻辑应可配置，支持规则动态更新",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "calculateScore|qualityScore|质控评分",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "将质控规则配置化，支持动态加载",
+        "code_example": "// 使用规则引擎\n@Autowired\nprivate QualityControlRuleEngine ruleEngine;\n\npublic QualityScore calculateScore(MedicalRecord record) {\n    return ruleEngine.evaluate(record);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["病历质控", "规则引擎"],
+      "references": ["病历质控系统设计规范"]
+    },
+    {
+      "rule_id": "MR-QC-003",
+      "rule_name": "病历时效性检查",
+      "category": "compliance",
+      "severity": "warning",
+      "description": "病历记录应在规定时限内完成（入院记录24小时内）",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "入院记录|admissionRecord|AdmissionRecord",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "添加病历完成时限检查逻辑",
+        "code_example": "public void checkAdmissionRecordTiming(Patient patient) {\n    LocalDateTime admissionTime = patient.getAdmissionTime();\n    LocalDateTime recordTime = patient.getAdmissionRecordTime();\n    \n    if (recordTime == null || \n        Duration.between(admissionTime, recordTime).toHours() > 24) {\n        qcAlertService.alertTimingViolation(patient);\n    }\n}",
+        "auto_fixable": false
+      },
+      "tags": ["病历质控", "时效性", "医疗合规"],
+      "references": ["病历书写时限规范"]
+    },
+    {
+      "rule_id": "MR-QC-004",
+      "rule_name": "电子签名验证检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "病历签名必须使用CA数字证书验证",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "sign|签名|signature|Signature",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用CA数字证书进行电子签名验证",
+        "code_example": "public boolean verifySignature(MedicalRecord record, DigitalSignature signature) {\n    return caService.verify(\n        record.getContent(),\n        signature.getValue(),\n        signature.getCertificate()\n    );\n}",
+        "auto_fixable": false
+      },
+      "tags": ["病历质控", "电子签名", "CA认证"],
+      "references": ["电子病历应用管理规范"]
+    }
+  ]
+}

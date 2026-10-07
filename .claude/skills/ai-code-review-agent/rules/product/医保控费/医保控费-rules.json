@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "description": "Level 3: 医保控费产品线规则",
+  "rules": [
+    {
+      "rule_id": "INS-COST-001",
+      "rule_name": "费用计算精度检查",
+      "category": "quality",
+      "severity": "critical",
+      "description": "医保费用计算必须使用BigDecimal，禁止使用double/float",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "double|float\\s+\\w+(Cost|Price|Amount|Fee)",
+        "file_pattern": "**/*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用BigDecimal进行费用计算，避免精度丢失",
+        "code_example": "// ❌ 错误\npublic double calculateTotalFee(List<FeeItem> items) {\n    double total = 0.0;\n    for (FeeItem item : items) {\n        total += item.getPrice() * item.getQuantity();\n    }\n    return total;\n}\n\n// ✅ 正确\npublic BigDecimal calculateTotalFee(List<FeeItem> items) {\n    BigDecimal total = BigDecimal.ZERO;\n    for (FeeItem item : items) {\n        total = total.add(\n            item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))\n        );\n    }\n    return total.setScale(2, RoundingMode.HALF_UP);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医保控费", "费用计算", "精度"],
+      "references": ["医保费用结算规范"]
+    },
+    {
+      "rule_id": "INS-RULE-001",
+      "rule_name": "医保政策规则配置化检查",
+      "category": "standard",
+      "severity": "warning",
+      "description": "医保政策规则应配置化，支持多地区政策差异",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "报销比例|reimbursementRate|医保政策|insurancePolicy",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "将医保政策配置化，支持按地区、时间动态调整",
+        "code_example": "// 使用配置化的政策规则\n@Autowired\nprivate InsurancePolicyService policyService;\n\npublic BigDecimal calculateReimbursement(String region, MedicalFee fee) {\n    InsurancePolicy policy = policyService.getPolicy(region, LocalDate.now());\n    return policy.calculateReimbursement(fee);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医保控费", "政策配置", "多地区支持"],
+      "references": ["医保政策管理规范"]
+    },
+    {
+      "rule_id": "INS-AUDIT-001",
+      "rule_name": "医保审核日志记录检查",
+      "category": "compliance",
+      "severity": "warning",
+      "description": "医保审核过程必须记录完整日志",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "audit|审核|InsuranceAudit",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "记录审核操作的完整日志，包括操作人、时间、结果",
+        "code_example": "@Service\npublic class InsuranceAuditService {\n    \n    @Autowired\n    private AuditLogRepository auditLogRepository;\n    \n    public AuditResult audit(InsuranceClaim claim, String auditorId) {\n        AuditLog log = new AuditLog();\n        log.setClaimId(claim.getId());\n        log.setAuditorId(auditorId);\n        log.setAuditTime(LocalDateTime.now());\n        \n        try {\n            AuditResult result = doAudit(claim);\n            log.setResult(result.getStatus());\n            log.setDetails(result.getDetails());\n            return result;\n        } finally {\n            auditLogRepository.save(log);\n        }\n    }\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医保控费", "审核日志", "合规"],
+      "references": ["医保审核管理规范"]
+    },
+    {
+      "rule_id": "INS-CHECK-001",
+      "rule_name": "医保合规性校验检查",
+      "category": "compliance",
+      "severity": "critical",
+      "description": "医保结算前必须进行合规性校验",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "settle|结算|InsuranceSettlement",
+        "file_pattern": "**/*Service*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "结算前执行合规性校验，包括医保目录、报销比例、封顶线等",
+        "code_example": "public SettlementResult settle(InsuranceSettlementRequest request) {\n    // 1. 合规性校验\n    ComplianceCheckResult checkResult = complianceChecker.check(\n        request.getPatient(),\n        request.getFeeItems(),\n        request.getInsuranceType()\n    );\n    \n    if (!checkResult.isCompliant()) {\n        return SettlementResult.rejected(checkResult.getViolations());\n    }\n    \n    // 2. 执行结算\n    return doSettlement(request);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["医保控费", "合规校验", "医保结算"],
+      "references": ["医保基金使用监督管理条例"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+# Ignore sensitive configuration files
+config/tfs-config.json
+
+# Ignore cache files
+config/repos-cache.json
+
+# Ignore node modules
+node_modules/
+
+# Ignore test coverage
+coverage/
+
+# Ignore user data
+assets/chroma_db/
+assets/logs/
+
+.wincode-builtin

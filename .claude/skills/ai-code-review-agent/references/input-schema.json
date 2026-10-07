@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodeReviewAgentInput",
+  "description": "代码规范审查Agent输入协议",
+  "type": "object",
+  "required": [
+    "task_id",
+    "work_item_id",
+    "product_line",
+    "project_name",
+    "repository_url",
+    "source_branch",
+    "target_branch",
+    "tech_stack_tags",
+    "scan_mode",
+    "scan_type",
+    "triggered_by"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "任务唯一标识",
+      "pattern": "^REVIEW-\\d{8}-\\d{3}$"
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "TFS工作项ID",
+      "minimum": 1
+    },
+    "product_line": {
+      "type": "string",
+      "description": "产品线名称",
+      "enum": ["AI重症", "病历质控", "CDSS", "医保控费", "AI-MY"]
+    },
+    "project_name": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "repository_url": {
+      "type": "string",
+      "description": "代码仓库地址",
+      "format": "uri"
+    },
+    "source_branch": {
+      "type": "string",
+      "description": "源分支名称"
+    },
+    "target_branch": {
+      "type": "string",
+      "description": "目标分支名称"
+    },
+    "tech_stack_tags": {
+      "type": "array",
+      "description": "技术栈标签",
+      "items": {
+        "type": "string",
+        "enum": ["java", "vue", "ts", "rust", "csharp", "html", "sql", "python"]
+      },
+      "minItems": 1
+    },
+    "scan_mode": {
+      "type": "string",
+      "description": "扫描模式",
+      "enum": ["initial", "incremental"]
+    },
+    "scan_type": {
+      "type": "string",
+      "description": "扫描类型",
+      "enum": ["full", "security", "quality"]
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "触发来源"
+    },
+    "callback_info": {
+      "type": "object",
+      "description": "回调配置",
+      "properties": {
+        "on_complete": {
+          "type": "string",
+          "description": "完成时回调动作"
+        },
+        "on_block": {
+          "type": "string",
+          "description": "阻断时回调动作"
+        }
+      }
+    }
+  }
+}

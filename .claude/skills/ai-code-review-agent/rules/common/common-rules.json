@@ -1,0 +1,186 @@
+{
+  "version": "1.0.0",
+  "description": "Level 1: 通用编码规则（所有项目必选）",
+  "rules": [
+    {
+      "rule_id": "COMMON-SEC-001",
+      "rule_name": "SQL注入风险检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "禁止使用字符串拼接构造SQL语句，防止SQL注入攻击",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "(SELECT|INSERT|UPDATE|DELETE).*?\\+.*?(id|name|userId)",
+        "file_pattern": "**/*.{java,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用参数化查询或ORM框架",
+        "code_example": "// 修复前\nString sql = \"SELECT * FROM user WHERE id = \" + userId;\n\n// 修复后\nString sql = \"SELECT * FROM user WHERE id = ?\";\nstmt.setString(1, userId);",
+        "auto_fixable": false
+      },
+      "tags": ["安全", "SQL注入"],
+      "references": ["OWASP Top 10 - A03:2021 Injection"]
+    },
+    {
+      "rule_id": "COMMON-SEC-002",
+      "rule_name": "敏感信息日志输出检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "禁止在日志中输出密码、Token、密钥等敏感信息",
+      "tech_stack": ["java", "vue", "ts", "python", "csharp"],
+      "detection": {
+        "pattern": "log\\.(info|debug|error).*?(password|token|secret|key)",
+        "file_pattern": "**/*.{java,vue,ts,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "敏感信息脱敏后再输出，或直接移除日志",
+        "code_example": "// 修复前\nlog.info(\"用户登录: password={}\", password);\n\n// 修复后\nlog.info(\"用户登录成功\");",
+        "auto_fixable": false
+      },
+      "tags": ["安全", "敏感信息"],
+      "references": ["OWASP Top 10 - A01:2021 Broken Access Control"]
+    },
+    {
+      "rule_id": "COMMON-SEC-003",
+      "rule_name": "XSS风险检查",
+      "category": "security",
+      "severity": "critical",
+      "description": "禁止使用v-html直接渲染用户输入内容，防止XSS攻击",
+      "tech_stack": ["vue", "ts"],
+      "detection": {
+        "pattern": "v-html\\s*=\\s*[\"'].*?\\{\\{",
+        "file_pattern": "**/*.vue",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用DOMPurify等库对HTML进行净化后再渲染",
+        "code_example": "<!-- 修复前 -->\n<div v-html=\"userInput\"></div>\n\n<!-- 修复后 -->\n<div v-html=\"sanitize(userInput)\"></div>",
+        "auto_fixable": false
+      },
+      "tags": ["安全", "XSS"],
+      "references": ["OWASP Top 10 - A03:2021 Injection"]
+    },
+    {
+      "rule_id": "COMMON-PERF-001",
+      "rule_name": "N+1查询检查",
+      "category": "performance",
+      "severity": "warning",
+      "description": "禁止在循环中调用数据库查询，会导致N+1性能问题",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "for\\s*\\(.*?\\)\\s*\\{[\\s\\S]*?(select|query|find|get)",
+        "file_pattern": "**/*.{java,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用批量查询或JOIN优化，减少数据库往返次数",
+        "code_example": "// 修复前\nfor (User user : users) {\n    Order order = orderMapper.selectByUserId(user.getId());\n}\n\n// 修复后\nList<Long> userIds = users.stream().map(User::getId).collect(toList());\nMap<Long, Order> orderMap = orderMapper.selectByUserIds(userIds);",
+        "auto_fixable": false
+      },
+      "tags": ["性能", "数据库"],
+      "references": []
+    },
+    {
+      "rule_id": "COMMON-PERF-002",
+      "rule_name": "深分页检查",
+      "category": "performance",
+      "severity": "warning",
+      "description": "OFFSET超过10000的深分页查询性能较差",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "OFFSET\\s*\\d{5,}",
+        "file_pattern": "**/*.{java,py,cs,sql}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用游标分页或基于ID的分页方式",
+        "code_example": "-- 修复前\nSELECT * FROM orders ORDER BY id LIMIT 10 OFFSET 100000;\n\n-- 修复后\nSELECT * FROM orders WHERE id > ? ORDER BY id LIMIT 10;",
+        "auto_fixable": false
+      },
+      "tags": ["性能", "数据库"],
+      "references": []
+    },
+    {
+      "rule_id": "COMMON-QUAL-001",
+      "rule_name": "空catch块检查",
+      "category": "quality",
+      "severity": "warning",
+      "description": "禁止使用空的catch块，至少应记录日志",
+      "tech_stack": ["java", "python", "csharp"],
+      "detection": {
+        "pattern": "catch\\s*\\([^)]+\\)\\s*\\{\\s*\\}",
+        "file_pattern": "**/*.{java,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "在catch块中添加日志记录或适当的异常处理",
+        "code_example": "// 修复前\ntry {\n    doSomething();\n} catch (Exception e) {\n}\n\n// 修复后\ntry {\n    doSomething();\n} catch (Exception e) {\n    log.error(\"操作失败\", e);\n}",
+        "auto_fixable": false
+      },
+      "tags": ["质量", "异常处理"],
+      "references": []
+    },
+    {
+      "rule_id": "COMMON-QUAL-002",
+      "rule_name": "空指针风险检查",
+      "category": "quality",
+      "severity": "warning",
+      "description": "对象调用前应进行空值检查，避免NullPointerException",
+      "tech_stack": ["java"],
+      "detection": {
+        "pattern": "\\w+\\.\\w+\\(\\)\\.\\w+\\(",
+        "file_pattern": "**/*.java",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "使用Optional或显式空值检查",
+        "code_example": "// 修复前\nuser.getAddress().getCity();\n\n// 修复后\nOptional.ofNullable(user)\n    .map(User::getAddress)\n    .map(Address::getCity)\n    .orElse(null);",
+        "auto_fixable": false
+      },
+      "tags": ["质量", "空指针"],
+      "references": []
+    },
+    {
+      "rule_id": "COMMON-STD-001",
+      "rule_name": "方法长度检查",
+      "category": "standard",
+      "severity": "info",
+      "description": "方法长度不应超过100行，超过应拆分",
+      "tech_stack": ["java", "vue", "ts", "python", "csharp"],
+      "detection": {
+        "pattern": "",
+        "file_pattern": "**/*.{java,vue,ts,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "将长方法拆分为多个职责单一的短方法",
+        "code_example": "// 建议拆分为多个方法，每个方法只做一件事",
+        "auto_fixable": false
+      },
+      "tags": ["规范", "代码可读性"],
+      "references": ["Clean Code - Functions Should Do One Thing"]
+    },
+    {
+      "rule_id": "COMMON-STD-002",
+      "rule_name": "命名规范检查",
+      "category": "standard",
+      "severity": "info",
+      "description": "变量、方法、类名应遵循命名规范",
+      "tech_stack": ["java", "vue", "ts", "python", "csharp"],
+      "detection": {
+        "pattern": "(var\\s+[A-Z]|def\\s+[A-Z]|class\\s+[a-z])",
+        "file_pattern": "**/*.{java,vue,ts,py,cs}",
+        "exclude_pattern": "**/test/**"
+      },
+      "fix_guidance": {
+        "description": "变量和方法使用camelCase，类使用PascalCase，常量使用UPPER_SNAKE_CASE",
+        "code_example": "// 错误\nvar UserName = \"test\";\n\n// 正确\nvar userName = \"test\";",
+        "auto_fixable": false
+      },
+      "tags": ["规范", "命名"],
+      "references": []
+    }
+  ]
+}

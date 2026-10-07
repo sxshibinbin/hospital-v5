@@ -1,0 +1,116 @@
+name: iOS App Store 构建上传
+
+# 手动触发（Actions 页面点 Run workflow）。省额度，不挂在 push 上。
+on:
+  workflow_dispatch:
+
+jobs:
+  build-upload:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}   # 未配置时空串 → 上传步自动跳过
+    steps:
+      - name: 从 Gitea 拉取最新代码（GitHub 仓库仅存构建配置，业务代码以 Gitea 为准）
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          git clone --depth 1 "http://jwl:${GITEA_TOKEN}@120.26.226.134:3000/qsg/hospital-v5.git" .
+          git log --oneline -1
+
+      - name: 选择最新 Xcode（必须满足苹果"当前 major SDK"上架要求）
+        run: |
+          ls -d /Applications/Xcode*.app | sort -V
+          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selected: $LATEST"
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.10'   # 与本机一致；pubspec sdk ^3.10.0 兼容
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter 版本确认
+        run: flutter --version
+
+      - name: 安装签名证书与描述文件
+        env:
+          DIST_P12_BASE64: ${{ secrets.APPSTORE_DIST_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          MOBILEPROVISION_BASE64: ${{ secrets.APPSTORE_MOBILEPROVISION }}
+        run: |
+          security create-keychain -p cicheck ci-keychain
+          security default-keychain -s ci-keychain
+          security unlock-keychain -p cicheck ci-keychain
+          security set-keychain-settings -t 3600 ci-keychain
+          echo "$DIST_P12_BASE64" | base64 --decode > /tmp/dist.p12
+          security import /tmp/dist.p12 -k ci-keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k cicheck ci-keychain
+          rm -f /tmp/dist.p12
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$MOBILEPROVISION_BASE64" | base64 --decode > /tmp/profile.mobileprovision
+          cp /tmp/profile.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/"
+          rm -f /tmp/profile.mobileprovision
+          security find-identity -v -p codesigning
+
+      - name: 刷新 CocoaPods specs（云机预装太旧会导致 Firebase 找不到版本）
+        run: pod repo update
+
+      - name: 构建 IPA（flutter build ipa 一遍式；Runner 手动签名注入，Pods 保持自动）
+        working-directory: flutter_app
+        env:
+          ALIYUN_SK: ${{ secrets.ALIYUN_NUMBER_AUTH_IOS_SK }}
+        run: |
+          # Gitea 里的 pubspec.lock 锁的是国内镜像 URL；云端用官方源。
+          # 不用 --enforce-lockfile：lock 中 characters/file_selector_android 等
+          # 包版本随 Flutter SDK 变化（本机 ohos 3.47.4 与云端 3.38.10 不同），
+          # 普通解析只会微调这几个 SDK 相关包，其余保持锁版本，Podfile 不受影响。
+          sed -i '' 's|https://pub.flutter-io.cn|https://pub.dev|g' pubspec.lock
+          flutter pub get
+          # 合并后 pub 依赖大变（新增 mobile_scanner 等 + firebase_auth 6.6.1），
+          # Podfile.lock 需全量重解析；pod update 自带 specs 刷新
+          (cd ios && pod update)
+          # 给 Runner 的 Release 配置注入手动签名（云端内存态修改，不回写仓库）
+          ruby -e "require 'xcodeproj'; p = Xcodeproj::Project.open('ios/Runner.xcodeproj'); p.targets.each { |t| next unless t.name == 'Runner'; t.build_configurations.each { |c| next unless c.name == 'Release'; c.build_settings['CODE_SIGN_STYLE'] = 'Manual'; c.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = 'hospital-v5 AppStore'; c.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution: Thirty Days Technology(shanxi) Co.,ltd (HDTYXYQC82)' } }; p.save; puts 'Runner Release signing configured'"
+          # flutter 驱动 archive+export（完整 embed 流程保证 App.framework 的 plist 正确；
+          # 切勿改回 --no-codesign 两遍构建，那会让 MinimumOSVersion 变空、ASC 校验拒收）
+          flutter build ipa --release \
+            --build-number=$GITHUB_RUN_NUMBER \
+            --export-options-plist=ios/ExportOptions-appstore.plist \
+            --dart-define=API_BASE_URL=https://web.sstkjgf.com \
+            --dart-define=ALIYUN_NUMBER_AUTH_IOS_SK="$ALIYUN_SK"
+          # 只读校验：确认 archive 内 App.framework 的 MinimumOSVersion 非空（不修改，避免破坏签名）
+          ARCHIVE_PLIST="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$ARCHIVE_PLIST" \
+            || echo "WARN: archive 内 MinimumOSVersion 缺失"
+
+      - name: 保存 IPA 产物备份
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-ipa
+          path: flutter_app/build/ios/ipa/*.ipa
+          retention-days: 30
+
+      - name: 上传 App Store Connect（配好 ASC 密钥后自动生效；未配置时跳过）
+        if: ${{ env.ASC_KEY_ID != '' }}
+        env:
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY_P8: ${{ secrets.ASC_PRIVATE_KEY_P8 }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$ASC_PRIVATE_KEY_P8" > ~/private_keys/AuthKey_"$ASC_KEY_ID".p8
+          IPA=$(ls flutter_app/build/ios/ipa/*.ipa | head -1)
+          # 先做认证与包校验（altool 失败时 exit code 可能为 0，不能只信退出码）
+          xcrun altool --validate-app -f "$IPA" --type ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" | tee /tmp/validate.log
+          if grep -qE "FAILED|ERROR" /tmp/validate.log; then
+            echo "::error::validate-app 未通过，中止上传"; exit 1
+          fi
+          xcrun altool --upload-app -f "$IPA" --type ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" | tee /tmp/upload.log
+          if grep -qE "FAILED|ERROR" /tmp/upload.log; then
+            echo "::error::upload-app 失败"; exit 1
+          fi
+          echo "上传流程完成"

@@ -1,0 +1,19 @@
+{
+  "skill_name": "ai-auto-dev",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "clean-workspace-check",
+      "prompt": "使用 ai-auto-dev 技能执行 Step 0.0 前置分支检查，验证当前工作区是否干净",
+      "expected_output": "检测到工作区干净，直接进入 Step 0.1",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "uncommitted-changes-check",
+      "prompt": "创建一个测试文件后，使用 ai-auto-dev 技能执行 Step 0.0 前置分支检查，验证技能能检测到未提交的更改并询问用户处理方式",
+      "expected_output": "检测到未提交的更改，询问用户选择处理方式（自动提交、人工处理、取消流程）",
+      "files": []
+    }
+  ]
+}

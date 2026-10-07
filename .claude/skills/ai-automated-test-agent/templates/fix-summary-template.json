@@ -1,0 +1,51 @@
+{
+  "work_item_id": 0,
+  "task_id": "",
+  "fix_start_time": "",
+  "fix_end_time": "",
+  "fix_rounds": 0,
+  "max_rounds": 3,
+  "bugs_total": 0,
+  "bugs_fixed": 0,
+  "bugs_failed": 0,
+  "p0_total": 0,
+  "p0_fixed": 0,
+  "p0_failed": 0,
+  "p1_total": 0,
+  "p1_fixed": 0,
+  "p1_failed": 0,
+  "p2_p3_recorded": 0,
+  "pass_rate_before": "0%",
+  "pass_rate_after": "0%",
+  "improvement": "0%",
+  "require_human_review_count": 0,
+  "fixes": [
+    {
+      "bug_id": "",
+      "severity": "",
+      "rule_id": "",
+      "test_class": "",
+      "test_method": "",
+      "error_message": "",
+      "root_cause": "",
+      "file_path": "",
+      "line_number": 0,
+      "strategy": "",
+      "fix_status": "FIXED|NEED_MANUAL_FIX|SKIPPED",
+      "strategies_tried": 0,
+      "compile_passed": true,
+      "test_passed": true,
+      "require_human_review": false,
+      "backup_file": ""
+    }
+  ],
+  "p2_p3_only": [
+    {
+      "bug_id": "",
+      "severity": "",
+      "rule_id": "",
+      "description": "",
+      "note": "P2/P3 仅记录，不自动修复"
+    }
+  ]
+}

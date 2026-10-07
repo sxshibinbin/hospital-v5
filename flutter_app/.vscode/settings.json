@@ -1,0 +1,11 @@
+{
+    "terminal.integrated.profiles.linux": {
+        "bash (login)": {
+            "path": "bash",
+            "args": [
+                "--login"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash (login)"
+}
