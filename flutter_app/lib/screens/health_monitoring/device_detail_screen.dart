@@ -1,3 +1,4 @@
+import '../../config/app_config.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'health_monitoring_screen.dart';
@@ -54,6 +55,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isUnbinding = false;
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, dynamic> _fallRadarParamValues = {};
   final Map<String, dynamic> _sleepRadarParamValues = {};
@@ -410,7 +412,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2F266F)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: const DeviceMessageText(
           '设备详情',
           style: TextStyle(
             color: Color(0xFF2F266F),
@@ -438,7 +440,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      DeviceMessageText(
                         widget.device.type,
                         style: const TextStyle(
                           fontSize: 18,
@@ -447,7 +449,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      DeviceMessageText(
                         '${widget.device.model} · ${widget.device.imei}',
                         style: const TextStyle(
                           fontSize: 12,
@@ -592,8 +594,92 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        _buildUnbindButton(),
       ],
     );
+  }
+
+  Widget _buildUnbindButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 42,
+      child: OutlinedButton(
+        onPressed: (_isSaving || _isUnbinding) ? null : _unbindDevice,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFE8453A),
+          disabledForegroundColor: const Color(
+            0xFFE8453A,
+          ).withValues(alpha: 0.4),
+          side: const BorderSide(color: Color(0xFFE8453A), width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: DeviceMessageText(
+          _isUnbinding ? '解绑中...' : '解除绑定',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _unbindDevice() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const DeviceMessageText('解除绑定？'),
+        content: DeviceMessageText(
+          '解除后您将不再收到该设备（${widget.device.imei}）的数据和报警，确定要解绑吗？',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const DeviceMessageText('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE8453A),
+            ),
+            child: const DeviceMessageText('确认解绑'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() => _isUnbinding = true);
+    try {
+      final data = await iotPostJson(
+        context,
+        '/api/iot/devices/unbind',
+        body: {'deviceImei': widget.device.imei},
+        operation: 'unbind IoT device',
+      );
+
+      if (!mounted) return;
+      if (data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: DeviceMessageText('解绑成功'),
+            backgroundColor: Color(0xFF22A06B),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        _showError(data['message']?.toString() ?? '解绑失败');
+      }
+    } on IotApiException catch (e) {
+      if (!mounted) return;
+      _showError(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      _showError('网络异常，请稍后重试');
+    } finally {
+      if (mounted) setState(() => _isUnbinding = false);
+    }
   }
 
   Widget _buildSleepRadarParamTabs() {
@@ -639,7 +725,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   ]
                 : null,
           ),
-          child: Text(
+          child: DeviceMessageText(
             label,
             style: TextStyle(
               fontSize: 13,
@@ -879,7 +965,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: Text(
+        child: DeviceMessageText(
           _isSaving ? '保存中...' : label,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
@@ -1001,6 +1087,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     String unit,
     String range,
   ) {
+    if (AppConfig.iosLimitedMode &&
+        (AppConfig.hidesMetric(label) || label.contains('异常'))) {
+      return const SizedBox.shrink();
+    }
     final isDirty = _dirtyFields.contains(fieldName);
 
     return Row(
@@ -1008,7 +1098,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       children: [
         SizedBox(
           width: 100,
-          child: Text(
+          child: DeviceMessageText(
             label,
             style: const TextStyle(
               fontSize: 12,
@@ -1071,7 +1161,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           const SizedBox(width: 8),
           SizedBox(
             width: 30,
-            child: Text(
+            child: DeviceMessageText(
               unit,
               textAlign: TextAlign.right,
               style: const TextStyle(fontSize: 11, color: Color(0xFF9891B8)),
@@ -1079,7 +1169,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
         ],
         const SizedBox(width: 8),
-        Text(
+        DeviceMessageText(
           '范围：$range',
           style: const TextStyle(fontSize: 10, color: Color(0xFFB8B0D0)),
         ),
@@ -1429,11 +1519,14 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _buildSwitchRow(String label, bool value, Function(bool) onChanged) {
+    if (AppConfig.iosLimitedMode && label.contains('异常')) {
+      return const SizedBox.shrink();
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Text(
+          child: DeviceMessageText(
             label,
             style: const TextStyle(
               fontSize: 12,
@@ -1467,7 +1560,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       children: [
         SizedBox(
           width: 100,
-          child: Text(
+          child: DeviceMessageText(
             label,
             style: const TextStyle(
               fontSize: 12,
@@ -1498,7 +1591,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 items: options.entries.map((entry) {
                   return DropdownMenuItem<K>(
                     value: entry.key,
-                    child: Text(
+                    child: DeviceMessageText(
                       entry.value,
                       style: const TextStyle(
                         fontSize: 13,
@@ -1529,7 +1622,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       children: [
         SizedBox(
           width: 100,
-          child: Text(
+          child: DeviceMessageText(
             '睡眠时间段',
             style: const TextStyle(
               fontSize: 12,
@@ -1565,7 +1658,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                           color: const Color(0xFF9891B8),
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        DeviceMessageText(
                           _sleepStartTime != null
                               ? '${_sleepStartTime!.hour.toString().padLeft(2, '0')}:${_sleepStartTime!.minute.toString().padLeft(2, '0')}'
                               : '开始时间',
@@ -1587,7 +1680,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
+                child: DeviceMessageText(
                   '至',
                   style: TextStyle(color: Color(0xFF9891B8), fontSize: 12),
                 ),
@@ -1616,7 +1709,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                           color: const Color(0xFF9891B8),
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        DeviceMessageText(
                           _sleepEndTime != null
                               ? '${_sleepEndTime!.hour.toString().padLeft(2, '0')}:${_sleepEndTime!.minute.toString().padLeft(2, '0')}'
                               : '结束时间',
@@ -1719,7 +1812,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         if (!mounted) return false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('保存成功'),
+            content: DeviceMessageText('保存成功'),
             backgroundColor: Color(0xFF22A06B),
             duration: Duration(seconds: 1),
           ),
@@ -1745,7 +1838,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: DeviceMessageText(message),
         backgroundColor: const Color(0xFFE8453A),
         duration: const Duration(seconds: 2),
       ),

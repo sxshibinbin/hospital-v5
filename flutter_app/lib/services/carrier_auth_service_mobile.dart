@@ -106,6 +106,9 @@ class CarrierAuthService {
         // 协议详情页（SDK 内置 WebView）导航栏配色，保证协议页有返回按钮可退出
         webNavColor: '#F8F3FF',
         webNavTextColor: '#2F266F',
+        // iOS：SDK 内置协议页返回按钮默认是白色箭头，浅色导航栏上不可见；
+        // 显式指定与授权页导航栏一致的深色返回图标
+        webNavReturnImgPath: 'assets/auth/icon_nav_back.png',
         bottomNavColor: '#FFFFFF',
         numberColor: '#2F266F',
         sloganText: effectiveCarrierName?.isNotEmpty == true

@@ -1,3 +1,4 @@
+import '../../config/app_config.dart';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -2679,7 +2680,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
       spots: _lineSpotsForData(data, (point) => point.value),
       isCurved: true,
       curveSmoothness: 0.3,
-      color: reference.normalColor,
+      color: AppConfig.iosLimitedMode
+          ? AppConfig.neutralColor
+          : reference.normalColor,
       barWidth: 2.5,
       isStrokeCapRound: true,
       dotData: FlDotData(
@@ -2871,7 +2874,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
             spots: _lineSpotsForData(data, valueOf),
             isCurved: true,
             curveSmoothness: 0.3,
-            color: reference.normalColor,
+            color: AppConfig.iosLimitedMode
+                ? AppConfig.neutralColor
+                : reference.normalColor,
             barWidth: 2.5,
             dotData: FlDotData(
               show: true,
@@ -2915,6 +2920,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     double minY,
     double maxY,
   ) {
+    if (AppConfig.iosLimitedMode) return RangeAnnotations();
     if (!reference.hasRange) {
       return RangeAnnotations(
         horizontalRangeAnnotations: [
@@ -3496,6 +3502,9 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
   }
 
   Widget _buildDataRow(String label, String value, {Color? valueColor}) {
+    if (AppConfig.iosLimitedMode && label == '状态') {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -3547,6 +3556,7 @@ class _MetricDetailScreenState extends State<MetricDetailScreen> {
     double minValue,
     double maxValue,
   ) {
+    if (AppConfig.iosLimitedMode) return AppConfig.neutralColor;
     if (reference.safeHigh != null && maxValue > reference.safeHigh!) {
       return reference.highColor;
     }
@@ -3719,6 +3729,7 @@ class _MetricReference {
       criticalLow != null || safeLow != null || safeHigh != null;
 
   Color colorFor(double value) {
+    if (AppConfig.iosLimitedMode) return AppConfig.neutralColor;
     if (!hasRange) return normalColor;
     if (criticalLow != null && value < criticalLow!) {
       return criticalLowColor;

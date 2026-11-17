@@ -37,7 +37,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Hi，我是时小安'), findsOneWidget);
+    expect(find.text('Hi，我是安小记'), findsOneWidget);
     expect(find.text('本机号码一键登录'), findsOneWidget);
     expect(find.text('其他手机号登录'), findsOneWidget);
 

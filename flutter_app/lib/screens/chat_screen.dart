@@ -4946,7 +4946,7 @@ class _ChatScreenState extends State<ChatScreen> with RouteAware {
       return;
     }
 
-    const copySuffix = '——以上内容由AI生成，仅供参考';
+    const copySuffix = '——以上内容由AI生成，不构成诊断建议和用药指导，仅供参考';
     final copyText = normalized.endsWith(copySuffix)
         ? normalized
         : '$normalized\n\n$copySuffix';

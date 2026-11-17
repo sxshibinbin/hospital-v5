@@ -7,6 +7,7 @@
   "license": "",
   "dependencies": {
     "@ohos/flutter_ohos": "har/flutter.har",
-    "numberauth_standard": "har/numberauth_standard.har"
+    "numberauth_standard": "har/numberauth_standard.har",
+    "integration_test": "file:../har/integration_test.har"
   }
 }

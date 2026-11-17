@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#6d3bd4" />
+  <meta name="description" content="三十天时刻智护 App 官方下载页，支持 Android APK 下载与手机扫码安装。" />
+  <title>三十天时刻智护 · App 下载</title>
+  <link rel="icon" type="image/webp" href="./favicon.webp" />
+  <style>
+    :root {
+      --ink: #1d1730;
+      --muted: #706984;
+      --violet: #6d3bd4;
+      --violet-deep: #4c1d95;
+      --blue: #2f6bff;
+      --line: rgba(72, 45, 122, 0.12);
+      --panel: rgba(255, 255, 255, 0.8);
+      --shadow: 0 28px 90px rgba(56, 32, 103, 0.16);
+      --radius: 34px;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background:
+        radial-gradient(circle at 8% 4%, rgba(218, 198, 255, 0.72), transparent 31%),
+        radial-gradient(circle at 92% 10%, rgba(193, 220, 255, 0.7), transparent 30%),
+        linear-gradient(145deg, #fbfaff 0%, #f5f5ff 46%, #f9fcff 100%);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(83, 55, 137, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(83, 55, 137, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent 78%);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page-shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding:
+        max(30px, env(safe-area-inset-top))
+        24px
+        max(26px, env(safe-area-inset-bottom));
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 38px 40px;
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+    }
+
+    .hero::before {
+      position: absolute;
+      top: -210px;
+      right: -140px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.15), transparent 66%);
+    }
+
+    .hero > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .brand-mark {
+      display: grid;
+      flex: 0 0 56px;
+      width: 56px;
+      height: 56px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 19px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(84, 52, 145, 0.16);
+    }
+
+    .brand-mark img {
+      width: 76%;
+      height: 76%;
+      object-fit: contain;
+    }
+
+    .brand-kicker {
+      margin: 0 0 5px;
+      color: var(--violet);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 3.3vw, 2.35rem);
+      font-weight: 760;
+      letter-spacing: -0.045em;
+      line-height: 1.2;
+    }
+
+    .version-strip {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 9px 14px 9px 12px;
+      border: 1px solid rgba(109, 59, 212, 0.12);
+      border-radius: 999px;
+      background: rgba(109, 59, 212, 0.055);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .version-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #5a467d;
+      font-weight: 700;
+    }
+
+    .version-label::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      content: "";
+      background: #21b56b;
+      box-shadow: 0 0 0 4px rgba(33, 181, 107, 0.12);
+    }
+
+    .version-divider {
+      width: 1px;
+      height: 12px;
+      background: rgba(72, 45, 122, 0.14);
+    }
+
+    .version-number {
+      color: var(--ink);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .version-date {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+    }
+
+    .version-tag {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(109, 59, 212, 0.09);
+      color: var(--violet);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .hero-content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 246px;
+      align-items: center;
+      gap: 54px;
+      margin-top: 42px;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .hero-title {
+      max-width: 610px;
+      margin: 0 0 15px;
+      font-size: clamp(2rem, 4.6vw, 3.35rem);
+      font-weight: 780;
+      letter-spacing: -0.055em;
+      line-height: 1.12;
+    }
+
+    .hero-title em {
+      color: var(--violet);
+      font-style: normal;
+      white-space: nowrap;
+      background: linear-gradient(115deg, #4f21b8 0%, #7c4dff 48%, #2f6bff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lead {
+      max-width: 540px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .feature-pills span {
+      padding: 7px 11px;
+      border: 1px solid rgba(72, 45, 122, 0.09);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      color: #665b7a;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      width: fit-content;
+      min-height: 64px;
+      margin-top: 27px;
+      padding: 11px 20px 11px 17px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 19px;
+      color: #fff;
+      text-decoration: none;
+      background: linear-gradient(120deg, #4f21b8 0%, #7140e6 53%, #356fff 100%);
+      box-shadow: 0 16px 34px rgba(91, 44, 196, 0.3);
+      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(91, 44, 196, 0.36);
+      filter: saturate(1.08);
+    }
+
+    .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .download-btn:focus-visible,
+    .platform-card:focus-visible,
+    .copy-link:focus-visible {
+      outline: 3px solid rgba(47, 107, 255, 0.35);
+      outline-offset: 3px;
+    }
+
+    .download-icon {
+      display: grid;
+      width: 39px;
+      height: 39px;
+      flex: 0 0 39px;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .download-icon svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .download-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .download-text strong {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.01em;
+    }
+
+    .download-text small {
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .download-arrow {
+      margin-left: 6px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 18px;
+      transition: transform 180ms ease;
+    }
+
+    .download-btn:hover .download-arrow {
+      transform: translateX(3px);
+    }
+
+    .download-meta {
+      margin: 12px 0 0;
+      color: #8a819b;
+      font-size: 11px;
+    }
+
+    .qr-panel {
+      padding: 19px;
+      border: 1px solid rgba(72, 45, 122, 0.1);
+      border-radius: 27px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 18px 50px rgba(55, 30, 102, 0.1);
+      text-align: center;
+    }
+
+    .qr-eyebrow {
+      margin: 0 0 13px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .qr-frame {
+      display: grid;
+      width: 100%;
+      aspect-ratio: 1;
+      place-items: center;
+      padding: 9px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: inset 0 0 0 1px rgba(72, 45, 122, 0.08);
+    }
+
+    #qrCode {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+    }
+
+    #qrCode canvas,
+    #qrCode img {
+      width: 100% !important;
+      height: auto !important;
+      border-radius: 5px;
+    }
+
+    #qrCode.qr-fallback {
+      padding: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .qr-note {
+      margin: 12px 4px 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .copy-link {
+      margin-top: 12px;
+      padding: 7px 12px;
+      border: 1px solid rgba(109, 59, 212, 0.13);
+      border-radius: 999px;
+      color: var(--violet);
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(109, 59, 212, 0.055);
+      cursor: pointer;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .copy-link:hover {
+      border-color: rgba(109, 59, 212, 0.24);
+      background: rgba(109, 59, 212, 0.09);
+    }
+
+    .qr-url {
+      display: none;
+    }
+
+    .platforms {
+      margin-top: 30px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 0 4px 16px;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--violet);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+      font-weight: 760;
+      letter-spacing: -0.035em;
+    }
+
+    .section-note {
+      margin: 0 0 2px;
+      color: #8b839b;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .platform-card {
+      --tone: #16a34a;
+      --tone-soft: #eaf8ef;
+      --tone-strong: #137a38;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 238px;
+      padding: 21px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 27px;
+      color: var(--ink);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow: 0 16px 44px rgba(51, 30, 91, 0.065);
+      isolation: isolate;
+      transition: transform 190ms ease, box-shadow 190ms ease, border-color 190ms ease;
+    }
+
+    .platform-card::after {
+      position: absolute;
+      right: -52px;
+      bottom: -74px;
+      z-index: -1;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      content: "";
+      background: radial-gradient(circle, var(--tone-soft), transparent 68%);
+      opacity: 0.95;
+    }
+
+    a.platform-card:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in srgb, var(--tone) 26%, transparent);
+      box-shadow: 0 23px 55px rgba(51, 30, 91, 0.11);
+    }
+
+    .platform-card.harmonyos {
+      --tone: #e74b37;
+      --tone-soft: #fff0ed;
+      --tone-strong: #c43625;
+    }
+
+    .platform-card.ios {
+      --tone: #656476;
+      --tone-soft: #f0f0f5;
+      --tone-strong: #5d5d70;
+    }
+
+    .platform-card.is-soon {
+      cursor: pointer;
+    }
+
+    .platform-card.is-soon::after {
+      opacity: 0.5;
+    }
+
+    .platform-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .platform-icon {
+      display: grid;
+      width: 59px;
+      height: 59px;
+      place-items: center;
+      border-radius: 19px;
+      color: var(--tone);
+      background: var(--tone-soft);
+    }
+
+    .platform-icon svg {
+      width: 31px;
+      height: 31px;
+      fill: currentColor;
+    }
+
+    .platform-icon .stroke-icon {
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .status-badge {
+      padding: 6px 9px;
+      border: 1px solid color-mix(in srgb, var(--tone) 14%, transparent);
+      border-radius: 999px;
+      color: var(--tone-strong);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      background: color-mix(in srgb, var(--tone-soft) 86%, white);
+    }
+
+    .platform-card.is-soon .status-badge {
+      border-color: rgba(93, 93, 112, 0.1);
+      color: #77758a;
+      background: rgba(240, 240, 245, 0.7);
+    }
+
+    .platform-name {
+      margin: 22px 0 4px;
+      font-size: 20px;
+      font-weight: 770;
+      letter-spacing: -0.035em;
+    }
+
+    .platform-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .platform-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: auto;
+      padding-top: 18px;
+      color: var(--tone-strong);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .platform-cta span {
+      transition: transform 180ms ease;
+    }
+
+    a.platform-card:hover .platform-cta span {
+      transform: translateX(3px);
+    }
+
+    .platform-card.is-soon .platform-cta {
+      color: #8a899a;
+    }
+
+    .site-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px 4px 0;
+      color: #91899f;
+      font-size: 10px;
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 160ms ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--violet);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: max(26px, env(safe-area-inset-bottom));
+      left: 50%;
+      z-index: 20;
+      max-width: calc(100vw - 36px);
+      padding: 11px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(35, 26, 54, 0.9);
+      box-shadow: 0 12px 34px rgba(29, 23, 48, 0.25);
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, 8px);
+      backdrop-filter: blur(12px);
+      transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 900px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+
+      .qr-panel {
+        width: min(100%, 340px);
+      }
+
+      .platform-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .platform-card {
+        min-height: 190px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        padding: max(14px, env(safe-area-inset-top)) 13px max(18px, env(safe-area-inset-bottom));
+      }
+
+      .hero {
+        padding: 23px 19px 27px;
+        border-radius: 27px;
+      }
+
+      .brand-line {
+        gap: 11px;
+      }
+
+      .brand-mark {
+        flex-basis: 43px;
+        width: 43px;
+        height: 43px;
+        border-radius: 15px;
+      }
+
+      .brand-kicker {
+        margin-bottom: 3px;
+        font-size: 8px;
+      }
+
+      h1 {
+        font-size: clamp(1.03rem, 5.4vw, 1.24rem);
+        letter-spacing: -0.055em;
+      }
+
+      .version-strip {
+        gap: 8px;
+        margin-top: 17px;
+        padding: 8px 10px;
+        font-size: 10px;
+      }
+
+      .version-tag {
+        display: none;
+      }
+
+      .hero-content {
+        margin-top: 31px;
+      }
+
+      .hero-title {
+        margin-bottom: 12px;
+        font-size: clamp(1.9rem, 9.8vw, 2.55rem);
+      }
+
+      .lead {
+        font-size: 13px;
+        line-height: 1.72;
+      }
+
+      .feature-pills {
+        margin-top: 15px;
+      }
+
+      .feature-pills span {
+        padding: 6px 9px;
+        font-size: 10px;
+      }
+
+      .download-btn {
+        width: 100%;
+        min-height: 61px;
+        margin-top: 22px;
+      }
+
+      .download-arrow {
+        margin-left: auto;
+      }
+
+      .qr-panel {
+        width: 100%;
+      }
+
+      .qr-frame {
+        width: min(100%, 218px);
+        margin: 0 auto;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 13px;
+      }
+
+      .section-note {
+        text-align: left;
+      }
+
+      .platform-card {
+        min-height: 198px;
+      }
+
+      .site-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-top: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="brand-line">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="./favicon.webp" alt="" />
+        </div>
+        <div>
+          <p class="brand-kicker">Thirty Days · AI Health</p>
+          <h1>三十天时刻智护</h1>
+        </div>
+      </div>
+
+      <div class="version-strip" aria-label="版本更新记录：v1.0.3，更新日期 2026 年 10 月 8 日">
+        <span class="version-label">版本更新记录</span>
+        <span class="version-divider" aria-hidden="true"></span>
+        <span class="version-number">v1.0.3</span>
+        <span class="version-date">2026.10.08</span>
+        <span class="version-tag">最新稳定版</span>
+      </div>
+
+      <div class="hero-content">
+        <div class="hero-copy">
+          <h2 class="hero-title">把健康管理，<em>装进口袋</em>。</h2>
+          <p class="lead">
+            三十天时刻智护，随时随地为你提供 AI 健康问答、健康档案与检查报告解读服务。
+          </p>
+
+          <div class="feature-pills" aria-label="主要功能">
+            <span>AI 健康问答</span>
+            <span>健康档案</span>
+            <span>报告解读</span>
+          </div>
+
+          <a
+            class="download-btn"
+            id="apkDownload"
+            href="./downloads/hospital-v5-android-release.apk"
+            download="hospital-v5-android-release.apk"
+            type="application/vnd.android.package-archive"
+          >
+            <span class="download-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12" />
+                <path d="m8 11 4 4 4-4" />
+                <path d="M5 19h14" />
+              </svg>
+            </span>
+            <span class="download-text">
+              <strong>下载 Android 版</strong>
+              <small>APK 安装包 · 88.9 MB</small>
+            </span>
+            <span class="download-arrow" aria-hidden="true">→</span>
+          </a>
+          <p class="download-meta">官方安装包 · 点击即可下载</p>
+        </div>
+
+        <aside class="qr-panel" aria-label="手机扫码下载 Android 版">
+          <p class="qr-eyebrow">手机扫码下载</p>
+          <div class="qr-frame">
+            <div id="qrCode" aria-label="Android APK 下载二维码"></div>
+          </div>
+          <p class="qr-note">使用手机相机或浏览器扫一扫<br />可直接获取 Android 安装包</p>
+          <button class="copy-link" id="copyLink" type="button">复制下载链接</button>
+          <p class="qr-url" id="qrUrl"></p>
+        </aside>
+      </div>
+    </header>
+
+    <main class="platforms" aria-labelledby="platforms-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Download Center</p>
+          <h2 id="platforms-title">选择你的设备</h2>
+        </div>
+        <p class="section-note">请根据设备系统选择对应版本</p>
+      </div>
+
+      <div class="platform-grid">
+        <a
+          class="platform-card android"
+          href="./downloads/hospital-v5-android-release.apk"
+          download="hospital-v5-android-release.apk"
+          type="application/vnd.android.package-archive"
+          aria-label="下载 Android 版 APK"
+        >
+          <div class="platform-top">
+            <div class="platform-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M15.9 14.3c.8-2.5 2.8-4.3 5.3-5.1l-1.6-2.8a.9.9 0 0 1 .3-1.2.9.9 0 0 1 1.2.3l1.7 2.9a11.8 11.8 0 0 1 6.4 0l1.7-2.9a.9.9 0 0 1 1.2-.3.9.9 0 0 1 .3 1.2l-1.6 2.8c2.5.8 4.5 2.6 5.3 5.1H15.9Z" />
+                <path d="M11.1 18.9h25.8c1.2 0 2.1.9 2.1 2.1v13.8a5 5 0 0 1-5 5H14a5 5 0 0 1-5-5V21c0-1.2.9-2.1 2.1-2.1Z" />
+                <rect x="3.6" y="21.2" width="4.7" height="12.1" rx="2.35" />
+                <rect x="39.7" y="21.2" width="4.7" height="12.1" rx="2.35" />
+                <circle cx="19" cy="17.4" r="1.35" fill="#fff" />
+                <circle cx="29" cy="17.4" r="1.35" fill="#fff" />
+              </svg>
+            </div>
+            <span class="status-badge">可下载</span>
+          </div>
+          <h3 class="platform-name">Android</h3>
+          <p class="platform-desc">下载 APK 安装包，适用于 Android 手机与平板。</p>
+          <span class="platform-cta">立即下载 <span aria-hidden="true">→</span></span>
+        </a>
+
+        <a
+          class="platform-card harmonyos"
+          href="https://appgallery.huawei.com/app/C118801437"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="前往华为鸿蒙应用市场"
+        >
+          <div class="platform-top">
+            <div class="platform-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M24 5.5c7.2 4.8 11.3 11.1 11.3 18.5S31.2 37.7 24 42.5c-7.2-4.8-11.3-11.1-11.3-18.5S16.8 10.3 24 5.5Z" opacity=".2" />
+                <path d="M24 11.5c4.6 3.4 7.1 7.6 7.1 12.5S28.6 33.1 24 36.5c-4.6-3.4-7.1-7.6-7.1-12.5s2.5-9.1 7.1-12.5Z" opacity=".42" />
+                <path d="M24 18.1c2.2 1.7 3.4 3.6 3.4 5.9s-1.2 4.2-3.4 5.9c-2.2-1.7-3.4-3.6-3.4-5.9s1.2-4.2 3.4-5.9Z" />
+              </svg>
+            </div>
+            <span class="status-badge">应用市场</span>
+          </div>
+          <h3 class="platform-name">HarmonyOS</h3>
+          <p class="platform-desc">前往华为鸿蒙应用市场，获取 HarmonyOS 版本。</p>
+          <span class="platform-cta">打开华为应用市场 <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <div
+          class="platform-card ios is-soon"
+          id="iosCard"
+          role="button"
+          tabindex="0"
+          aria-label="iOS 版本敬请期待"
+        >
+          <div class="platform-top">
+            <div class="platform-icon" aria-hidden="true">
+              <svg class="stroke-icon" viewBox="0 0 24 24">
+                <path d="M12 6.528V3a1 1 0 0 1 1-1h0" />
+                <path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21" />
+              </svg>
+            </div>
+            <span class="status-badge">敬请期待</span>
+          </div>
+          <h3 class="platform-name">iOS</h3>
+          <p class="platform-desc">App Store 版本正在准备中，敬请期待。</p>
+          <span class="platform-cta">敬请期待</span>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 三十天时刻智护</p>
+      <div class="footer-links">
+        <a href="./privacy-policy.html">隐私政策</a>
+        <a href="./user-agreement.html">用户协议</a>
+      </div>
+    </footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- QRCode.js v1.0.0 (MIT) · https://github.com/davidshimjs/qrcodejs -->
+  <script src="./vendor/qrcode.min.js"></script>
+  <script>
+    (() => {
+      const apkLink = document.getElementById("apkDownload");
+      const apkUrl = new URL(apkLink.getAttribute("href"), window.location.href).href;
+      const qrCode = document.getElementById("qrCode");
+      const copyLink = document.getElementById("copyLink");
+      const qrUrl = document.getElementById("qrUrl");
+      const toast = document.getElementById("toast");
+      const iosCard = document.getElementById("iosCard");
+      const isWebPage = /^https?:$/.test(window.location.protocol);
+      let toastTimer;
+
+      qrUrl.textContent = apkUrl;
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("is-visible");
+        toastTimer = window.setTimeout(() => {
+          toast.classList.remove("is-visible");
+        }, 2400);
+      }
+
+      function showQrFallback() {
+        qrCode.classList.add("qr-fallback");
+        qrCode.textContent = isWebPage
+          ? "二维码生成失败，请直接点击下载"
+          : "请通过网站访问本页面以生成下载二维码";
+      }
+
+      if (isWebPage && window.QRCode) {
+        try {
+          new QRCode(qrCode, {
+            text: apkUrl,
+            width: 188,
+            height: 188,
+            colorDark: "#26183f",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+        } catch (error) {
+          console.error("二维码生成失败", error);
+          showQrFallback();
+        }
+      } else {
+        showQrFallback();
+      }
+
+      function legacyCopy(text) {
+        const input = document.createElement("textarea");
+        input.value = text;
+        input.setAttribute("readonly", "");
+        input.style.position = "fixed";
+        input.style.left = "-9999px";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        const copied = document.execCommand("copy");
+        input.remove();
+        if (!copied) {
+          throw new Error("copy command failed");
+        }
+      }
+
+      copyLink.addEventListener("click", async () => {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(apkUrl);
+          } else {
+            legacyCopy(apkUrl);
+          }
+          showToast("下载链接已复制");
+          copyLink.textContent = "已复制";
+          window.setTimeout(() => {
+            copyLink.textContent = "复制下载链接";
+          }, 1800);
+        } catch (error) {
+          console.error("复制链接失败", error);
+          showToast("复制失败，请长按或扫描二维码");
+        }
+      });
+
+      function notifyIosSoon() {
+        showToast("iOS 版本正在准备中，敬请期待");
+      }
+
+      iosCard.addEventListener("click", notifyIosSoon);
+      iosCard.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          notifyIosSoon();
+        }
+      });
+
+      if (!isWebPage) {
+        copyLink.hidden = true;
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -491,6 +491,17 @@ export default class AliAuthPlugin
     config.dialogAutoCancel = false;
     config.webAuthDialogWidth = '100%';
     config.webAuthDialogHeight = '100%';
+    // 协议页（SDK 内置 WebView 弹窗）默认的关闭图标是蓝色 X 且不锚定左上角，
+    // 用户无法识别返回入口。显式指定深色返回箭头并锚定左上角，点击后
+    // SDK 会关闭协议页回到一键登录授权页。
+    config.webCloseImg = $r('app.media.icon_nav_back');
+    config.webCloseImgWidth = 24;
+    config.webCloseImgHeight = 24;
+    config.webCloseImgMargin = { left: 16, top: 12 };
+    config.webCloseImgAlignRuleOption = {
+      top: { anchor: '__container__', align: VerticalAlign.Top },
+      left: { anchor: '__container__', align: HorizontalAlign.Start },
+    };
 
     return config;
   }

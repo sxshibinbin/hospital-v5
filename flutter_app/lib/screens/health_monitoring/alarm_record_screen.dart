@@ -1,3 +1,4 @@
+import '../../config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'iot_api_client.dart';
 
@@ -132,7 +133,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message),
+          content: DeviceMessageText(e.message),
           backgroundColor: const Color(0xFFE88D0C),
         ),
       );
@@ -234,7 +235,9 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
       );
     }
 
-    return records;
+    return records
+        .where((record) => !AppConfig.hidesMessage(record.alarmReason))
+        .toList();
   }
 
   List<AlarmRecord> _parseEventRecords(dynamic responseData) {
@@ -351,7 +354,9 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
       }
     }
 
-    return records;
+    return records
+        .where((record) => !AppConfig.hidesMessage(record.alarmReason))
+        .toList();
   }
 
   String _deviceStateLabel(int deviceState) {
@@ -382,7 +387,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2F266F)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: DeviceMessageText(
           _pageTitle,
           style: const TextStyle(
             color: Color(0xFF2F266F),
@@ -440,7 +445,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                           color: Color(0xFF5B57F7),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        const DeviceMessageText(
                           '筛选条件',
                           style: TextStyle(
                             fontSize: 13,
@@ -471,7 +476,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        const DeviceMessageText(
                           '日期范围',
                           style: TextStyle(
                             fontSize: 12,
@@ -504,7 +509,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
+                                      DeviceMessageText(
                                         _selectedDateRange?.start
                                                 .toIso8601String()
                                                 .split('T')[0] ??
@@ -527,7 +532,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                             ),
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
+                              child: DeviceMessageText(
                                 '至',
                                 style: TextStyle(
                                   color: Color(0xFF9891B8),
@@ -556,7 +561,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
+                                      DeviceMessageText(
                                         _selectedDateRange?.end
                                                 .toIso8601String()
                                                 .split('T')[0] ??
@@ -600,7 +605,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Center(
-                                child: Text(
+                                child: DeviceMessageText(
                                   '重置',
                                   style: TextStyle(
                                     color: Color(0xFF6B6490),
@@ -632,7 +637,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                                 ],
                               ),
                               child: const Center(
-                                child: Text(
+                                child: DeviceMessageText(
                                   '应用',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -674,7 +679,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
               color: const Color(0xFFE7E3F5),
             ),
             const SizedBox(height: 16),
-            Text(
+            DeviceMessageText(
               _emptyText,
               style: const TextStyle(fontSize: 14, color: Color(0xFF9891B8)),
             ),
@@ -775,7 +780,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: DeviceMessageText(
                           group.installLocation,
                           style: const TextStyle(
                             fontSize: 15,
@@ -799,7 +804,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
+                        child: DeviceMessageText(
                           '上报 ${group.reportCount} 次',
                           style: TextStyle(
                             color: typeStyle.color,
@@ -811,7 +816,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(
+                  DeviceMessageText(
                     group.eventName,
                     style: const TextStyle(
                       fontSize: 14,
@@ -830,7 +835,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
+                        child: DeviceMessageText(
                           '最新上报 ${group.latestReportTime}',
                           style: const TextStyle(
                             fontSize: 12,
@@ -867,7 +872,9 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
   }
 
   Widget _buildAlarmCard(BuildContext context, AlarmRecord record, int index) {
-    final typeStyle = _alarmTypeStyles[record.type] ?? _alarmTypeStyles['其他']!;
+    final typeStyle =
+        _alarmTypeStyles[AppConfig.iosLimitedMode ? '事件上报' : record.type] ??
+        _alarmTypeStyles['其他']!;
 
     return GestureDetector(
       onTap: () => _showAlarmDetail(context, record),
@@ -909,7 +916,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
+                        child: DeviceMessageText(
                           record.address,
                           style: const TextStyle(
                             fontSize: 15,
@@ -933,7 +940,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
+                        child: DeviceMessageText(
                           record.type,
                           style: TextStyle(
                             color: typeStyle.color,
@@ -956,7 +963,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                         color: Color(0xFF9891B8),
                       ),
                       const SizedBox(width: 6),
-                      Text(
+                      DeviceMessageText(
                         record.alarmTime,
                         style: const TextStyle(
                           fontSize: 12,
@@ -970,7 +977,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                   const SizedBox(height: 8),
 
                   // Reason
-                  Text(
+                  DeviceMessageText(
                     record.alarmReason,
                     style: const TextStyle(
                       fontSize: 13,
@@ -1004,7 +1011,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                                 color: Color(0xFF22A06B),
                               ),
                               const SizedBox(width: 5),
-                              Text(
+                              DeviceMessageText(
                                 record.confirmTime,
                                 style: const TextStyle(
                                   fontSize: 11,
@@ -1014,7 +1021,7 @@ class _AlarmRecordScreenState extends State<AlarmRecordScreen> {
                               ),
                             ],
                           ),
-                          Text(
+                          DeviceMessageText(
                             '处理人 ${record.confirmPerson}',
                             style: const TextStyle(
                               fontSize: 12,
@@ -1328,7 +1335,7 @@ class _EventReportGroupDetailScreenState
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2F266F)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: DeviceMessageText(
           _pageTitle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -1366,7 +1373,7 @@ class _EventReportGroupDetailScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          DeviceMessageText(
             widget.group.eventName,
             style: const TextStyle(
               fontSize: 16,
@@ -1399,7 +1406,7 @@ class _EventReportGroupDetailScreenState
         Icon(icon, size: 15, color: const Color(0xFF9891B8)),
         const SizedBox(width: 7),
         Expanded(
-          child: Text(
+          child: DeviceMessageText(
             text,
             style: const TextStyle(
               fontSize: 12,
@@ -1447,7 +1454,7 @@ class _EventReportGroupDetailScreenState
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: DeviceMessageText(
                       record.alarmTime,
                       style: const TextStyle(
                         fontSize: 14,
@@ -1513,7 +1520,7 @@ class _EventReportGroupDetailScreenState
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 18),
       child: Center(
-        child: Text(
+        child: DeviceMessageText(
           text,
           style: const TextStyle(fontSize: 13, color: Color(0xFF9891B8)),
         ),
@@ -1561,7 +1568,7 @@ class _EventReportGroupDetailScreenState
   Widget _buildTableCell(String text, TextStyle style) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Text(text, style: style),
+      child: DeviceMessageText(text, style: style),
     );
   }
 }
@@ -1581,7 +1588,9 @@ class _AlarmDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final typeStyle =
-        _AlarmRecordScreenState._alarmTypeStyles[record.type] ??
+        _AlarmRecordScreenState._alarmTypeStyles[AppConfig.iosLimitedMode
+            ? '事件上报'
+            : record.type] ??
         _AlarmRecordScreenState._alarmTypeStyles['其他']!;
     final infoSectionTitle = isEventReportMode ? '事件信息' : '报警信息';
     final infoRows = isEventReportMode
@@ -1591,7 +1600,9 @@ class _AlarmDetailSheet extends StatelessWidget {
             _DetailRow(
               '设备状态',
               record.deviceStatus,
-              statusColor: record.deviceStatus == '正常'
+              statusColor: AppConfig.iosLimitedMode
+                  ? AppConfig.neutralColor
+                  : record.deviceStatus == '正常'
                   ? const Color(0xFF22A06B)
                   : const Color(0xFFE8453A),
             ),
@@ -1599,12 +1610,14 @@ class _AlarmDetailSheet extends StatelessWidget {
         : [
             _DetailRow('接警人员', record.receiver),
             _DetailRow('报警原因', record.alarmReason),
-            _DetailRow(
-              '报警等级',
-              _AlarmRecordScreenState._levelLabels[record.alarmLevel] ??
-                  '${record.alarmLevel}级',
-            ),
-            _DetailRow('事件等级', '${record.eventLevel}级'),
+            if (!AppConfig.iosLimitedMode)
+              _DetailRow(
+                '报警等级',
+                _AlarmRecordScreenState._levelLabels[record.alarmLevel] ??
+                    '${record.alarmLevel}级',
+              ),
+            if (!AppConfig.iosLimitedMode)
+              _DetailRow('事件等级', '${record.eventLevel}级'),
             _DetailRow('确认时间', record.confirmTime, mono: true),
             _DetailRow('确认人', record.confirmPerson),
           ];
@@ -1663,7 +1676,7 @@ class _AlarmDetailSheet extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(
+                            child: DeviceMessageText(
                               record.type,
                               style: TextStyle(
                                 color: typeStyle.color,
@@ -1682,7 +1695,7 @@ class _AlarmDetailSheet extends StatelessWidget {
                                 color: Color(0xFF9891B8),
                               ),
                               const SizedBox(width: 5),
-                              Text(
+                              DeviceMessageText(
                                 record.alarmTime,
                                 style: const TextStyle(
                                   fontSize: 13,
@@ -1794,7 +1807,7 @@ class _AlarmDetailSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
+              DeviceMessageText(
                 title,
                 style: const TextStyle(
                   fontSize: 14,
@@ -1845,7 +1858,7 @@ class _AlarmDetailSheet extends StatelessWidget {
         children: [
           SizedBox(
             width: 72,
-            child: Text(
+            child: DeviceMessageText(
               row.label,
               style: const TextStyle(
                 fontSize: 12,
@@ -1856,7 +1869,7 @@ class _AlarmDetailSheet extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
+            child: DeviceMessageText(
               row.value,
               style: TextStyle(
                 fontSize: 14,
@@ -1889,7 +1902,7 @@ class _AlarmDetailSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(
+              const DeviceMessageText(
                 '最近报警',
                 style: TextStyle(
                   fontSize: 14,
@@ -1919,7 +1932,7 @@ class _AlarmDetailSheet extends StatelessWidget {
               ],
             ),
             child: const Center(
-              child: Text(
+              child: DeviceMessageText(
                 '暂无历史记录',
                 style: TextStyle(fontSize: 13, color: Color(0xFF9891B8)),
               ),
@@ -1955,7 +1968,7 @@ class _AlarmDetailSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              DeviceMessageText(
                 recent.type,
                 style: TextStyle(
                   fontSize: 12,
@@ -1963,7 +1976,7 @@ class _AlarmDetailSheet extends StatelessWidget {
                   color: typeStyle.color,
                 ),
               ),
-              Text(
+              DeviceMessageText(
                 recent.time,
                 style: const TextStyle(
                   fontSize: 11,
@@ -1974,7 +1987,7 @@ class _AlarmDetailSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
+          DeviceMessageText(
             recent.reason,
             style: const TextStyle(
               fontSize: 13,

@@ -1,3 +1,4 @@
+import '../config/app_config.dart';
 import 'dart:developer' as developer;
 import 'dart:ui' show Color;
 
@@ -167,6 +168,9 @@ GoRouter createRouter(
         path: '/health-monitoring/metric-detail',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
+          if (AppConfig.hidesMetric(extra['metricName']?.toString() ?? '')) {
+            return const HealthMonitoringScreen();
+          }
           return MetricDetailScreen(
             deviceId: extra['deviceId'] as int,
             deviceImei: extra['deviceImei'] as String,

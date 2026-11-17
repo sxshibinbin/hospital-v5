@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Checkbox, Form, Input, message, QRCode, Tabs } from 'antd';
-import { MobileOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { DownloadOutlined, MobileOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { cancelQrLoginSession, createQrLoginSession, fetchQrLoginStatus, sendSmsCode, loginWithSms } from '../api/auth';
 import Logo from '../components/Logo';
 import gsap from 'gsap';
@@ -180,8 +180,18 @@ const LoginPage: React.FC = () => {
   const showLegacyQrRefreshButton = false;
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_24%),linear-gradient(180deg,#eef1ff_0%,#f5f6ff_55%,#f6f3ff_100%)] px-4">
-      <div className="login-container w-full max-w-md rounded-[24px] border border-white/60 bg-white/80 p-8 shadow-[0_20px_45px_rgba(149,157,215,0.14)] backdrop-blur-xl">
+    <div className="flex min-h-screen w-full flex-col items-center bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_24%),linear-gradient(180deg,#eef1ff_0%,#f5f6ff_55%,#f6f3ff_100%)] px-4 pb-8">
+      <header className="flex w-full justify-end pt-4 sm:pt-6">
+        <a
+          href="/download.html"
+          className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/70 px-4 py-2 text-sm font-medium text-indigo-600 shadow-sm backdrop-blur-md transition hover:border-indigo-200 hover:bg-white hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60"
+          aria-label="下载移动端"
+        >
+          <DownloadOutlined />
+          <span>下载移动端</span>
+        </a>
+      </header>
+      <div className="login-container my-auto w-full max-w-md rounded-[24px] border border-white/60 bg-white/80 p-8 shadow-[0_20px_45px_rgba(149,157,215,0.14)] backdrop-blur-xl">
         <div className="mb-8 text-center">
           <Logo />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">三十天时刻智护</h1>

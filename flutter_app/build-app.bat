@@ -39,7 +39,7 @@ if "%TARGET_PLATFORM%"=="" (
 if /I not "%TARGET_PLATFORM%"=="ohos-arm64" if /I not "%TARGET_PLATFORM%"=="ohos-arm" if /I not "%TARGET_PLATFORM%"=="ohos-x64" goto invalid_target
 if "%API_BASE_URL%"=="" set "API_BASE_URL=https://web.sstkjgf.com"
 
-if "%FLUTTER_OHOS%"=="" set "FLUTTER_OHOS=D:\tmp\flutter_ohos_3_44"
+if "%FLUTTER_OHOS%"=="" set "FLUTTER_OHOS=D:\sdk\flutter_ohos_3_44"
 
 set "DEVECO=D:\Program Files\Huawei\DevEco Studio"
 set "SIGN_TOOL=%DEVECO%\sdk\default\openharmony\toolchains\lib\hap-sign-tool.jar"
@@ -52,7 +52,21 @@ set "PATH=%DEVECO%\tools\node;%DEVECO%\tools\ohpm\bin;%DEVECO%\tools\hvigor\bin;
 set "PUB_HOSTED_URL=https://pub.flutter-io.cn"
 set "FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn"
 
+REM 与 build-hap.bat 一致：从本地配置读取阿里云号码认证 SK 并以 dart-define 注入，
+REM 否则上架包登录页会提示"当前环境未配置运营商一键登录"。
 set "PUBSPEC=%SCRIPT_DIR%\pubspec.yaml"
+set "ALIYUN_HARMONY_AUTH_FILE=%SCRIPT_DIR%\ohos\aliyun-number-auth.local.properties"
+set "EXTRA_DART_DEFINES="
+set "ALIYUN_NUMBER_AUTH_HARMONY_SK_FROM_ENV=%ALIYUN_NUMBER_AUTH_HARMONY_SK%"
+set "ALIYUN_NUMBER_AUTH_HARMONY_SK="
+if exist "%ALIYUN_HARMONY_AUTH_FILE%" (
+    for /f "usebackq tokens=1,* delims==" %%K in (`findstr /B /C:"ALIYUN_NUMBER_AUTH_HARMONY_SK=" "%ALIYUN_HARMONY_AUTH_FILE%"`) do set "ALIYUN_NUMBER_AUTH_HARMONY_SK=%%L"
+)
+if not defined ALIYUN_NUMBER_AUTH_HARMONY_SK if exist "%ALIYUN_HARMONY_AUTH_FILE%" for /f "usebackq tokens=1,* delims==" %%K in (`findstr /B /C:"ALIYUN_NUMBER_AUTH_ANDROID_SK=" "%ALIYUN_HARMONY_AUTH_FILE%"`) do set "ALIYUN_NUMBER_AUTH_HARMONY_SK=%%L"
+if not defined ALIYUN_NUMBER_AUTH_HARMONY_SK if defined ALIYUN_NUMBER_AUTH_OHOS_SK set "ALIYUN_NUMBER_AUTH_HARMONY_SK=%ALIYUN_NUMBER_AUTH_OHOS_SK%"
+if not defined ALIYUN_NUMBER_AUTH_HARMONY_SK if defined ALIYUN_NUMBER_AUTH_HARMONY_SK_FROM_ENV set "ALIYUN_NUMBER_AUTH_HARMONY_SK=%ALIYUN_NUMBER_AUTH_HARMONY_SK_FROM_ENV%"
+if not "%ALIYUN_NUMBER_AUTH_HARMONY_SK%"=="" set "EXTRA_DART_DEFINES=%EXTRA_DART_DEFINES% --dart-define=ALIYUN_NUMBER_AUTH_HARMONY_SK=%ALIYUN_NUMBER_AUTH_HARMONY_SK%"
+
 set "APP_VERSION="
 for /f "tokens=2 delims= " %%V in ('findstr /B /C:"version:" "%PUBSPEC%"') do set "APP_VERSION=%%V"
 if "%APP_VERSION%"=="" set "APP_VERSION=0.0.0"
@@ -107,7 +121,7 @@ if errorlevel 1 goto fail
 echo.
 
 echo [3/5] Build unsigned APP
-call "%FLUTTER_OHOS%\bin\flutter.bat" build app %FLUTTER_BUILD_FLAG% --target-platform %TARGET_PLATFORM% --dart-define=API_BASE_URL=%API_BASE_URL% --no-pub --no-codesign
+call "%FLUTTER_OHOS%\bin\flutter.bat" build app %FLUTTER_BUILD_FLAG% --target-platform %TARGET_PLATFORM% --dart-define=API_BASE_URL=%API_BASE_URL%%EXTRA_DART_DEFINES% --no-pub --no-codesign
 if errorlevel 1 goto fail
 if not exist "%UNSIGNED_APP%" (
     echo [ERROR] unsigned APP not found:

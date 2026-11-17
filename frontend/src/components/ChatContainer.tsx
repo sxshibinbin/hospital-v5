@@ -1081,7 +1081,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
           </div>
           <div>
             <div className="text-5xl font-semibold leading-[1.1] tracking-tight text-foreground">
-              我是时小安
+              我是安小记
               <br />
               <span className="bg-[linear-gradient(135deg,#4f46e5,#7c3aed)] bg-clip-text text-transparent">
                 你的 AI 健康助手

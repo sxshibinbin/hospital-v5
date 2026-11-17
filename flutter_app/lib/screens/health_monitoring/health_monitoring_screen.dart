@@ -1,3 +1,4 @@
+import '../../config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -155,7 +156,7 @@ class _HealthMonitoringScreenState extends State<HealthMonitoringScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message),
+          content: DeviceMessageText(e.message),
           backgroundColor: const Color(0xFFE88D0C),
         ),
       );
@@ -511,7 +512,7 @@ class _HealthMonitoringScreenState extends State<HealthMonitoringScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2F266F)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: const DeviceMessageText(
           '健康监测',
           style: TextStyle(
             color: Color(0xFF2F266F),
@@ -549,7 +550,7 @@ class _HealthMonitoringScreenState extends State<HealthMonitoringScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _devices.isEmpty
           ? const Center(
-              child: Text(
+              child: DeviceMessageText(
                 '暂无设备数据',
                 style: TextStyle(fontSize: 14, color: Color(0xFF9891B8)),
               ),
@@ -561,6 +562,7 @@ class _HealthMonitoringScreenState extends State<HealthMonitoringScreen> {
                 return _DeviceCard(
                   device: _devices[index],
                   animationDelay: (index + 1) * 40,
+                  onChanged: _loadDevices,
                 );
               },
             ),
@@ -574,14 +576,28 @@ class _HealthMonitoringScreenState extends State<HealthMonitoringScreen> {
 class _DeviceCard extends StatelessWidget {
   final DeviceData device;
   final int animationDelay;
+  final VoidCallback onChanged;
 
-  const _DeviceCard({required this.device, required this.animationDelay});
+  const _DeviceCard({
+    required this.device,
+    required this.animationDelay,
+    required this.onChanged,
+  });
+
+  Future<void> _openDetail(BuildContext context) async {
+    final result = await context.push(
+      '/health-monitoring/device-detail',
+      extra: device,
+    );
+    if (result == true) {
+      onChanged();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          context.push('/health-monitoring/device-detail', extra: device),
+      onTap: () => _openDetail(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -606,7 +622,7 @@ class _DeviceCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Text(
+                      DeviceMessageText(
                         device.type,
                         style: const TextStyle(
                           fontSize: 15,
@@ -616,7 +632,7 @@ class _DeviceCard extends StatelessWidget {
                       ),
                       if (device.model.isNotEmpty) ...[
                         const SizedBox(width: 6),
-                        Text(
+                        DeviceMessageText(
                           device.model,
                           style: const TextStyle(
                             fontSize: 12,
@@ -633,10 +649,7 @@ class _DeviceCard extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => context.push(
-                    '/health-monitoring/device-detail',
-                    extra: device,
-                  ),
+                  onTap: () => _openDetail(context),
                   child: Container(
                     width: 32,
                     height: 32,
@@ -689,14 +702,14 @@ class _DeviceCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  DeviceMessageText(
                     '最新 ${device.latestTime}',
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF9891B8),
                     ),
                   ),
-                  Text(
+                  DeviceMessageText(
                     device.address,
                     style: const TextStyle(
                       fontSize: 12,
@@ -756,6 +769,11 @@ class _StatusBadge extends StatelessWidget {
         dotColor = const Color(0xFF999999);
     }
 
+    if (AppConfig.iosLimitedMode) {
+      bgColor = const Color(0xFFEBF2FF);
+      textColor = AppConfig.neutralColor;
+      dotColor = AppConfig.neutralColor;
+    }
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -779,7 +797,7 @@ class _StatusBadge extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            Text(
+            DeviceMessageText(
               status,
               style: TextStyle(
                 fontSize: 12,
@@ -843,6 +861,37 @@ class _HealthMetricsGrid extends StatelessWidget {
         showRange: true,
       ),
     ];
+
+    if (AppConfig.iosLimitedMode) {
+      return Column(
+        children: [
+          _HealthMetricCard(
+            metric: metrics.first,
+            deviceId: device.id,
+            deviceImei: device.imei,
+            healthTime: device.healthTime,
+            deviceType: device.type,
+            wide: true,
+          ),
+          if (device.isWearable) ...[
+            const SizedBox(height: _healthCardGap),
+            _HealthMetricCard(
+              metric: _buildMetric(
+                '步数',
+                health['steps'],
+                AppConfig.neutralColor,
+                iconData: Icons.directions_walk,
+              ),
+              deviceId: device.id,
+              deviceImei: device.imei,
+              healthTime: device.healthTime,
+              deviceType: device.type,
+              wide: true,
+            ),
+          ],
+        ],
+      );
+    }
 
     return Column(
       children: [
@@ -993,7 +1042,7 @@ class _HealthMetricCard extends StatelessWidget {
                 height: 18,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
+                  child: DeviceMessageText(
                     metric.name,
                     style: const TextStyle(
                       fontSize: 13,
@@ -1010,7 +1059,7 @@ class _HealthMetricCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  DeviceMessageText(
                     metric.value,
                     style: TextStyle(
                       fontSize: (metric.name == '心率' || metric.name == '血压')
@@ -1021,7 +1070,7 @@ class _HealthMetricCard extends StatelessWidget {
                       fontFamily: 'monospace',
                     ),
                   ),
-                  Text(
+                  DeviceMessageText(
                     metric.unit,
                     style: const TextStyle(
                       fontSize: 10,
@@ -1031,7 +1080,8 @@ class _HealthMetricCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (metric.showRange &&
+              if (!AppConfig.iosLimitedMode &&
+                  metric.showRange &&
                   metric.high != null &&
                   metric.low != null) ...[
                 const SizedBox(height: 4),
@@ -1059,7 +1109,7 @@ class _HealthMetricCard extends StatelessWidget {
               const Spacer(),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
+                child: DeviceMessageText(
                   healthTime,
                   style: const TextStyle(fontSize: 9, color: Color(0xFFB8B0D0)),
                 ),
@@ -1284,7 +1334,7 @@ class _SleepRadarMetricCard extends StatelessWidget {
                 height: 18,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
+                  child: DeviceMessageText(
                     metric.name,
                     style: const TextStyle(
                       fontSize: 15,
@@ -1303,7 +1353,7 @@ class _SleepRadarMetricCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        DeviceMessageText(
                           metric.value,
                           style: TextStyle(
                             fontSize: isNumericMetric ? 22 : 18,
@@ -1312,7 +1362,7 @@ class _SleepRadarMetricCard extends StatelessWidget {
                             fontFamily: isNumericMetric ? 'monospace' : null,
                           ),
                         ),
-                        Text(
+                        DeviceMessageText(
                           metric.unit,
                           style: const TextStyle(
                             fontSize: 10,
@@ -1328,7 +1378,7 @@ class _SleepRadarMetricCard extends StatelessWidget {
               const Spacer(),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
+                child: DeviceMessageText(
                   healthTime,
                   style: const TextStyle(fontSize: 9, color: Color(0xFFB8B0D0)),
                 ),
@@ -1648,11 +1698,11 @@ class _RadarStatRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        DeviceMessageText(
           label,
           style: const TextStyle(fontSize: 13, color: Color(0xFF9891B8)),
         ),
-        Text(
+        DeviceMessageText(
           value,
           style: TextStyle(
             fontSize: 16,

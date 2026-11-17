@@ -43,6 +43,7 @@
 /flutter_app/ohos/signing
 /docs/一键登录/sdk
 /.keystore_password.tmp
+/三端签名与秘钥存档-勿提交.md
 
 # 临时文件
 *.tmp
@@ -67,6 +68,10 @@
 /.dart-appdata
 /.dart-localappdata
 /.deploy_tmp
+# Gradle 沙箱绕行缓存（junction 目标，指向 Flutter SDK 内部目录）
+/.gradle-flutter-tools
+/.gradle-flutter-tools-build
+/.gradle-flutter-tools-kotlin
 
 # Claude Code 本地设置
 /.claude/settings.local.json
@@ -80,3 +85,6 @@
 # ali_auth SDK 示例资源与截图（体积大，禁止上传）
 /flutter_app/.vendor/ali_auth/example
 /flutter_app/.vendor/ali_auth/screenshots
+
+# 演示视频大文件（不提交仓库）
+/frontend/public/video/*.mp4

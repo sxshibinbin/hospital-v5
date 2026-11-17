@@ -842,7 +842,7 @@ function ChatPage() {
               </div> */}
             </div>
             <div data-shell-enter className="text-center">
-              <div className="text-lg font-semibold tracking-tight text-foreground">我是时小安，你的 AI 健康助手</div>
+              <div className="text-lg font-semibold tracking-tight text-foreground">我是安小记，你的 AI 健康助手</div>
               <div className="mt-1 text-sm text-muted-foreground">医学问题、解读报告、检索文献，都来问我吧</div>
             </div>
             <div data-shell-enter className="flex items-center gap-2">

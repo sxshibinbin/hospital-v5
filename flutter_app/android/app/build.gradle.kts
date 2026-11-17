@@ -41,6 +41,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // build-apk.bat 的 arm64 模式传 -Pabi=arm64：仅打包 arm64-v8a 原生库，
+        // 生成 64 位发布包（-Ptarget-platform 只过滤 Flutter AOT，管不到插件 so）
+        if (project.findProperty("abi") == "arm64") {
+            ndk {
+                abiFilters.add("arm64-v8a")
+            }
+        }
     }
 
     // 添加签名信息

@@ -1,38 +1,65 @@
 @echo off
+rem Keep this file pure ASCII. cmd.exe decodes the script with the console code page,
+rem so UTF-8 comments can be split mid-sequence and executed as bogus commands.
+chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "ROOT=%~dp0"
 if "%ROOT:~-1%"=="\" set "ROOT=%ROOT:~0,-1%"
+rem Capture host default locations BEFORE overriding LOCALAPPDATA; used as Android SDK fallbacks
+set "HOST_ANDROID_HOME=%ANDROID_HOME%"
+set "HOST_ANDROID_SDK_ROOT=%ANDROID_SDK_ROOT%"
+set "HOST_LOCALAPPDATA=%LOCALAPPDATA%"
 
-set "FLUTTER_HOME=D:\sdk\flutter"
+set "FLUTTER_HOME=D:\flutter"
 set "FLUTTER_APP=%ROOT%\flutter_app"
 set "ANDROID_DIR=%FLUTTER_APP%\android"
 set "DIST_DIR=%ROOT%\dist"
 set "APK_NAME=hospital-v5-android-release.apk"
 set "SRC_APK=%FLUTTER_APP%\build\app\outputs\flutter-apk\app-release.apk"
 set "DIST_APK=%DIST_DIR%\%APK_NAME%"
-set "ALIYUN_AUTH_FILE=%FLUTTER_APP%\ohos\aliyun-number-auth.local.properties"
+rem Each platform has its own scheme and SK. Never mix them:
+rem   android/aliyun-number-auth.local.properties ANDROID_SK = Android scheme key (300 chars)
+rem   same file IOS_SK = iOS scheme key (256 chars); HARMONY_SK = Harmony reserved (376 chars)
+rem   ohos/ same-named keys are Harmony-only SK (376 chars); Android SDK rejects them with 600017
+set "ALIYUN_AUTH_FILE=%FLUTTER_APP%\android\aliyun-number-auth.local.properties"
 set "API_PORT=8000"
+set "TARGET_PLATFORM_FLAG="
+set "APK_TAG="
 
 if /I "%~1"=="help" goto usage
 if /I "%~1"=="-h" goto usage
 if /I "%~1"=="--help" goto usage
+if /I "%~1"=="arm64" (
+    rem disable-abi-filtering: Flutter plugins reset and force 3-ABI buildType abiFilters.
+    rem Passing this property lets build.gradle.kts defaultConfig ndk.abiFilters (-Pabi=arm64) win
+    set "TARGET_PLATFORM_FLAG=-Ptarget-platform=android-arm64 -Pabi=arm64 -Pdisable-abi-filtering=true"
+    set "APK_TAG=-arm64"
+    shift
+)
 if not "%~2"=="" set "API_PORT=%~2"
 
 call :resolve_api_url "%~1"
 if errorlevel 1 exit /b 1
 call :normalize_api_url
 
+set "APK_NAME=hospital-v5-android-release%APK_TAG%.apk"
+set "DIST_APK=%DIST_DIR%\%APK_NAME%"
+
 set "APPDATA=%ROOT%\.dart_cli_home"
 set "LOCALAPPDATA=%ROOT%\.dart_cli_home"
 set "GRADLE_USER_HOME=%FLUTTER_APP%\.gradle_home"
-set "ANDROID_HOME=D:\sdk\android-sdk"
-set "ANDROID_SDK_ROOT=D:\sdk\android-sdk"
 set "JAVA_HOME=C:\Program Files\Java\jdk-17.0.12"
 set "PUB_CACHE=%FLUTTER_APP%\.pub-cache"
 set "FLUTTER_ROOT=%FLUTTER_HOME%"
 set "FLUTTER_SUPPRESS_ANALYTICS=true"
 set "FLUTTER_STORAGE_BASE_URL=https://storage.googleapis.com"
+
+call :resolve_android_sdk
+if errorlevel 1 exit /b 1
+
+call :ensure_gradle_wrapper
+if errorlevel 1 exit /b 1
 
 call :check_required_paths
 if errorlevel 1 exit /b 1
@@ -52,6 +79,11 @@ echo   Hospital V5 Android APK Build
 echo ========================================
 echo Root:      %ROOT%
 echo API URL:   %API_BASE_URL%
+if defined TARGET_PLATFORM_FLAG (
+    echo Target:    android-arm64 only
+) else (
+    echo Target:    armeabi-v7a + arm64-v8a + x86_64
+)
 if exist "%ALIYUN_AUTH_FILE%" (
     echo Aliyun:   local number auth config found
 ) else (
@@ -75,7 +107,9 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2/4] Building release APK...
 pushd "%ANDROID_DIR%"
-call gradlew.bat --no-daemon --no-watch-fs --no-configuration-cache --no-build-cache :app:assembleRelease -Pdart-defines=%DART_DEFINE% --console=plain --stacktrace
+rem Must use an explicit path: with NoDefaultCurrentDirectoryInExePath=1, a bare "gradlew.bat"
+rem is not resolved from the current directory.
+call "%ANDROID_DIR%\gradlew.bat" --no-daemon --no-watch-fs --no-configuration-cache --no-build-cache :app:assembleRelease -Pdart-defines=%DART_DEFINE% %TARGET_PLATFORM_FLAG% --console=plain --stacktrace
 set "BUILD_EXIT=%ERRORLEVEL%"
 popd
 
@@ -103,14 +137,14 @@ if errorlevel 1 (
 
 echo.
 echo [4/4] Verifying APK...
-if exist "%ANDROID_HOME%\build-tools\36.0.0\apksigner.bat" (
-    "%ANDROID_HOME%\build-tools\36.0.0\apksigner.bat" verify --verbose --print-certs "%DIST_APK%"
+if defined BUILD_TOOLS_VER if exist "%BUILD_TOOLS%\%BUILD_TOOLS_VER%\apksigner.bat" (
+    "%BUILD_TOOLS%\%BUILD_TOOLS_VER%\apksigner.bat" verify --verbose --print-certs "%DIST_APK%"
 ) else (
     echo [WARN] apksigner not found, signature verification skipped.
 )
 
-if exist "%ANDROID_HOME%\build-tools\36.0.0\aapt.exe" (
-    "%ANDROID_HOME%\build-tools\36.0.0\aapt.exe" dump badging "%DIST_APK%" | findstr /C:"package:" /C:"sdkVersion" /C:"targetSdkVersion" /C:"application-label:"
+if defined BUILD_TOOLS_VER if exist "%BUILD_TOOLS%\%BUILD_TOOLS_VER%\aapt.exe" (
+    "%BUILD_TOOLS%\%BUILD_TOOLS_VER%\aapt.exe" dump badging "%DIST_APK%" | findstr /C:"package:" /C:"sdkVersion" /C:"targetSdkVersion" /C:"application-label:"
 ) else (
     echo [WARN] aapt not found, package info verification skipped.
 )
@@ -173,6 +207,62 @@ if defined API_BASE_URL (
 )
 exit /b 0
 
+:resolve_android_sdk
+rem Try in order: explicit config -> host ANDROID_HOME -> ANDROID_SDK_ROOT -> default install path -> adb on PATH
+set "ANDROID_HOME="
+if defined LOCAL_ANDROID_HOME call :use_android_sdk "%LOCAL_ANDROID_HOME%"
+if not defined ANDROID_HOME if defined HOST_ANDROID_HOME call :use_android_sdk "%HOST_ANDROID_HOME%"
+if not defined ANDROID_HOME if defined HOST_ANDROID_SDK_ROOT call :use_android_sdk "%HOST_ANDROID_SDK_ROOT%"
+if not defined ANDROID_HOME if defined HOST_LOCALAPPDATA call :use_android_sdk "%HOST_LOCALAPPDATA%\Android\Sdk"
+if not defined ANDROID_HOME (
+    for /f "delims=" %%A in ('where adb.exe 2^>nul') do (
+        if not defined ANDROID_HOME call :use_android_sdk "%%~dpA.."
+    )
+)
+if not defined ANDROID_HOME (
+    echo [ERROR] Android SDK not found.
+    echo         Set ANDROID_HOME, or install Android SDK to %HOST_LOCALAPPDATA%\Android\Sdk
+    exit /b 1
+)
+for %%I in ("%ANDROID_HOME%") do set "ANDROID_HOME=%%~fI"
+set "ANDROID_SDK_ROOT=%ANDROID_HOME%"
+
+rem Pick the newest build-tools dir that contains apksigner (no hardcoded version)
+set "BUILD_TOOLS=%ANDROID_HOME%\build-tools"
+set "BUILD_TOOLS_VER="
+if exist "%BUILD_TOOLS%" for /f "delims=" %%V in ('dir /b /ad /o-n "%BUILD_TOOLS%" 2^>nul') do if not defined BUILD_TOOLS_VER if exist "%BUILD_TOOLS%\%%V\apksigner.bat" set "BUILD_TOOLS_VER=%%V"
+exit /b 0
+
+:use_android_sdk
+if "%~1"=="" exit /b 0
+if not exist "%~1\platform-tools" exit /b 0
+set "ANDROID_HOME=%~1"
+exit /b 0
+
+:ensure_gradle_wrapper
+rem gradlew/gradle-wrapper.jar are gitignored, so a fresh clone has no wrapper.
+rem Flutter ships one in its cache; copy it the same way `flutter build` does.
+set "WRAPPER_SRC=%FLUTTER_HOME%\bin\cache\artifacts\gradle_wrapper"
+set "WRAPPER_DST=%ANDROID_DIR%"
+if not exist "%WRAPPER_DST%\gradlew.bat" (
+    if not exist "%WRAPPER_SRC%\gradlew.bat" (
+        echo [ERROR] Gradle wrapper is missing and the Flutter SDK has no cached copy:
+        echo         %WRAPPER_SRC%\gradlew.bat
+        echo         Run "flutter doctor" once to populate the Flutter cache.
+        exit /b 1
+    )
+    copy /Y "%WRAPPER_SRC%\gradlew.bat" "%WRAPPER_DST%\gradlew.bat" >nul
+    echo [INFO] Restored gradlew.bat from the Flutter SDK cache.
+)
+if not exist "%WRAPPER_DST%\gradle\wrapper\gradle-wrapper.jar" (
+    if exist "%WRAPPER_SRC%\gradle\wrapper\gradle-wrapper.jar" (
+        if not exist "%WRAPPER_DST%\gradle\wrapper" mkdir "%WRAPPER_DST%\gradle\wrapper"
+        copy /Y "%WRAPPER_SRC%\gradle\wrapper\gradle-wrapper.jar" "%WRAPPER_DST%\gradle\wrapper\gradle-wrapper.jar" >nul
+        echo [INFO] Restored gradle-wrapper.jar from the Flutter SDK cache.
+    )
+)
+exit /b 0
+
 :check_required_paths
 if not exist "%FLUTTER_HOME%\bin\flutter.bat" (
     echo [ERROR] Flutter SDK not found: %FLUTTER_HOME%
@@ -197,7 +287,8 @@ if not exist "%ANDROID_DIR%\gradlew.bat" (
 exit /b 0
 
 :write_local_properties
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$path = Join-Path $env:ANDROID_DIR 'local.properties'; $flutterSdk = $env:FLUTTER_HOME.Replace('\', '\\'); $androidSdk = $env:ANDROID_HOME.Replace('\', '\\'); $nl = [Environment]::NewLine; $content = 'flutter.sdk=' + $flutterSdk + $nl + 'sdk.dir=' + $androidSdk + $nl + 'flutter.buildMode=release' + $nl + 'flutter.versionName=1.0.0' + $nl + 'flutter.versionCode=1' + $nl; [IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))"
+rem Version comes from pubspec.yaml so it matches the Harmony package (no more hardcoded 1.0.0/1)
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$path = Join-Path $env:ANDROID_DIR 'local.properties'; $flutterSdk = $env:FLUTTER_HOME.Replace('\', '\\'); $androidSdk = $env:ANDROID_HOME.Replace('\', '\\'); $ver = '1.0.0'; $code = '1'; $pubspec = Join-Path $env:FLUTTER_APP 'pubspec.yaml'; if (Test-Path -LiteralPath $pubspec) { foreach ($line in [IO.File]::ReadAllLines($pubspec)) { if ($line -match '^\s*version:\s*([0-9]+)\.([0-9]+)\.([0-9]+)\+([0-9]+)\s*$') { $ver = '{0}.{1}.{2}' -f $Matches[1], $Matches[2], $Matches[3]; $code = $Matches[4]; break } } }; $nl = [Environment]::NewLine; $content = 'flutter.sdk=' + $flutterSdk + $nl + 'sdk.dir=' + $androidSdk + $nl + 'flutter.buildMode=release' + $nl + 'flutter.versionName=' + $ver + $nl + 'flutter.versionCode=' + $code + $nl; [IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))"
 if errorlevel 1 (
     echo [ERROR] Failed to write Android local.properties.
     exit /b 1
@@ -258,6 +349,9 @@ echo   build-apk.bat 172.19.51.96
 echo   build-apk.bat 172.19.51.96 8000
 echo   build-apk.bat http://172.19.51.96:8000
 echo   build-apk.bat https://web.sstkjgf.com
+echo   build-apk.bat arm64 https://web.sstkjgf.com
+echo   build-apk.bat arm64 172.19.51.96 8000
 echo.
+echo First argument "arm64": build arm64-v8a only APK (smaller, for store upload).
 echo No argument: auto-detect IPv4 and build with http://IP:8000.
 exit /b 0

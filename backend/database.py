@@ -681,6 +681,37 @@ async def init_db():
         await conn.run_sync(_ensure_sensitive_data_encryption)
 
 
+TEST_ACCOUNT_PHONE = "13888888888"
+
+
+async def ensure_test_account():
+    """确保测试账号存在（users 表一条记录，不建新表）。
+
+    手机号 13888888888 的验证码在 routers/auth.py 中固定为 123456，
+    发送验证码时不真实调用短信服务。
+    """
+    from sqlalchemy import select
+
+    from models import User
+
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.phone_hash == phone_lookup_hash(TEST_ACCOUNT_PHONE))
+        )
+        if result.scalars().first() is not None:
+            return
+        session.add(
+            User(
+                phone=TEST_ACCOUNT_PHONE,
+                phone_hash=phone_lookup_hash(TEST_ACCOUNT_PHONE),
+                display_name="测试账号",
+                is_active=True,
+            )
+        )
+        await session.commit()
+        logger.info("Created test account for phone {}.", TEST_ACCOUNT_PHONE)
+
+
 async def seed_default_data():
     """Seed default system configs and agreements using ORM (dialect-safe)."""
     from models import SystemConfig, Agreement
@@ -720,3 +751,6 @@ async def seed_default_data():
             ))
 
         await session.commit()
+
+    # 确保测试账号存在（幂等，手机号 13888888888，验证码固定 123456）
+    await ensure_test_account()

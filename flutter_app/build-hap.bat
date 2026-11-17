@@ -76,7 +76,7 @@ if /I "%TARGET_PLATFORM%"=="ohos-arm" set "TARGET_ABI_DIR=armeabi-v7a"
 if /I "%TARGET_PLATFORM%"=="ohos-x64" set "TARGET_ABI_DIR=x86_64"
 if "%API_BASE_URL%"=="" set "API_BASE_URL=https://web.sstkjgf.com"
 
-if "%FLUTTER_OHOS%"=="" set "FLUTTER_OHOS=D:\tmp\flutter_ohos_3_44"
+if "%FLUTTER_OHOS%"=="" set "FLUTTER_OHOS=D:\sdk\flutter_ohos_3_44"
 
 set "DEVECO=D:\Program Files\Huawei\DevEco Studio"
 set "SIGN_TOOL=%DEVECO%\sdk\default\openharmony\toolchains\lib\hap-sign-tool.jar"

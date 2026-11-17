@@ -281,6 +281,21 @@ class DeviceAddRequest(BaseModel):
         return v
 
 
+class DeviceUnbindRequest(BaseModel):
+    """解除设备绑定请求"""
+    deviceImei: str = Field(..., description="设备IMEI", min_length=14, max_length=16)
+    userId: Optional[int] = Field(None, description="已废弃：后端使用登录用户ID", gt=0)
+
+    @field_validator("deviceImei")
+    @classmethod
+    def validate_imei(cls, v: str) -> str:
+        """校验IMEI格式：14-16位数字"""
+        v = v.strip()
+        if not re.match(r"^\d{14,16}$", v):
+            raise ValueError("IMEI必须是14-16位数字")
+        return v
+
+
 class DeviceReportRequest(BaseModel):
     """设备报告查询请求"""
     userId: Optional[int] = Field(None, description="已废弃：后端使用登录用户ID", gt=0)
@@ -1612,6 +1627,57 @@ async def add_device(
             "data": f"设备：{req.deviceImei}；添加成功！",
             "deviceId": device_id,
         }
+    )
+
+
+@router.post("/devices/unbind", summary="解除设备绑定")
+async def unbind_device(
+    req: DeviceUnbindRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """
+    解除当前登录用户与指定设备的绑定关系
+
+    将 iot_user_devices 中该用户与设备的绑定记录置为失效（status=0），
+    不删除历史记录，重新绑定时会自动恢复。
+    """
+    user_id = current_iot_user_id(current_user)
+    logger.info(f"解除设备绑定请求: imei={req.deviceImei}, userId={user_id}")
+
+    def _unbind():
+        with get_connection() as conn:
+            result = conn.execute("""
+                UPDATE iot_user_devices
+                SET status = 0, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = %s
+                  AND device_imei = %s
+                  AND status = 1
+            """, (user_id, req.deviceImei))
+            return result.rowcount
+
+    try:
+        affected = await asyncio.to_thread(_unbind)
+    except Exception as e:
+        logger.error(f"解除设备绑定失败: {e}")
+        return ApiResponse(
+            code="ERROR",
+            success=False,
+            message={"msg": f"解除设备绑定失败: {str(e)}"}
+        )
+
+    if affected == 0:
+        logger.warning(f"解除设备绑定未找到有效绑定: imei={req.deviceImei}, userId={user_id}")
+        return ApiResponse(
+            code="ERROR",
+            success=False,
+            message={"msg": "设备不存在或未绑定"}
+        )
+
+    logger.info(f"解除设备绑定成功: imei={req.deviceImei}, userId={user_id}")
+    return ApiResponse(
+        code="OK",
+        success=True,
+        message={"data": f"设备：{req.deviceImei}；解绑成功！"}
     )
 
 

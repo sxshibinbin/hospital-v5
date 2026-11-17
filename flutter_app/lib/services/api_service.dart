@@ -91,6 +91,7 @@ class SendCodeResult {
     this.debugMode = false,
     this.debugCode,
     this.smsDelivered = true,
+    this.isTestAccount = false,
   });
 
   factory SendCodeResult.fromJson(Map<String, dynamic> json) => SendCodeResult(
@@ -99,6 +100,7 @@ class SendCodeResult {
     debugMode: json['debug_mode'] == true,
     debugCode: _extractString(json, 'debug_code'),
     smsDelivered: json['sms_delivered'] != false,
+    isTestAccount: json['is_test_account'] == true,
   );
 
   final String message;
@@ -106,6 +108,7 @@ class SendCodeResult {
   final bool debugMode;
   final String? debugCode;
   final bool smsDelivered;
+  final bool isTestAccount;
 }
 
 class QrLoginScanResult {

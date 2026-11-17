@@ -5,8 +5,8 @@ issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+
 version: 6.3.33
 
 environment:
-  # 本地补丁：语言版本降为本机 Flutter 3.41.7 支持的 3.11
-  sdk: ">=3.11.0 <4.0.0"
+  # 本地补丁：语言版本下限 3.10，兼容本机 Dart 3.11 与云端 CI Flutter 3.38.10（Dart 3.10）
+  sdk: ">=3.10.0 <4.0.0"
   flutter: ">=3.32.0"
 
 flutter:

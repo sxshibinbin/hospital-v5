@@ -3,6 +3,7 @@ import io
 import base64
 from loguru import logger
 from safety.constants import GUARDRAIL_PROMPT
+from identity import ASSISTANT_IDENTITY_PROMPT
 import json
 import tempfile
 from pathlib import Path
@@ -15,7 +16,7 @@ load_dotenv()
 
 MODEL_NAME = "qwen-plus"
 LONG_CONTEXT_MODEL_NAME = "qwen-long"
-VISION_MODEL_NAME = "qwen-vl-plus"
+VISION_MODEL_NAME = "qwen3-vl-plus"
 CARD_OPEN_TAG = "[CARD]"
 CARD_CLOSE_TAG = "[/CARD]"
 
@@ -239,7 +240,9 @@ def flush_plain_text(buffer: str) -> tuple[str, str]:
 
 
 def merge_system_prompt(system_prompt: str, user_context: Optional[str]) -> str:
-    normalized_prompt = f"{system_prompt.strip()}\n\n{GUARDRAIL_PROMPT}"
+    normalized_prompt = (
+        f"{system_prompt.strip()}\n\n{ASSISTANT_IDENTITY_PROMPT}\n{GUARDRAIL_PROMPT}"
+    )
     normalized_context = normalize_text_block(user_context or "")
 
     if not normalized_context:

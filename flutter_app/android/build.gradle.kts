@@ -28,6 +28,21 @@ subprojects {
     }
 }
 
+// integration_test 的依赖声明使用动态版本（1.2+ / 3.2+），每次构建都要联网
+// 查询 maven-metadata；离线或 download.flutter.io 不通时会直接失败。
+// 这里钉死为本机 Gradle 缓存中已存在的静态版本（与 1.2+ 的解析结果一致）。
+subprojects {
+    if (project.name == "integration_test") {
+        project.configurations.configureEach {
+            resolutionStrategy {
+                force("androidx.test:runner:1.2.0")
+                force("androidx.test:rules:1.2.0")
+                force("androidx.test.espresso:espresso-core:3.2.0")
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

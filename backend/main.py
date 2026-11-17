@@ -53,6 +53,7 @@ from health_report import (
     should_handle_health_report,
     should_handle_latest_metric,
 )
+from identity import build_identity_answer
 
 
 DEFAULT_CORS_ALLOWED_ORIGINS = (
@@ -619,6 +620,29 @@ async def chat_endpoint(
                     await record_event(safety_db, user_id=current_user.id, terminal=event_terminal, scene=f"chat_{mode}", text=message, decision=safety_decision, reply_text=reply, session_id=session_id)
             except Exception as error:
                 logger.warning(f"Failed to record input safety event: {error}")
+            return
+        # 身份类问题由服务端直接给出固定回答，避免模型编造开发方信息
+        identity_answer = None if (file_ids or image_data_urls) else build_identity_answer(message)
+        if identity_answer is not None:
+            reply = identity_answer
+            identity_decision = check_output(reply, scope=mode)
+            if identity_decision.blocked:
+                reply = identity_decision.reply_template or REPLIES["default"]
+            full_response = reply
+            yield {"data": json.dumps({"type": "content", "content": reply}, ensure_ascii=False)}
+            yield {
+                "data": json.dumps(
+                    {"type": "ai_label", "meta": build_ai_label_meta(content_id=label_content_id)},
+                    ensure_ascii=False,
+                )
+            }
+            yield {"data": "[DONE]"}
+            if session_id is not None:
+                try:
+                    memory_manager = get_memory_manager(AsyncSessionLocal)
+                    await memory_manager.add_turn(session_id, current_user.id, message, full_response)
+                except Exception as e:
+                    logger.error(f"Failed to persist memory for session {session_id}: {e}")
             return
         # Step 1: Check HighFreqQuestion for exact or partial match if no files/history
         if health_report_request is None and latest_metric_request is None and not file_ids and not parsed_history:

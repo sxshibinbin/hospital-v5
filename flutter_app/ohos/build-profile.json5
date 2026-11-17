@@ -31,7 +31,6 @@
     "products": [
       {
         "name": "default",
-        "signingConfig": "release",
         "compatibleSdkVersion": "5.1.0(18)",
         "runtimeOS": "HarmonyOS",
         "targetSdkVersion": "6.1.0(23)",
@@ -58,6 +57,18 @@
     {
       "name": "entry",
       "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "integration_test",
+      "srcPath": "../../../../../sdk/flutter_ohos_3_44/packages/integration_test/ohos",
       "targets": [
         {
           "name": "default",

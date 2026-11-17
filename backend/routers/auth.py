@@ -45,6 +45,9 @@ SMS_DEBUG_CODE = "123456"
 APP_ENV = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "")).strip().lower()
 if SMS_DEBUG_MODE and APP_ENV in {"prod", "production"}:
     raise RuntimeError("SMS_DEBUG_MODE must be disabled in production")
+# 测试账号：该手机号点击"发送验证码"时不真实发送短信，固定使用 TEST_ACCOUNT_SMS_CODE 登录
+TEST_ACCOUNT_PHONE = "13888888888"
+TEST_ACCOUNT_SMS_CODE = "123456"
 PASSWORD_LOGIN_MAX_ATTEMPTS = 5
 PASSWORD_LOGIN_LOCK_TTL_SECONDS = 900
 TOKEN_BLACKLIST_TTL_SECONDS = 86400 * 7
@@ -579,6 +582,19 @@ async def send_code(request: SendCodeRequest):
     phone = _normalize_phone(request.phone)
     _ensure_valid_phone(phone)
 
+    if phone == TEST_ACCOUNT_PHONE:
+        # 测试账号：固定验证码 123456，不真实发送短信，也不受冷却/当日次数限制
+        logger.info(
+            "Test account verification code generated without SMS delivery: phone={}",
+            _mask_phone(phone),
+        )
+        return {
+            "message": f"测试账号，验证码为：{TEST_ACCOUNT_SMS_CODE}",
+            "debug_mode": False,
+            "sms_delivered": False,
+            "is_test_account": True,
+        }
+
     if not await auth_cache.try_mark_sms_cooldown(phone, SMS_RESEND_INTERVAL_SECONDS):
         raise HTTPException(
             status_code=429,
@@ -770,8 +786,9 @@ async def login_with_sms(
         raise
 
     debug_code_ok = SMS_DEBUG_MODE and submitted_code == SMS_DEBUG_CODE
+    test_code_ok = phone == TEST_ACCOUNT_PHONE and submitted_code == TEST_ACCOUNT_SMS_CODE
     saved_code = await auth_cache.get_sms_code(phone)
-    if not debug_code_ok and (not saved_code or saved_code != submitted_code):
+    if not (debug_code_ok or test_code_ok) and (not saved_code or saved_code != submitted_code):
         await _log_auth_operation(
             request=request,
             action="login_sms",
@@ -784,7 +801,7 @@ async def login_with_sms(
         )
         raise HTTPException(status_code=400, detail="Invalid or expired verification code")
 
-    if not debug_code_ok:
+    if not (debug_code_ok or test_code_ok):
         await auth_cache.delete_sms_code(phone)
     try:
         token, user = await _issue_token_for_phone(phone, db)

@@ -29,6 +29,11 @@ const _aliyunNumberAuthHarmonySk = String.fromEnvironment(
   'ALIYUN_NUMBER_AUTH_HARMONY_SK',
 );
 
+/// 预取号失败(600012)与接口超时(600015)为瞬时故障（如蜂窝网关抖动），
+/// 允许用户点击时直接重试：插件 login() 内部会重新 checkEnvAvailable
+/// 并再次加速取号，不必判死弹手机号面板。
+const _retryableCarrierFailureCodes = <String>{'600012', '600015'};
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -57,6 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _detectedPhone;
   String? _carrierName;
   String? _carrierAuthUnavailableDetail;
+  String? _lastCarrierFailureCode;
   Timer? _resendTimer;
 
   @override
@@ -232,6 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _carrierName = carrierName;
         if (isAvailable) {
           _carrierAuthUnavailableDetail = null;
+          _lastCarrierFailureCode = null;
         }
       });
     } catch (error, stackTrace) {
@@ -356,7 +363,13 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
 
-    if (!_canUseCarrierAuth || !_isCarrierAuthAvailable) {
+    // 600012/600015 属瞬时故障：不拦截、不弹手机号面板，直接走 login()
+    // 让插件重新 checkEnvAvailable + 加速取号，给用户一次即时重试机会。
+    final canRetryCarrierFailure =
+        _canUseCarrierAuth &&
+        _retryableCarrierFailureCodes.contains(_lastCarrierFailureCode);
+    if (!_canUseCarrierAuth ||
+        (!_isCarrierAuthAvailable && !canRetryCarrierFailure)) {
       final detail = _carrierAuthUnavailableDetail;
       _showWarningMessage(
         detail == null || detail.isEmpty
@@ -448,6 +461,10 @@ class _LoginScreenState extends State<LoginScreen> {
           result.debugCode!,
         if (result.code != null && result.code!.isNotEmpty) result.code!,
       ];
+      if (result.isTestAccount) {
+        _showSuccessMessage('测试账号，验证码为：123456');
+        return;
+      }
       if (result.debugMode || !result.smsDelivered) {
         final message = result.debugMode
             ? (kDebugMode && debugCodes.isNotEmpty
@@ -597,6 +614,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isCarrierLoginInProgress = false;
         _isCarrierAuthAvailable = false;
+        _lastCarrierFailureCode = code;
         _carrierAuthUnavailableDetail = message == null || message.isEmpty
             ? 'SDK 返回 code=$code'
             : 'SDK 返回 code=$code，$message';
@@ -836,7 +854,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  'Hi，我是时小安',
+                                  'Hi，我是安小记',
                                   style: theme.textTheme.headlineMedium
                                       ?.copyWith(
                                         color: AppTheme.primaryDarkColor,
@@ -846,7 +864,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  '健康是福，健康的事就找时小安～',
+                                  '健康是福，健康的事就找安小记～',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     color: AppTheme.primaryDarkColor,
                                     fontWeight: FontWeight.w700,

@@ -213,7 +213,8 @@ bool bool_false = false;
           NSDictionary *dict = @{ @"resultCode": @"600024" };
           [self showResult: dict];
           //3. 调用取号接口，加速授权页的弹起
-          [[TXCommonHandler sharedInstance] accelerateLoginPageWithTimeout: 5.0 complete:^(NSDictionary * _Nonnull resultDic) {
+          // 本地补丁：预取号网关耗时常超 5s 导致 600015（接口超时），放宽到 10s
+          [[TXCommonHandler sharedInstance] accelerateLoginPageWithTimeout: 10.0 complete:^(NSDictionary * _Nonnull resultDic) {
             //4. 预取号成功后判断是否延时登录，否则立即登录
             if ([PNSCodeSuccess isEqualToString:[resultDic objectForKey:@"resultCode"]] == YES) {
               if (![dic boolValueForKey: @"isDelay" defaultValue: NO]) {
@@ -315,7 +316,8 @@ bool bool_false = false;
 */
 #pragma mark - action 一键登录预取号
 - (void)accelerateLogin:(TXCustomModel *)model call:(FlutterMethodCall*)call result:(FlutterResult)result complete:(void (^)(void))completion {
-    float timeout = 5.0; // self.tf_timeout.text.floatValue;
+    // 本地补丁：预取号网关耗时常超 5s 导致 600015（接口超时），放宽到 10s
+    float timeout = 10.0; // self.tf_timeout.text.floatValue;
     __weak typeof(self) weakSelf = self;
     
     //1. 调用check接口检查及准备接口调用环境
@@ -346,7 +348,8 @@ bool bool_false = false;
 
 #pragma mark - action 一键登录公共方法
 - (void)loginWithModel:(TXCustomModel *)model  complete:(void (^)(void))completion {
-  float timeout = 5.0; //self.tf_timeout.text.floatValue;
+  // 本地补丁：加速取号与取号网关耗时可能超 5s 导致 600015，放宽到 10s
+  float timeout = 10.0; //self.tf_timeout.text.floatValue;
   __weak typeof(self) weakSelf = self;
   
 //  UIWindow *window = [[UIApplication sharedApplication].delegate window];
