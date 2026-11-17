@@ -52,7 +52,7 @@
 
 | 端 | 实现位置 |
 |----|---------|
-| Flutter App | `lib/constants/ai_watermark.dart`（"以上内容由AI生成，不构成诊断建议和用药指导，仅供参考"），用于 `chat_screen.dart`（4 处）、`history_screen.dart`（2 处）、`health_archive_screen.dart`（1 处） |
+| Flutter App | `lib/constants/ai_watermark.dart`（"内容由AI生成，不构成诊断建议和用药指导，仅供参考"），用于 `chat_screen.dart`（4 处）、`history_screen.dart`（2 处）、`health_archive_screen.dart`（1 处） |
 | Web 端 | `frontend/src/utils/aiWatermark.ts`，用于 `MessageRender.tsx`、`ChatPage.tsx`、`MedicalCard.tsx`；`ChatContainer.tsx` 另有免责声明 |
 
 ### 3.2 缺口（隐式标识 ❌）
@@ -347,7 +347,7 @@ else if (data.type === 'ai_label' && data.meta && typeof data.meta === 'object')
 4. **编号唯一性**：连续生成 2 条内容，验证 `contentId` 互不相同；
 5. **报告接口**：`POST /api/consultations`、`/save-card` 响应含 `ai_label_meta`，`GET /records` 带出；历史数据返回 `null` 不报错；
 6. **回归**：老前端页面（不升级）跑完整聊天 + 报告流程无报错；
-7. **复制尾巴**：App/Web 复制 AI 回复，验证剪贴板文本末尾包含「——以上内容由AI生成，不构成诊断建议和用药指导，仅供参考」；
+7. **复制尾巴**：App/Web 复制 AI 回复，验证剪贴板文本末尾包含「——内容由AI生成，不构成诊断建议和用药指导，仅供参考」；
 8. **导出双标识（导出功能上线时）**：导出图片/PDF 验证 ①内容本体可见「AI生成」水印 ②文件元数据含完整六要素 JSON；
 9. **合规自查**：显式标识各屏可见（已有）；AI 回复、会话留存、报告留存三处均可读出完整六要素。
 

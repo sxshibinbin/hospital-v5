@@ -600,24 +600,27 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _buildUnbindButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 42,
-      child: OutlinedButton(
-        onPressed: (_isSaving || _isUnbinding) ? null : _unbindDevice,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFFE8453A),
-          disabledForegroundColor: const Color(
-            0xFFE8453A,
-          ).withValues(alpha: 0.4),
-          side: const BorderSide(color: Color(0xFFE8453A), width: 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 42),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: (_isSaving || _isUnbinding) ? null : _unbindDevice,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            foregroundColor: const Color(0xFFE8453A),
+            disabledForegroundColor: const Color(
+              0xFFE8453A,
+            ).withValues(alpha: 0.4),
+            side: const BorderSide(color: Color(0xFFE8453A), width: 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
-        ),
-        child: DeviceMessageText(
-          _isUnbinding ? '解绑中...' : '解除绑定',
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          child: DeviceMessageText(
+            _isUnbinding ? '解绑中...' : '解除绑定',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
         ),
       ),
     );

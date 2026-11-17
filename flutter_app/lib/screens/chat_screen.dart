@@ -2307,12 +2307,6 @@ class _ChatScreenState extends State<ChatScreen> with RouteAware {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: const Color(0xFFB45309),
-          ),
-          const SizedBox(width: 6),
           Flexible(
             child: Text(
               kAiWatermark,
@@ -4946,7 +4940,7 @@ class _ChatScreenState extends State<ChatScreen> with RouteAware {
       return;
     }
 
-    const copySuffix = '——以上内容由AI生成，不构成诊断建议和用药指导，仅供参考';
+    const copySuffix = '——内容由AI生成，不构成诊断建议和用药指导，仅供参考';
     final copyText = normalized.endsWith(copySuffix)
         ? normalized
         : '$normalized\n\n$copySuffix';

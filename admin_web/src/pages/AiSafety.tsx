@@ -9,6 +9,7 @@ const intentText: Record<string, string> = { I1: '诊断请求', I2: '症状判�
 const AiSafety: React.FC = () => {
   const [text, setText] = useState('');
   const [result, setResult] = useState<any>(null);
+  const [isChecking, setIsChecking] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [page, setPage] = useState(1);
@@ -17,15 +18,31 @@ const AiSafety: React.FC = () => {
   const reload = async (targetPage = page) => {
     try { const data = await getAiSafetyEvents({ page: targetPage, page_size: pageSize }); setEvents(data.items); setTotal(data.total); setPage(data.page); } catch { /* 页面保持现状 */ }
   };
-  const check = async () => { try { setResult(await checkAiSafety(text)); } catch { setResult({ error: '安全检测失败，请稍后重试' }); } };
+  const check = async () => {
+    if (!text.trim() || isChecking) return;
+    setIsChecking(true);
+    setResult(null);
+    try { setResult(await checkAiSafety(text.trim())); }
+    catch { setResult({ error: '安全检测失败，请稍后重试' }); }
+    finally { setIsChecking(false); }
+  };
   useEffect(() => { void reload(1); }, []);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   return <div className="space-y-4">
     <section className="rounded-xl bg-white px-6 py-4 shadow">
       <h2 className="mb-3 text-lg font-semibold">规则检测</h2>
       <textarea rows={3} className="w-full rounded border p-3" value={text} onChange={(event) => setText(event.target.value)} placeholder="输入问题进行安全判定" />
-      <div className="mt-3 flex items-center gap-3"><button className="rounded bg-indigo-600 px-4 py-2 text-white" onClick={() => void check()}>检测</button>{result && <span className="text-sm text-slate-500">已完成检测</span>}</div>
-      {result && <pre className="mt-3 max-h-32 overflow-auto rounded bg-slate-50 p-3 text-sm">{JSON.stringify(result, null, 2)}</pre>}
+      <div className="mt-3 flex items-center gap-3"><button disabled={isChecking || !text.trim()} className="rounded bg-indigo-600 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50" onClick={() => void check()}>{isChecking ? '检测中…' : '检测'}</button>{result && <span className="text-sm text-slate-500">已完成检测</span>}</div>
+      {result && <div role="status" className="mt-3 rounded bg-slate-50 p-4 text-sm">
+        {result.error ? <p className="text-red-600">{result.error}</p> : <>
+          <div className="mb-3 flex flex-wrap gap-2 text-xs text-slate-600">
+            <span>风险等级：{riskText[result.risk_level] || result.risk_level || '未提供'}</span>
+            <span>处理方式：{actionText[result.action] || result.action || '未提供'}</span>
+            <span>问题类型：{intentText[result.intent_code] || result.intent_code || '未提供'}</span>
+          </div>
+          <p className="whitespace-pre-wrap break-words leading-7 text-slate-800">{result.reply_template || '未命中固定回复规则，将交由模型继续回答。本次检测仅执行规则判定，不生成模型回答。'}</p>
+        </>}
+      </div>}
     </section>
     <section className="rounded-xl bg-white p-6 shadow">
       <div className="mb-4 flex items-center justify-between"><div><h2 className="text-lg font-semibold">违规记录</h2><p className="mt-1 text-sm text-slate-500">规则由内置基础规则和数据库可配置规则共同组成。</p></div><button className="rounded border px-3 py-1 text-sm" onClick={() => void reload(page)}>刷新</button></div>
